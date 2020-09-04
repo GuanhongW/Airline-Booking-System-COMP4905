@@ -35,6 +35,28 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+		<!--	jpa	   -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!--	Mysql	-->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+<!--		&lt;!&ndash;	Alibaba druid	&ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>com.alibaba</groupId>-->
+<!--			<artifactId>druid-spring-boot-starter</artifactId>-->
+<!--			<version>1.1.0</version>-->
+<!--		</dependency>-->
+
+
 	</dependencies>
 
 	<build>
@@ -42,6 +64,17 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.mybatis.generator</groupId>
+				<artifactId>mybatis-generator-maven-plugin</artifactId>
+				<version>1.3.2</version>
+				<configuration>
+					<configurationFile>${basedir}/src/main/resources/generator/generatorConfig.xml</configurationFile>
+					<overwrite>true</overwrite>
+					<verbose>true</verbose>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
