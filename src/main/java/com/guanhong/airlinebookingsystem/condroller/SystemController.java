@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.condroller;
 
 import com.guanhong.airlinebookingsystem.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.guanhong.airlinebookingsystem.entity.User;
 
 @RestController
-
+@Slf4j
 public class SystemController {
     @Autowired
     UserService userService;
@@ -41,6 +42,11 @@ public class SystemController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public ResponseEntity test(){
+        log.trace("Trace log Test 1");
+        log.debug("Debug log test 2");
+        log.info("Info log test 3");
+        log.warn("Warn log test 4");
+        log.error("Error log test 5");
         return new ResponseEntity("Test", HttpStatus.BAD_REQUEST);
     }
 
