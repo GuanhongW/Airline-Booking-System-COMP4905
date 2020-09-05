@@ -23,6 +23,14 @@ public class UserService {
         else {
             throw new Exception("No user record exist for given id");
         }
+    }
+
+    public User addUser(User user) throws Exception {
+        User isNewUser = userRepository.findUserByUsername(user.getUsername());
+        if (isNewUser == null){
+            return userRepository.save(user);
+        }
+        throw new Exception("The user already exits in system");
 
     }
 

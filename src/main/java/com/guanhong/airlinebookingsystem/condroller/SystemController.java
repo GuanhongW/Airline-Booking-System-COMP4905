@@ -2,9 +2,9 @@ package com.guanhong.airlinebookingsystem.condroller;
 
 import com.guanhong.airlinebookingsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.guanhong.airlinebookingsystem.entity.User;
 
@@ -14,17 +14,34 @@ public class SystemController {
     @Autowired
     UserService userService;
 
-    @RequestMapping("/get/{id}")
-    public User startSpringBoot(@PathVariable("id") int id) {
+    @RequestMapping(value = "/getUser", method = RequestMethod.GET)
+    public ResponseEntity getUserById(int id) {
         try{
             System.out.println(userService.getUserById(id).toString());
-            return userService.getUserById(id);
+            return new ResponseEntity(userService.getUserById(id),HttpStatus.OK);
         }
         catch (Exception e){
             System.out.println(e);
-            return null;
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
 
+    @RequestMapping(value = "/addUser", method = RequestMethod.POST)
+    public ResponseEntity addUser(User user){
+        try{
+            System.out.println(user);
+            User newUser = userService.addUser(user);
+            return new ResponseEntity(newUser, HttpStatus.OK);
+        }
+        catch (Exception e){
+            System.out.println(e);
+            return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public ResponseEntity test(){
+        return new ResponseEntity("Test", HttpStatus.BAD_REQUEST);
     }
 
 }
