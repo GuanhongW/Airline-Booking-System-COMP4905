@@ -10,7 +10,7 @@ public class User {
 
     }
 
-    public User(String username, String password, String role){
+    public User(String username, String password, String role, String jwttoken){
         this.username = username;
         this.password = password;
         this.role = role;
@@ -67,6 +67,8 @@ public class User {
     public String getPassword() {
         return password;
     }
+
+
 
     @Override
     public String toString(){

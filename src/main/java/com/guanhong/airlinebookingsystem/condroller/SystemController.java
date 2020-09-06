@@ -1,6 +1,8 @@
 package com.guanhong.airlinebookingsystem.condroller;
 
 import com.guanhong.airlinebookingsystem.service.UserService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ public class SystemController {
     @Autowired
     UserService userService;
 
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/getUser", method = RequestMethod.GET)
     public ResponseEntity getUserById(int id) {
         try{
@@ -27,6 +30,7 @@ public class SystemController {
         }
     }
 
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     public ResponseEntity addUser(User user){
         try{
@@ -40,6 +44,7 @@ public class SystemController {
         }
     }
 
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public ResponseEntity test(){
         log.trace("Trace log Test 1");
