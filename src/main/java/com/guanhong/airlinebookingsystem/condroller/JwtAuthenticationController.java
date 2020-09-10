@@ -1,5 +1,7 @@
 package com.guanhong.airlinebookingsystem.condroller;
 
+import com.guanhong.airlinebookingsystem.Exception.ServerException;
+import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,7 @@ public class JwtAuthenticationController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity createAuthenticationToken(User user) throws Exception {
+    public ResponseEntity createAuthenticationToken(@RequestBody User user) throws Exception {
         try{
             if (user.getUsername() == null || user.getPassword() == null){
                 log.error("Http Code: 400  URL: authenticate  username or password is null");
@@ -46,13 +48,17 @@ public class JwtAuthenticationController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity createUser(User user) throws Exception {
+    public ResponseEntity createUser(@RequestBody AccountInfo newUserInfo) throws Exception {
         try{
-            if (user.getUsername() == null || user.getPassword() == null || user.getRole() == null){
+            if (newUserInfo.getUsername() == null || newUserInfo.getPassword() == null || newUserInfo.getRole() == null){
                 log.error("Http Code: 400  URL: register  username, password, or role is null");
                 return ResponseEntity.badRequest().body("Username, password, or role cannot be empty");
             }
-            return ResponseEntity.ok(jwtUserDetailsService.save(user));
+            return ResponseEntity.ok(jwtUserDetailsService.createAccount(newUserInfo));
+        }
+        catch (ServerException e){
+            log.error("URL: register, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e){
             log.error("URL: register, Http Code: 400: " + e.getMessage());
