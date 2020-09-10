@@ -14,7 +14,7 @@
         <!-- 定义日志存储的路径，不要配置相对路径 -->
         <property name="FILE_PATH" value="/Users/gwu/Desktop/SynologyDrive/2020Fall/COMP4905/AirlineBookingSystem/Airline-Booking-System-COMP4905/logs" />
         <!-- 定义日志归档压缩包名字，通常设置为项目名 -->
-        <property name="FILE_NAME" value="hangge-test" />
+        <property name="FILE_NAME" value="airline-booking-system" />
     </Properties>
 
     <appenders>

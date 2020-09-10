@@ -10,10 +10,15 @@ public class User {
 
     }
 
-    public User(String username, String password, String role, String jwttoken){
+    public User(String username, String password, Role role){
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public User(String userName, String password){
+        this.username = userName;
+        this.password = password;
     }
 
     @Id
@@ -28,20 +33,15 @@ public class User {
     private String password;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
-    }
-
-
-    public User(String userName, String password){
-        this.username = userName;
-        this.password = password;
     }
 
     public long getId() {

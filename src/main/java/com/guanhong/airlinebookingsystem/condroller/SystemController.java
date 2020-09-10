@@ -55,4 +55,20 @@ public class SystemController {
         return new ResponseEntity("Test", HttpStatus.BAD_REQUEST);
     }
 
+    @RequestMapping(value = "/test1", method = RequestMethod.GET)
+    public ResponseEntity test1() throws InterruptedException {
+        System.out.println("This is Test 1");
+        Thread.sleep(15000);
+        System.out.println("Test1 Finish");
+        return new ResponseEntity("Test1", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/test2", method = RequestMethod.GET)
+    public ResponseEntity test2(){
+        System.out.println("This is Test 2");
+        System.out.println("Test2 Finish");
+        return new ResponseEntity("Test1", HttpStatus.OK);
+    }
+
+
 }
