@@ -8,16 +8,15 @@ import java.util.Date;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.CustomerInfo;
-import com.guanhong.airlinebookingsystem.entity.Gender;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.UserCredential;
 import com.guanhong.airlinebookingsystem.model.UserLoginResponse;
 import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
 import com.guanhong.airlinebookingsystem.entity.User;
 
-import com.sun.tools.javah.Gen;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,14 +66,14 @@ public class JwtUserDetailsService implements UserDetailsService {
     /**
      * Check if the username and password is correct.
      * If it is correct, return the JWT to front-end
-     * @param user
+     * @param userCredential
      * @return UserLoginResponse res
      * @throws Exception
      */
-    public UserLoginResponse authUser(User user) throws Exception {
-        authenticate(user.getUsername(), user.getPassword());
+    public UserLoginResponse authUser(UserCredential userCredential) throws Exception {
+        authenticate(userCredential.getUsername(), userCredential.getPassword());
 
-        User newUser = userRepository.findUserByUsername(user.getUsername());
+        User newUser = userRepository.findUserByUsername(userCredential.getUsername());
         final UserDetails userDetails = loadUser(newUser);
 
         final String token = jwtTokenUtil.generateToken(userDetails);

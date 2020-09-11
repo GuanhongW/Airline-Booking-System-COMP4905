@@ -2,6 +2,7 @@ package com.guanhong.airlinebookingsystem.condroller;
 
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
+import com.guanhong.airlinebookingsystem.model.UserCredential;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 
-
-import com.guanhong.airlinebookingsystem.entity.User;
-
 @RestController
 @CrossOrigin
 @Slf4j
@@ -28,13 +26,13 @@ public class JwtAuthenticationController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity createAuthenticationToken(@RequestBody User user) throws Exception {
+    public ResponseEntity createAuthenticationToken(@RequestBody UserCredential userCredential) throws Exception {
         try{
-            if (user.getUsername() == null || user.getPassword() == null){
+            if (userCredential.getUsername() == null || userCredential.getPassword() == null){
                 log.error("Http Code: 400  URL: authenticate  username or password is null");
                 return ResponseEntity.badRequest().body("Username or password cannot be empty");
             }
-            return ResponseEntity.ok(jwtUserDetailsService.authUser(user));
+            return ResponseEntity.ok(jwtUserDetailsService.authUser(userCredential));
 
         }
         catch (Exception e){
