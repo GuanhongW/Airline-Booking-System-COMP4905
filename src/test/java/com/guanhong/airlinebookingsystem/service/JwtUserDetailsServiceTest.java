@@ -76,7 +76,7 @@ class JwtUserDetailsServiceTest {
 
         // Create default customer user
         String testCustomerUsername = "auto1@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruse1", Role.USER,"test", Gender.male,"2000-01-01");
+        newUserInfo = new AccountInfo(testCustomerUsername,"useruser1", Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testCustomerUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -387,16 +387,16 @@ class JwtUserDetailsServiceTest {
         // Test 1: Auth a Admin account
         UserCredential userCredential = new UserCredential("autoadmin1", "adminadmin1");
         UserLoginResponse userLoginResponse = jwtUserDetailsService.authUser(userCredential);
-        assertEquals("autoadmin", userLoginResponse.getUsername());
+        assertEquals("autoadmin1", userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getJwttoken());
-        assertEquals("autoadmin", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
+        assertEquals("autoadmin1", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
 
         // Test 2: Auth a Customer account
         userCredential = new UserCredential("auto1@test.com", "useruser1");
         userLoginResponse = jwtUserDetailsService.authUser(userCredential);
-        assertEquals("auto@test.com", userLoginResponse.getUsername());
+        assertEquals("auto1@test.com", userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getJwttoken());
-        assertEquals("auto@test.com", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
+        assertEquals("auto1@test.com", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
     }
 
     @Test
