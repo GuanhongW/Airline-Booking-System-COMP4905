@@ -26,7 +26,7 @@ public class JwtAuthenticationController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity createAuthenticationToken(@RequestBody UserCredential userCredential) throws Exception {
+    public ResponseEntity createAuthenticationTokenController(@RequestBody UserCredential userCredential){
         try{
             if (userCredential.getUsername() == null || userCredential.getPassword() == null){
                 log.error("Http Code: 400  URL: authenticate  username or password is null");
@@ -46,7 +46,7 @@ public class JwtAuthenticationController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity createUser(@RequestBody AccountInfo newUserInfo) throws Exception {
+    public ResponseEntity createUserController(@RequestBody AccountInfo newUserInfo) throws Exception {
         try{
             if (newUserInfo.getUsername() == null || newUserInfo.getPassword() == null || newUserInfo.getRole() == null){
                 log.error("Http Code: 400  URL: register  username, password, or role is null");
