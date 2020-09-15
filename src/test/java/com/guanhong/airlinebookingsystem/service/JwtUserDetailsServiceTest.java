@@ -134,12 +134,12 @@ class JwtUserDetailsServiceTest {
         User customer = userRepository.findUserByUsername(testCustomerUsername);
         userRepository.delete(customer);
         assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findAccountById(customer.getId()));
+        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
         testCustomerUsername = "auto2@test.com";
         customer = userRepository.findUserByUsername(testCustomerUsername);
         userRepository.delete(customer);
         assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findAccountById(customer.getId()));
+        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
     }
 
     @Test

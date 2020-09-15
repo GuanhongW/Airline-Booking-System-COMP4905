@@ -4,8 +4,8 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "ticket")
-public class ticket {
-    public ticket() {
+public class Ticket {
+    public Ticket() {
     }
 
     @Id
@@ -24,7 +24,7 @@ public class ticket {
     @Column(name = "seat_number")
     private int seatNumber;
 
-    public ticket(long id, long customerId, long flightNumber) {
+    public Ticket(long id, long customerId, long flightNumber) {
         this.id = id;
         this.customerId = customerId;
         this.flightNumber = flightNumber;
