@@ -1,14 +1,12 @@
 package com.guanhong.airlinebookingsystem.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.CustomerInfo;
 import com.guanhong.airlinebookingsystem.entity.Gender;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.entity.User;
-import com.guanhong.airlinebookingsystem.model.AccountInfo;
-import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
-import com.guanhong.airlinebookingsystem.model.UserCredential;
-import com.guanhong.airlinebookingsystem.model.UserLoginResponse;
+import com.guanhong.airlinebookingsystem.model.*;
 import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
 
@@ -32,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 
 @SpringBootTest
@@ -57,6 +56,25 @@ class JwtUserDetailsServiceTest {
                                      @Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+//        String testAdminUsername = "autoadmin1";
+//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
+//        assertNull(userRepository.findUserByUsername(testAdminUsername));
+//        testAdminUsername = "autoadmin2";
+//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
+//        assertNull(userRepository.findUserByUsername(testAdminUsername));
+//        //Delete default customer user
+//        String testCustomerUsername = "auto1@test.com";
+//        User customer = userRepository.findUserByUsername(testCustomerUsername);
+//        userRepository.delete(customer);
+//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
+//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
+//        testCustomerUsername = "auto2@test.com";
+//        customer = userRepository.findUserByUsername(testCustomerUsername);
+//        userRepository.delete(customer);
+//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
+//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
+
         // Create default admin user 1
         String testAdminUsername = "autoadmin1";
         AccountInfo newUserInfo = new AccountInfo(testAdminUsername,"adminadmin1", Role.ADMIN);

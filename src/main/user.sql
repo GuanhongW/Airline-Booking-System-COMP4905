@@ -28,3 +28,54 @@ create table customer_info
 			on delete cascade
 );
 
+-- Table flight
+create table flight
+(
+	id int not null,
+	departure_city char(255) not null,
+	destination_city char(255) not null,
+	departure_time TIME not null,
+	arrival_time TIME not null,
+	capacity int not null,
+	overbooking int default 0 not null,
+	start_date date not null,
+	end_date date null,
+	available_seat int not null,
+	constraint flight_pk
+		primary key (id)
+);
+
+-- Table ticket
+create table ticket
+(
+	id int auto_increment,
+	customer_id int not null,
+	flight_id int not null,
+	seat_number int null,
+	constraint ticket_pk
+		primary key (id),
+	constraint ticket_customer_info_id_fk
+		foreign key (customer_id) references customer_info (id)
+			on delete cascade,
+	constraint ticket_flight_id_fk
+		foreign key (flight_id) references flight (id)
+			on delete cascade
+);
+
+-- Table flight seat info
+create table flight_seat_info
+(
+	flight_id int not null,
+	seat_list json not null,
+	constraint flight_seat_info_pk
+		primary key (flight_id),
+	constraint flight_seat_info_flight_id_fk
+		foreign key (flight_id) references flight (id)
+			on delete cascade
+);
+
+
+
+
+
+
