@@ -1,12 +1,11 @@
 package com.guanhong.airlinebookingsystem.Exception;
 
 import org.springframework.http.HttpStatus;
-
-public class ServerException extends Exception{
+public class ClientException extends Exception {
 
     private HttpStatus httpStatus;
 
-    public ServerException(String message, HttpStatus httpStatus){
+    public ClientException(String message, HttpStatus httpStatus){
         super(message);
         this.httpStatus = httpStatus;
     }
@@ -17,5 +16,10 @@ public class ServerException extends Exception{
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
+    }
+
+    public ClientException(String message) {
+        super(message);
+        this.httpStatus = HttpStatus.BAD_REQUEST;
     }
 }

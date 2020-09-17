@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.CustomerInfo;
@@ -154,12 +155,12 @@ public class JwtUserDetailsService implements UserDetailsService {
         User isNewUser = userRepository.findUserByUsername(accountInfo.getUsername());
         // Check if the username already existed in the system
         if (isNewUser != null){
-            throw new Exception("The user already exits in system.");
+            throw new ClientException("The user already exits in system.");
         }
         // Check if the password is at least 6 digits
         if (accountInfo.getPassword().length() < 6 || accountInfo.getPassword().length() >255){
             log.error("The password should be at least six digits and less than 255 digits.");
-            throw new Exception("The password should be at least six digits and less than 255 digits.");
+            throw new ClientException("The password should be at least six digits and less than 255 digits.");
         }
         // If the role is admin, the system does not requires any more info
         if (accountInfo.getRole() == Role.ADMIN){
@@ -169,15 +170,15 @@ public class JwtUserDetailsService implements UserDetailsService {
         else if (accountInfo.getRole() == Role.USER){
             // Check if username is a valid email address
             if (!isEmailValid(accountInfo.getUsername())){
-                throw new Exception("The email format is invalid.");
+                throw new ClientException("The email format is invalid.");
             }
             // Check if birth date is valid format
             if (!isDateValid(accountInfo.getBirthDate())){
-                throw new Exception("The birth date's format is invalid.");
+                throw new ClientException("The birth date's format is invalid.");
             }
             return true;
         }
-        throw new Exception("The account role is invalid.");
+        throw new ClientException("The account role is invalid.");
     }
 
     private boolean isEmailValid(String email){
@@ -185,18 +186,22 @@ public class JwtUserDetailsService implements UserDetailsService {
         return validator.isValid(email);
     }
 
-    private boolean isDateValid(String date){
+    private boolean isDateValid(String date) throws Exception {
         try{
             Date birthDate = convertStringToDate(date);
             Date today = new Date();
             if (today.before(birthDate)){
-                throw new Exception("The birth date cannot after today.");
+                throw new ClientException("The birth date cannot after today.");
             }
             return true;
-        } catch (Exception e) {
+        } catch (ClientException e){
+            throw e;
+        }
+        catch (Exception e) {
             log.warn(e.getMessage());
             return false;
         }
+
     }
 
     private Date convertStringToDate(String date) throws ParseException {

@@ -1,4 +1,6 @@
 package com.guanhong.airlinebookingsystem.entity;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -12,6 +14,7 @@ public class CustomerInfo {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "birth_date", nullable = false)
     private Date birthDate;
 

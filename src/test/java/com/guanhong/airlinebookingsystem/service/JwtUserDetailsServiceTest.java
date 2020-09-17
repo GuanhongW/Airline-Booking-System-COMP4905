@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.CustomerInfo;
 import com.guanhong.airlinebookingsystem.entity.Gender;
@@ -337,12 +338,12 @@ class JwtUserDetailsServiceTest {
         String testUsername = "admin";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername, password, Role.ADMIN);
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The user already exits in system.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The user already exits in system.");
 
         // Test 2: Customer user already exist in the system
         testUsername = "string@test.com";
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The user already exits in system.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The user already exits in system.");
     }
 
     @Test
@@ -352,27 +353,27 @@ class JwtUserDetailsServiceTest {
         String testUsername = "test1.carleton.ca";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The email format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The email format is invalid.");
 
         // Test 2: Invalid email format
         testUsername = "test1@ca..ca";
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The email format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The email format is invalid.");
 
         // Test 3: Invalid email format
         testUsername = "testuser";
         AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The email format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The email format is invalid.");
 
         // Test 4: Invalid email format
         testUsername = "test..user@carleton.ca";
         AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
 
         // Test 5: Invalid email format
         testUsername = "test.user@.carleton.ca";
         AccountInfo newUserInfo5 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
     }
 
     @Test
@@ -383,20 +384,20 @@ class JwtUserDetailsServiceTest {
         String testUsername = "test1@carleton.ca";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-32");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The birth date's format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The birth date's format is invalid.");
 
         // Test 2: Invalid birth date (2001-02-29)
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2001-02-29");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The birth date's format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The birth date's format is invalid.");
 
         // Test 3: Invalid birth date (2000-02-30)
         AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-02-30");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
 
         // Test 3: Invalid birth date (tomorrow)
         Date tomorrow = tomorrow(new Date());
         AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, dateFormat.format(tomorrow));
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
+        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
     }
 
     @Test

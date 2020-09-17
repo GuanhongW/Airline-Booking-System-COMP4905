@@ -1,5 +1,6 @@
 package com.guanhong.airlinebookingsystem.condroller;
 
+import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.UserCredential;
@@ -55,6 +56,10 @@ public class JwtAuthenticationController {
             return ResponseEntity.ok(jwtUserDetailsService.createAccount(newUserInfo));
         }
         catch (ServerException e){
+            log.error("URL: register, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
             log.error("URL: register, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
             return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
