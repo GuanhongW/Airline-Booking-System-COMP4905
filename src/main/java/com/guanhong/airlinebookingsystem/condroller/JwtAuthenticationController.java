@@ -3,11 +3,13 @@ package com.guanhong.airlinebookingsystem.condroller;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
+import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
 import com.guanhong.airlinebookingsystem.model.UserCredential;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -53,7 +55,8 @@ public class JwtAuthenticationController {
                 log.error("Http Code: 400  URL: register  username, password, or role is null");
                 return ResponseEntity.badRequest().body("Username, password, or role cannot be empty");
             }
-            return ResponseEntity.ok(jwtUserDetailsService.createAccount(newUserInfo));
+            CreateUserResponse test = jwtUserDetailsService.createAccount(newUserInfo);
+            return ResponseEntity.ok(test);
         }
         catch (ServerException e){
             log.error("URL: register, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
@@ -61,7 +64,12 @@ public class JwtAuthenticationController {
         }
         catch (ClientException e){
             log.error("URL: register, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
-            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (DataIntegrityViolationException e){
+            log.error(e.getMessage());
+            log.info("Create entity in customer info table is failed, rolling back in user table");
+            return new ResponseEntity("Create a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e){
             log.error("URL: register, Http Code: 400: " + e.getMessage());

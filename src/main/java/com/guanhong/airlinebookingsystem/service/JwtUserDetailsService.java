@@ -19,6 +19,7 @@ import com.guanhong.airlinebookingsystem.repository.UserRepository;
 import com.guanhong.airlinebookingsystem.entity.User;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -98,18 +99,8 @@ public class JwtUserDetailsService implements UserDetailsService {
 
             if (accountInfo.getRole() == Role.USER){
                 CustomerInfo customerInfo = new CustomerInfo(returnedUser.getId(), accountInfo.getName(), convertStringToDate(accountInfo.getBirthDate()), accountInfo.getGender());
-                CustomerInfo returnedInfo;
-                try{
-                    returnedInfo = customerInfoRepository.save(customerInfo);
-                    log.info("Customer user: " + returnedUser.getUsername() + " create the profile in customer info table");
-                }
-                catch (Exception e){
-                    // If create customer info is failed, rollback will be triggered
-
-                    log.error(e.getMessage());
-                    log.info("Create entity in customer info table is failed, rolling back in user table");
-                    throw new ServerException("Error in creating entity in customer_info table.", HttpStatus.INTERNAL_SERVER_ERROR);
-                }
+                CustomerInfo returnedInfo = customerInfoRepository.save(customerInfo);
+                log.info("Customer user: " + returnedUser.getUsername() + " create the profile in customer info table");
             }
             CreateUserResponse res = new CreateUserResponse(newUser.getUsername(), newUser.getId());
             return res;
