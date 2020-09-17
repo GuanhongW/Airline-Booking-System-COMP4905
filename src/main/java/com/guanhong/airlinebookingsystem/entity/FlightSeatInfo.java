@@ -16,7 +16,8 @@ public class FlightSeatInfo {
     public FlightSeatInfo() {
     }
 
-    public FlightSeatInfo(String seatList) {
+    public FlightSeatInfo(long flightNumber, String seatList) {
+        this.flightNumber = flightNumber;
         this.seatList = seatList;
     }
 

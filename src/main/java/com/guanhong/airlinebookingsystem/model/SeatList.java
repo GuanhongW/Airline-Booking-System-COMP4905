@@ -15,6 +15,13 @@ public class SeatList {
         this.seatList = new HashMap<String, SeatStatus>();
     }
 
+    public SeatList(int capacity) {
+        this.seatList = new HashMap<String, SeatStatus>();
+        for (int i = 1; i <= capacity; i++){
+            this.seatList.put(Integer.toString(i),SeatStatus.AVAILABLE);
+        }
+    }
+
     public SeatList(HashMap<String, SeatStatus> seatList) {
         this.seatList = seatList;
     }

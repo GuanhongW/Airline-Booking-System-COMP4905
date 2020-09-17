@@ -45,6 +45,8 @@ create table flight
 		primary key (id)
 );
 
+alter table flight modify overbooking decimal(4,2) default 0 not null;
+
 -- Table ticket
 create table ticket
 (
@@ -73,6 +75,8 @@ create table flight_seat_info
 		foreign key (flight_id) references flight (id)
 			on delete cascade
 );
+
+
 
 
 

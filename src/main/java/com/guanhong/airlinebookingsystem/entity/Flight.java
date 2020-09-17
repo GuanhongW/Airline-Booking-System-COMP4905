@@ -1,8 +1,15 @@
 package com.guanhong.airlinebookingsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.util.Calendar;
 
 @Entity
 @Table(name= "flight")
@@ -27,19 +34,21 @@ public class Flight {
     private Time arrivalTime;
 
     @Column(name = "capacity", nullable = false)
-    private int capacity;
+    private Integer capacity;
 
     @Column(name = "overbooking", nullable = false)
-    private int overbooking;
+    private BigDecimal overbooking;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "start_date", nullable = false)
     private Date startDate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
     @Column(name = "available_seat", nullable = false)
-    private int availableSeat;
+    private Integer availableSeat;
 
     public long getFlightNumber() {
         return flightNumber;
@@ -81,19 +90,19 @@ public class Flight {
         this.arrivalTime = arrivalTime;
     }
 
-    public int getCapacity() {
+    public Integer getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 
-    public int getOverbooking() {
+    public BigDecimal getOverbooking() {
         return overbooking;
     }
 
-    public void setOverbooking(int overbooking) {
+    public void setOverbooking(BigDecimal overbooking) {
         this.overbooking = overbooking;
     }
 
@@ -113,16 +122,34 @@ public class Flight {
         this.endDate = endDate;
     }
 
-    public int getAvailableSeat() {
+    public Integer getAvailableSeat() {
         return availableSeat;
     }
 
-    public void setAvailableSeat(int availableSeat) {
+    public void setAvailableSeat(Integer availableSeat) {
         this.availableSeat = availableSeat;
     }
 
     public int calculateAvailableSeat(int capacity, int overbooking){
         int availableSeats = capacity + (int)Math.floor(capacity * overbooking);
         return availableSeats;
+    }
+
+    public Flight(long flightNumber, String departureCity, String destinationCity, Time departureTime, Time arrivalTime, Integer capacity, BigDecimal overbooking, Date startDate, Date endDate, Integer availableSeat) {
+        this.flightNumber = flightNumber;
+        this.departureCity = departureCity;
+        this.destinationCity = destinationCity;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
+        this.capacity = capacity;
+        this.overbooking = overbooking;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.availableSeat = availableSeat;
+    }
+
+    public String toJsonString() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
     }
 }

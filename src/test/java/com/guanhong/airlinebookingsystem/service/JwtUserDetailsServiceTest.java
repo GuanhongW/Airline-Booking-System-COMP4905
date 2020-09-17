@@ -12,6 +12,7 @@ import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
 
 
+import com.mysql.cj.xdevapi.Client;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.BeforeClass;
@@ -322,13 +323,15 @@ class JwtUserDetailsServiceTest {
         String testUsername = "admin1";
         String password = "12345";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername, password, Role.ADMIN);
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo1),"The password should be at least six digits and less than 255 digits.");
+        ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
+        assertEquals("The password should be at least six digits and less than 255 digits.", exception.getMessage());
 
 
         // Test 2: password is more than 255 digits
         password = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.ADMIN);
-        assertThrows(Exception.class, ()->jwtUserDetailsService.createAccount(newUserInfo2),"The password should be at least six digits and less than 255 digits.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
+        assertEquals("The password should be at least six digits and less than 255 digits.", exception.getMessage());
     }
 
     @Test
@@ -338,12 +341,14 @@ class JwtUserDetailsServiceTest {
         String testUsername = "admin";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername, password, Role.ADMIN);
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The user already exits in system.");
+        ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
+        assertEquals("The user already exits in system.", exception.getMessage());
 
         // Test 2: Customer user already exist in the system
         testUsername = "string@test.com";
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The user already exits in system.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
+        assertEquals("The user already exits in system.", exception.getMessage());
     }
 
     @Test
@@ -353,27 +358,32 @@ class JwtUserDetailsServiceTest {
         String testUsername = "test1.carleton.ca";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The email format is invalid.");
+        ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
+        assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 2: Invalid email format
         testUsername = "test1@ca..ca";
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The email format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
+        assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 3: Invalid email format
         testUsername = "testuser";
         AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The email format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
+        assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 4: Invalid email format
         testUsername = "test..user@carleton.ca";
         AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4));
+        assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 5: Invalid email format
         testUsername = "test.user@.carleton.ca";
         AccountInfo newUserInfo5 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4), "The email format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4));
+        assertEquals("The email format is invalid.",exception.getMessage());
     }
 
     @Test
@@ -384,20 +394,24 @@ class JwtUserDetailsServiceTest {
         String testUsername = "test1@carleton.ca";
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-32");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1), "The birth date's format is invalid.");
+        ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
+        assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 2: Invalid birth date (2001-02-29)
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2001-02-29");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2), "The birth date's format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
+        assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 3: Invalid birth date (2000-02-30)
         AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-02-30");
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
+        assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 3: Invalid birth date (tomorrow)
         Date tomorrow = tomorrow(new Date());
         AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, dateFormat.format(tomorrow));
-        assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3), "The birth date's format is invalid.");
+        exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
+        assertEquals("The birth date's format is invalid.", exception.getMessage());
     }
 
     @Test
@@ -424,28 +438,33 @@ class JwtUserDetailsServiceTest {
         User newUser = userRepository.findUserByUsername("autoadmin1");
         // Test 1: Auth a Admin account with random password
         UserCredential userCredential1 = new UserCredential("autoadmin1", "adminadminwrong");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential1),"INVALID_CREDENTIALS");
+        Exception exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential1));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 2: Auth a Admin account with other password
         UserCredential userCredential2 = new UserCredential("autoadmin2", "adminadmin1");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential2),"INVALID_CREDENTIALS");
+        exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential2));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 3: Auth a admin account with unknown user name
         UserCredential userCredential3 = new UserCredential("unknownautoadmin", "adminadmin1");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential3),"USER_DISABLED");
+        exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential3));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 4: Auth a Customer account with random password
         UserCredential userCredential4 = new UserCredential("auto1@test.com", "useruserwrong");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential4),"INVALID_CREDENTIALS");
+        exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential4));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 5: Auth a Customer account with other password
         UserCredential userCredential5 = new UserCredential("auto1@test.com", "useruser2");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential5),"INVALID_CREDENTIALS");
+        exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential5));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 6: Auth a Customer account with unknown user name
         UserCredential userCredential6 = new UserCredential("unknownauto@test.com", "useruser2");
-        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential6),"USER_DISABLED");
-
+        assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential6));
+        assertEquals("INVALID_CREDENTIALS", exception.getMessage());
     }
 
     private Date tomorrow(Date today) {
