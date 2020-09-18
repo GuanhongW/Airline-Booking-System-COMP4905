@@ -50,6 +50,19 @@ public class Flight {
     @Column(name = "available_seat", nullable = false)
     private Integer availableSeat;
 
+    public Flight(Flight flight) {
+        this.flightNumber = flight.getFlightNumber();
+        this.departureCity = flight.getDepartureCity();
+        this.destinationCity = flight.getDestinationCity();
+        this.departureTime = flight.getDepartureTime();
+        this.arrivalTime = flight.getArrivalTime();
+        this.capacity = flight.getCapacity();
+        this.overbooking = flight.getOverbooking();
+        this.startDate = flight.getStartDate();
+        this.endDate = flight.getEndDate();
+        this.availableSeat = flight.getAvailableSeat();
+    }
+
     public long getFlightNumber() {
         return flightNumber;
     }

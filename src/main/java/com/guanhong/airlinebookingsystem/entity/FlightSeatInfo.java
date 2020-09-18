@@ -1,6 +1,16 @@
 package com.guanhong.airlinebookingsystem.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guanhong.airlinebookingsystem.model.Seat;
+import com.guanhong.airlinebookingsystem.model.SeatList;
+import com.guanhong.airlinebookingsystem.model.SeatStatus;
+
+
 import javax.persistence.*;
+import java.util.HashMap;
+import java.util.List;
 
 
 @Entity
@@ -35,5 +45,11 @@ public class FlightSeatInfo {
 
     public void setSeatList(String seatList) {
         this.seatList = seatList;
+    }
+
+    public SeatList getSeatListByJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Seat> test =mapper.readValue(this.seatList, new TypeReference<List<Seat>>() {});
+        return new SeatList(test);
     }
 }

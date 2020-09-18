@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -45,9 +46,11 @@ public class FlightService {
             log.info("Created seat info of flight " + returnedFlightSeatInfo.getFlightNumber() + " in the system");
         }
         return returnedFlight;
+    }
 
-
-
+    public List<Flight> getAllAvailableFlights() throws Exception{
+        List<Flight> flights = flightRepository.findAllByAvailableSeatIsGreaterThanAndEndDateAfter(0, new Date());
+        return flights;
     }
 
     private boolean validNewFlightInfo(Flight flight) throws Exception {
@@ -136,7 +139,7 @@ public class FlightService {
     }
 
     private BigDecimal roundOverbookingAllowance(BigDecimal overbooking){
-        return overbooking.setScale(2);
+        return overbooking.setScale(2, RoundingMode.FLOOR);
     }
 
 
