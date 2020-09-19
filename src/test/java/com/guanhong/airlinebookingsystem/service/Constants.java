@@ -1,11 +1,22 @@
 package com.guanhong.airlinebookingsystem.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightSeatInfo;
 import com.guanhong.airlinebookingsystem.model.SeatList;
+import com.guanhong.airlinebookingsystem.model.UserCredential;
+import com.guanhong.airlinebookingsystem.model.UserLoginResponse;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,6 +25,8 @@ import java.sql.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 
 public class Constants {
 
@@ -26,6 +39,7 @@ public class Constants {
     public static long FLIGHT_NUMBER_NO_AVAILABLE_SEAT = 9998;
     public static long FLIGHT_NUMBER_EXPIRED = 9997;
     public static long FLIGHT_NUMBER_AVAILABLE = 9996;
+    public static long FLIGHT_NUMBER_9995 = 9995;
 
     public static List<Long> flightList = new ArrayList<>();
 
@@ -80,6 +94,5 @@ public class Constants {
     public BigDecimal getOverbookingByNumber(double overbooking){
         return  BigDecimal.valueOf(overbooking).setScale(2);
     }
-
 
 }

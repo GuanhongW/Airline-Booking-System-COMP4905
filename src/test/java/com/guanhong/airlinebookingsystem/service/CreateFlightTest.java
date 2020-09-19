@@ -17,6 +17,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -31,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class CreateFlightTest {
 
     @Autowired
@@ -41,6 +49,9 @@ class CreateFlightTest {
 
     @Autowired
     private FlightSeatInfoRepository flightSeatInfoRepository;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     private static Constants constants = Constants.getInstance();
 
@@ -834,6 +845,7 @@ class CreateFlightTest {
         ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlight1));
         assertEquals("The arrival time should not be empty.", exception.getMessage());
     }
+
 
 
 //    @Test

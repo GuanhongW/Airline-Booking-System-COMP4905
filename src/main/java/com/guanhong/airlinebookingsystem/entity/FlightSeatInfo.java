@@ -49,7 +49,7 @@ public class FlightSeatInfo {
 
     public SeatList getSeatListByJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        List<Seat> test =mapper.readValue(this.seatList, new TypeReference<List<Seat>>() {});
+        List<Seat> test = mapper.readValue(this.seatList, new TypeReference<List<Seat>>() {});
         return new SeatList(test);
     }
 }

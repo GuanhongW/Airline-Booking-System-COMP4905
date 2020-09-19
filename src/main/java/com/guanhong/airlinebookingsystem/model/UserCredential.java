@@ -1,5 +1,8 @@
 package com.guanhong.airlinebookingsystem.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class UserCredential {
 
     private String username;
@@ -29,5 +32,9 @@ public class UserCredential {
         this.password = password;
     }
 
+    public String  toJsonString() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(this);
+    }
 
 }

@@ -6,17 +6,14 @@ import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.sql.Date;
+import java.sql.Time;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -117,7 +114,6 @@ class GetAvailableFlightTest {
         assertTrue(validFlightNotExistInList(flightService.getAllAvailableFlights(), constants.FLIGHT_NUMBER_EXPIRED));
         assertTrue(validFlightExistInList(flightService.getAllAvailableFlights(), constants.FLIGHT_NUMBER_AVAILABLE));
     }
-
 
 
     private void validFlightInfo(Flight expectedFlight, long actualFlightNumber, int availableSeats) {

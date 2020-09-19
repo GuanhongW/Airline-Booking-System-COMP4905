@@ -33,7 +33,7 @@ public class JwtAuthenticationController {
         try{
             if (userCredential.getUsername() == null || userCredential.getPassword() == null){
                 log.error("Http Code: 400  URL: authenticate  username or password is null");
-                return ResponseEntity.badRequest().body("Username or password cannot be empty");
+                return ResponseEntity.badRequest().body("Username or password cannot be empty.");
             }
             return ResponseEntity.ok(jwtUserDetailsService.authUser(userCredential));
 
@@ -50,6 +50,7 @@ public class JwtAuthenticationController {
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity createUserController(@RequestBody AccountInfo newUserInfo) throws Exception {
+        System.out.println(newUserInfo.getRole());
         try{
             if (newUserInfo.getUsername() == null || newUserInfo.getPassword() == null || newUserInfo.getRole() == null){
                 log.error("Http Code: 400  URL: register  username, password, or role is null");

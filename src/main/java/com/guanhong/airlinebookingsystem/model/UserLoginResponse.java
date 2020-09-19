@@ -6,12 +6,15 @@ public class UserLoginResponse {
 
     private String username;
     private long accountId;
-    private final String jwttoken;
+    private String jwttoken;
 
     public UserLoginResponse(String username, long accountId, String jwttoken) {
         this.username = username;
         this.accountId = accountId;
         this.jwttoken = jwttoken;
+    }
+
+    public UserLoginResponse() {
     }
 
     public String getUsername() {

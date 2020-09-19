@@ -60,7 +60,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/getFlights", method = RequestMethod.POST)
+    @RequestMapping(value = "/getFlights", method = RequestMethod.GET)
     public ResponseEntity getAvailableFlights(){
         try{
             return new ResponseEntity(flightService.getAllAvailableFlights(), HttpStatus.OK);

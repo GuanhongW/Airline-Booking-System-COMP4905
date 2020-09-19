@@ -9,6 +9,9 @@ public class CreateUserResponse {
         this.accountId = accountId;
     }
 
+    public CreateUserResponse() {
+    }
+
     public String getUsername() {
         return username;
     }
