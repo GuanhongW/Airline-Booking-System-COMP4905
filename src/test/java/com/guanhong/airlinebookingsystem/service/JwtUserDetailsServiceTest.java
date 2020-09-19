@@ -1,26 +1,20 @@
 package com.guanhong.airlinebookingsystem.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
-import com.guanhong.airlinebookingsystem.entity.CustomerInfo;
-import com.guanhong.airlinebookingsystem.entity.Gender;
-import com.guanhong.airlinebookingsystem.entity.Role;
-import com.guanhong.airlinebookingsystem.entity.User;
+import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
 import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
+import com.guanhong.airlinebookingsystem.repository.FlightRepository;
+import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
 
 
-import com.mysql.cj.xdevapi.Client;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+import java.math.BigDecimal;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 
 @SpringBootTest
@@ -53,52 +47,49 @@ class JwtUserDetailsServiceTest {
     private CustomerInfoRepository customerInfoRepository;
 
 
+    private static Constants constants = Constants.getInstance();
+
+    private static List<String> defaultAdminUsernames = new ArrayList<>();
+
+    private static List<String> defaultCustomerUsernames = new ArrayList<>();
+
+    private static List<Long> defaultFlights = new ArrayList<>();
+
+
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
                                      @Autowired UserRepository userRepository,
-                                     @Autowired CustomerInfoRepository customerInfoRepository) throws Exception {
+                                     @Autowired CustomerInfoRepository customerInfoRepository,
+                                     @Autowired FlightService flightService,
+                                     @Autowired FlightRepository flightRepository) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-//        String testAdminUsername = "autoadmin1";
-//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-//        assertNull(userRepository.findUserByUsername(testAdminUsername));
-//        testAdminUsername = "autoadmin2";
-//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-//        assertNull(userRepository.findUserByUsername(testAdminUsername));
-//        //Delete default customer user
-//        String testCustomerUsername = "auto1@test.com";
-//        User customer = userRepository.findUserByUsername(testCustomerUsername);
-//        userRepository.delete(customer);
-//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
-//        testCustomerUsername = "auto2@test.com";
-//        customer = userRepository.findUserByUsername(testCustomerUsername);
-//        userRepository.delete(customer);
-//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
-
         // Create default admin user 1
-        String testAdminUsername = "autoadmin1";
-        AccountInfo newUserInfo = new AccountInfo(testAdminUsername,"adminadmin1", Role.ADMIN);
+
+        String testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         User user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
-        testAdminUsername = "autoadmin2";
-        newUserInfo = new AccountInfo(testAdminUsername,"adminadmin2", Role.ADMIN);
+        testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
         // Create default customer user
-        String testCustomerUsername = "auto1@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser1", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -107,10 +98,11 @@ class JwtUserDetailsServiceTest {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
 
-        testCustomerUsername = "auto2@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser2", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_1, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -118,45 +110,75 @@ class JwtUserDetailsServiceTest {
         assertEquals("test", customerInfo.getName());
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
+
+        // Create default flight
+        long flightNumber = constants.getNextAvailableFlightNumber();
+        defaultFlights.add(flightNumber);
+        String departureCity = "YYZ";
+        String destinationCity = "YVR";
+        Time departureTime = Time.valueOf("10:05:00");
+        Time arrivalTime = Time.valueOf("12:00:00");
+        int capacity = 148;
+        BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+        java.sql.Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+        java.sql.Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Integer availableSeat = null;
+        Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+                capacity,overbooking,startDate,endDate,
+                availableSeat);
+        flightService.createNewFlight(newFlight);
+        Flight returnedFlight = flightRepository.findFlightByflightNumber(newFlight.getFlightNumber());
+        assertNotNull(returnedFlight);
+        System.out.println("Before All finished.");
     }
 
     @AfterAll
-    static void deleteDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
-                                     @Autowired UserRepository userRepository,
-                                     @Autowired CustomerInfoRepository customerInfoRepository) throws Exception {
+    static void deleteDefaultAccount(@Autowired UserRepository userRepository,
+                                     @Autowired CustomerInfoRepository customerInfoRepository,
+                                     @Autowired FlightRepository flightRepository,
+                                     @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
+
         // Delete default admin user
-        String testAdminUsername = "autoadmin1";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        testAdminUsername = "autoadmin2";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        //Delete default customer user
-        String testCustomerUsername = "auto1@test.com";
-        User customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
-        testCustomerUsername = "auto2@test.com";
-        customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
+        String testUsername;
+        for (int i = 0; i < defaultAdminUsernames.size(); i++){
+            testUsername = defaultAdminUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default customer user
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+            testUsername = defaultCustomerUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default flight
+        long flightNumber;
+        for (int i = 0; i < defaultFlights.size(); i++){
+            flightNumber = defaultFlights.get(i);
+            Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
+            flightRepository.delete(flight);
+            assertNull(flightRepository.findFlightByflightNumber(flightNumber));
+            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
+        }
     }
 
     @Test
     @Transactional
     void createAccount_Admin_Success() throws Exception {
         // Test 1: Create a new Admin account
-        String testUsername = "admin2";
-        AccountInfo newUserInfo = new AccountInfo(testUsername,"adminadmin", Role.ADMIN);
+        String testUsername = constants.getNextAdminUsername();
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         User user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
-
-
     }
 
     @Test
@@ -164,8 +186,8 @@ class JwtUserDetailsServiceTest {
     void createAccount_Gender_Success() throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // Test 1: Create a new User account (Male)
-        String testUsername = "testuser1@carleton.ca";
-        AccountInfo newUserInfo = new AccountInfo(testUsername,"useruser", Role.USER,"test", Gender.male,"2000-01-01");
+        String testUsername = constants.getNextCustomerUsername();
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -177,8 +199,8 @@ class JwtUserDetailsServiceTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Test 2: Create a new User account (Female)
-        testUsername = "testuser2@carleton.ca";
-        newUserInfo = new AccountInfo(testUsername,"useruser", Role.USER,"test", Gender.female,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.female,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -196,7 +218,7 @@ class JwtUserDetailsServiceTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // Test 1: valid email address
         String testUsername = "testuser1@cmail.carleton.ca";
-        AccountInfo newUserInfo = new AccountInfo(testUsername,"useruser", Role.USER,"test", Gender.male,"2000-01-01");
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -209,7 +231,7 @@ class JwtUserDetailsServiceTest {
 
         // Test 2: Create a new User account (Female)
         testUsername = "test.user2@carleton.ca";
-        newUserInfo = new AccountInfo(testUsername,"useruser", Role.USER,"test", Gender.female,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.female,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -220,9 +242,9 @@ class JwtUserDetailsServiceTest {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.female, customerInfo.getGender());
 
-        // Test 2: Create a new User account (Female)
+        // Test 3: Create a new User account (Female)
         testUsername = "test@test.ca";
-        newUserInfo = new AccountInfo(testUsername,"useruser", Role.USER,"test", Gender.female,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.female,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -238,7 +260,7 @@ class JwtUserDetailsServiceTest {
     @Transactional
     void createAccount_Password_Success() throws Exception {
         // Test 1: password only have 6 digits
-        String testUsername = "admin1";
+        String testUsername = constants.getNextAdminUsername();
         String password = "123456";
         AccountInfo newUserInfo = new AccountInfo(testUsername, password, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
@@ -248,7 +270,7 @@ class JwtUserDetailsServiceTest {
         assertEquals(Role.ADMIN, user.getRole());
 
         // Test 2: password only have 255 digits
-        testUsername = "admin2";
+        testUsername = constants.getNextAdminUsername();
         password = "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         newUserInfo = new AccountInfo(testUsername,password, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
@@ -258,7 +280,7 @@ class JwtUserDetailsServiceTest {
         assertEquals(Role.ADMIN, user.getRole());
 
         // Test 3: password only have 15 digits
-        testUsername = "admin3";
+        testUsername = constants.getNextAdminUsername();
         password = "password+PASSWORD";
         newUserInfo = new AccountInfo(testUsername,password, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
@@ -273,7 +295,7 @@ class JwtUserDetailsServiceTest {
     void createAccount_Birthdate_Success() throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // Test 1: Use valid birth date 2000-01-31
-        String testUsername = "test1@carleton.ca";
+        String testUsername = constants.getNextCustomerUsername();
         String password = "123456";
         AccountInfo newUserInfo = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-31");
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
@@ -287,7 +309,7 @@ class JwtUserDetailsServiceTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Test 2: Use valid birth date 2000-02-29
-        testUsername = "test2@carleton.ca";
+        testUsername = constants.getNextCustomerUsername();
         newUserInfo = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-02-29");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
@@ -300,7 +322,7 @@ class JwtUserDetailsServiceTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Test 3: Use valid birth date today
-        testUsername = "test3@carleton.ca";
+        testUsername = constants.getNextCustomerUsername();
         Date today = new Date();
         String todayStr = dateFormat.format(today);
         newUserInfo = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, todayStr);
@@ -320,7 +342,7 @@ class JwtUserDetailsServiceTest {
     @Transactional
     void createAccount_Password_Failed() throws Exception {
         // Test 1: password only have 5 digits
-        String testUsername = "admin1";
+        String testUsername = constants.getNextAdminUsername();
         String password = "12345";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername, password, Role.ADMIN);
         ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
@@ -338,14 +360,14 @@ class JwtUserDetailsServiceTest {
     @Transactional
     void createAccount_Duplicated_Username_Failed() throws Exception {
         // Test 1: Admin user already exist in the system
-        String testUsername = "admin";
+        String testUsername = defaultAdminUsernames.get(0);
         String password = "123456";
         AccountInfo newUserInfo1 = new AccountInfo(testUsername, password, Role.ADMIN);
         ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
         assertEquals("The user already exits in system.", exception.getMessage());
 
         // Test 2: Customer user already exist in the system
-        testUsername = "string@test.com";
+        testUsername = defaultCustomerUsernames.get(0);
         AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
         assertEquals("The user already exits in system.", exception.getMessage());
@@ -356,32 +378,31 @@ class JwtUserDetailsServiceTest {
     void createAccount_Invalid_Username_Failed() throws Exception {
         // Test 1: Invalid email format 1
         String testUsername = "test1.carleton.ca";
-        String password = "123456";
-        AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
+        AccountInfo newUserInfo1 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-01");
         ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
         assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 2: Invalid email format
         testUsername = "test1@ca..ca";
-        AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
+        AccountInfo newUserInfo2 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-01");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
         assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 3: Invalid email format
         testUsername = "testuser";
-        AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
+        AccountInfo newUserInfo3 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-01");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
         assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 4: Invalid email format
         testUsername = "test..user@carleton.ca";
-        AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
+        AccountInfo newUserInfo4 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-01");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4));
         assertEquals("The email format is invalid.",exception.getMessage());
 
         // Test 5: Invalid email format
         testUsername = "test.user@.carleton.ca";
-        AccountInfo newUserInfo5 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-01");
+        AccountInfo newUserInfo5 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-01");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo4));
         assertEquals("The email format is invalid.",exception.getMessage());
     }
@@ -391,25 +412,24 @@ class JwtUserDetailsServiceTest {
     void createAccount_Birthdate_Failed() throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // Test 1: Invalid birth date (2000-01-32)
-        String testUsername = "test1@carleton.ca";
-        String password = "123456";
-        AccountInfo newUserInfo1 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-01-32");
+        String testUsername = constants.getNextCustomerUsername();
+        AccountInfo newUserInfo1 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-01-32");
         ClientException exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo1));
         assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 2: Invalid birth date (2001-02-29)
-        AccountInfo newUserInfo2 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2001-02-29");
+        AccountInfo newUserInfo2 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2001-02-29");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo2));
         assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 3: Invalid birth date (2000-02-30)
-        AccountInfo newUserInfo3 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, "2000-02-30");
+        AccountInfo newUserInfo3 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, "2000-02-30");
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
         assertEquals("The birth date's format is invalid.", exception.getMessage());
 
         // Test 3: Invalid birth date (tomorrow)
         Date tomorrow = tomorrow(new Date());
-        AccountInfo newUserInfo4 = new AccountInfo(testUsername,password, Role.USER, "testuser", Gender.male, dateFormat.format(tomorrow));
+        AccountInfo newUserInfo4 = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "testuser", Gender.male, dateFormat.format(tomorrow));
         exception = assertThrows(ClientException.class, ()->jwtUserDetailsService.createAccount(newUserInfo3));
         assertEquals("The birth date's format is invalid.", exception.getMessage());
     }
@@ -418,51 +438,50 @@ class JwtUserDetailsServiceTest {
     @Transactional
     void authUser_Success() throws Exception {
         // Test 1: Auth a Admin account
-        UserCredential userCredential = new UserCredential("autoadmin1", "adminadmin1");
+        UserCredential userCredential = new UserCredential(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
         UserLoginResponse userLoginResponse = jwtUserDetailsService.authUser(userCredential);
-        assertEquals("autoadmin1", userLoginResponse.getUsername());
+        assertEquals(defaultAdminUsernames.get(0), userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getJwttoken());
-        assertEquals("autoadmin1", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
+        assertEquals(defaultAdminUsernames.get(0), jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
 
         // Test 2: Auth a Customer account
-        userCredential = new UserCredential("auto1@test.com", "useruser1");
+        userCredential = new UserCredential(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
         userLoginResponse = jwtUserDetailsService.authUser(userCredential);
-        assertEquals("auto1@test.com", userLoginResponse.getUsername());
+        assertEquals(defaultCustomerUsernames.get(0), userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getJwttoken());
-        assertEquals("auto1@test.com", jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
+        assertEquals(defaultCustomerUsernames.get(0), jwtTokenUtil.getUsernameFromToken(userLoginResponse.getJwttoken()));
     }
 
     @Test
     @Transactional
     void authUser_Failed() throws Exception {
-        User newUser = userRepository.findUserByUsername("autoadmin1");
         // Test 1: Auth a Admin account with random password
-        UserCredential userCredential1 = new UserCredential("autoadmin1", "adminadminwrong");
+        UserCredential userCredential1 = new UserCredential(defaultAdminUsernames.get(0), "adminadminwrong");
         Exception exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential1));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 2: Auth a Admin account with other password
-        UserCredential userCredential2 = new UserCredential("autoadmin2", "adminadmin1");
+        UserCredential userCredential2 = new UserCredential(defaultAdminUsernames.get(1), constants.ADMIN_USER_PASSWORD_0);
         exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential2));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 3: Auth a admin account with unknown user name
-        UserCredential userCredential3 = new UserCredential("unknownautoadmin", "adminadmin1");
+        UserCredential userCredential3 = new UserCredential("unknownautoadmin", constants.ADMIN_USER_PASSWORD_0);
         exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential3));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 4: Auth a Customer account with random password
-        UserCredential userCredential4 = new UserCredential("auto1@test.com", "useruserwrong");
+        UserCredential userCredential4 = new UserCredential(defaultCustomerUsernames.get(0), "useruserwrong");
         exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential4));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 5: Auth a Customer account with other password
-        UserCredential userCredential5 = new UserCredential("auto1@test.com", "useruser2");
+        UserCredential userCredential5 = new UserCredential(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_1);
         exception = assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential5));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
 
         // Test 6: Auth a Customer account with unknown user name
-        UserCredential userCredential6 = new UserCredential("unknownauto@test.com", "useruser2");
+        UserCredential userCredential6 = new UserCredential("unknownauto@test.com", constants.CUSTOMER_USER_PASSWORD_1);
         assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential6));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
     }

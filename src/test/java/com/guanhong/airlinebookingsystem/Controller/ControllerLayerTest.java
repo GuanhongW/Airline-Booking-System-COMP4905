@@ -1,6 +1,5 @@
 package com.guanhong.airlinebookingsystem.Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.entity.*;
@@ -15,17 +14,14 @@ import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,6 +31,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
@@ -51,6 +48,12 @@ public class ControllerLayerTest {
 
     private static Constants constants = Constants.getInstance();
 
+    private static List<String> defaultAdminUsernames = new ArrayList<>();
+
+    private static List<String> defaultCustomerUsernames = new ArrayList<>();
+
+    private static List<Long> defaultFlights = new ArrayList<>();
+
 
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
@@ -61,27 +64,31 @@ public class ControllerLayerTest {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Create default admin user 1
-        String testAdminUsername = "autoadmin1";
-        AccountInfo newUserInfo = new AccountInfo(testAdminUsername,"adminadmin1", Role.ADMIN);
+
+        String testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         User user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
-        testAdminUsername = "autoadmin2";
-        newUserInfo = new AccountInfo(testAdminUsername,"adminadmin2", Role.ADMIN);
+        testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
         // Create default customer user
-        String testCustomerUsername = "auto1@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser1", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -90,10 +97,11 @@ public class ControllerLayerTest {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
 
-        testCustomerUsername = "auto2@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser2", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_1, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -103,17 +111,16 @@ public class ControllerLayerTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Create default flight
-        long flightNumber = Constants.DEFAULT_FLIGHT_NUMBER;
+        long flightNumber = constants.getNextAvailableFlightNumber();
+        defaultFlights.add(flightNumber);
         String departureCity = "YYZ";
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
         int capacity = 148;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        String date = "2021-10-02";
-        Date startDate = new Date(dateFormat.parse(date).getTime());
-        date = "2021-12-28";
-        Date endDate = new Date(dateFormat.parse(date).getTime());
+        Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
@@ -121,6 +128,7 @@ public class ControllerLayerTest {
         flightService.createNewFlight(newFlight);
         Flight returnedFlight = flightRepository.findFlightByflightNumber(newFlight.getFlightNumber());
         assertNotNull(returnedFlight);
+        System.out.println("Before All finished.");
     }
 
     @AfterAll
@@ -128,31 +136,35 @@ public class ControllerLayerTest {
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightRepository flightRepository,
                                      @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
-        // Delete default admin user
-        String testAdminUsername = "autoadmin1";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        testAdminUsername = "autoadmin2";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        //Delete default customer user
-        String testCustomerUsername = "auto1@test.com";
-        User customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
-        testCustomerUsername = "auto2@test.com";
-        customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
-        // Delete default fligh
-        long flightNumber = Constants.DEFAULT_FLIGHT_NUMBER;
-        Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
-        flightRepository.delete(flight);
-        assertNull(flightRepository.findFlightByflightNumber(flightNumber));
-        assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
 
+        // Delete default admin user
+        String testUsername;
+        for (int i = 0; i < defaultAdminUsernames.size(); i++){
+            testUsername = defaultAdminUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default customer user
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+            testUsername = defaultCustomerUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default flight
+        long flightNumber;
+        for (int i = 0; i < defaultFlights.size(); i++){
+            flightNumber = defaultFlights.get(i);
+            Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
+            flightRepository.delete(flight);
+            assertNull(flightRepository.findFlightByflightNumber(flightNumber));
+            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
+        }
     }
 
     @Test
@@ -241,8 +253,8 @@ public class ControllerLayerTest {
     void authenticateTest_Controller_Success() throws Exception{
         // Login in with admin user
         String requestJSON = "{\n" +
-                "  \"password\": \"adminadmin1\",\n" +
-                "  \"username\": \"autoadmin1\"\n" +
+                "  \"password\": \""+  constants.ADMIN_USER_PASSWORD_0 +"\",\n" +
+                "  \"username\": \"" + defaultAdminUsernames.get(0) + "\"\n" +
                 "}";
         RequestBuilder builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
                 content(requestJSON).contentType(MediaType.APPLICATION_JSON);
@@ -251,14 +263,14 @@ public class ControllerLayerTest {
         String resultContent = result.getResponse().getContentAsString();
         ObjectMapper mapper = new ObjectMapper();
         UserLoginResponse userLoginResponse = mapper.readValue(resultContent, UserLoginResponse.class);
-        assertEquals("autoadmin1", userLoginResponse.getUsername());
+        assertEquals(defaultAdminUsernames.get(0), userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getAccountId());
         assertNotNull(userLoginResponse.getJwttoken());
 
         // Login in with customer user
         requestJSON = "{\n" +
-                "  \"password\": \"useruser1\",\n" +
-                "  \"username\": \"auto1@test.com\"\n" +
+                "  \"password\": \""+  constants.CUSTOMER_USER_PASSWORD_0 +"\",\n" +
+                "  \"username\": \"" + defaultCustomerUsernames.get(0) + "\"\n" +
                 "}";
         builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
                 content(requestJSON).contentType(MediaType.APPLICATION_JSON);
@@ -267,7 +279,7 @@ public class ControllerLayerTest {
         resultContent = result.getResponse().getContentAsString();
         mapper = new ObjectMapper();
         userLoginResponse = mapper.readValue(resultContent, UserLoginResponse.class);
-        assertEquals("auto1@test.com", userLoginResponse.getUsername());
+        assertEquals(defaultCustomerUsernames.get(0), userLoginResponse.getUsername());
         assertNotNull(userLoginResponse.getAccountId());
         assertNotNull(userLoginResponse.getJwttoken());
     }
@@ -302,7 +314,7 @@ public class ControllerLayerTest {
     @Test
     @Transactional
     void createNewFlightTest_Controller_Success() throws Exception{
-        String jwt = getJWTByUsername("autoadmin1", "adminadmin1");
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
         String requestJSON = "{\n" +
                 "\t\"arrivalTime\": \"13:05:00\",\n" +
                 "\t\"capacity\": 120,\n" +
@@ -335,7 +347,7 @@ public class ControllerLayerTest {
 
     @Test
     void createNewFlightTest_Controller_Failed() throws Exception{
-        String jwt = getJWTByUsername("autoadmin1", "adminadmin1");
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
 
         // input newFlight is null
         String requestJSON = null;
@@ -425,6 +437,7 @@ public class ControllerLayerTest {
 
 
     @Test
+    @Transactional
     void getAvailableFlightTest_Controller_Success() throws Exception {
         //Create a flight without any available seats
         long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
@@ -477,7 +490,7 @@ public class ControllerLayerTest {
         returnedFlightSeatInfo = flightSeatInfoRepository.save(flightSeatInfo);
         validFlightInfo(newFlight3,flightNumber,156);
 
-        String jwt = getJWTByUsername("autoadmin1","adminadmin1");
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0),constants.ADMIN_USER_PASSWORD_0);
         RequestBuilder builder = get("/getFlights").header("Authorization", "Bearer " + jwt);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();

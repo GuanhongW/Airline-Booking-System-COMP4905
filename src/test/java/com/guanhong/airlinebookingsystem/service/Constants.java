@@ -3,6 +3,7 @@ package com.guanhong.airlinebookingsystem.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightSeatInfo;
+import com.guanhong.airlinebookingsystem.entity.User;
 import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.model.UserCredential;
 import com.guanhong.airlinebookingsystem.model.UserLoginResponse;
@@ -31,8 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class Constants {
 
 
-    public static long DEFAULT_FLIGHT_NUMBER = 7777;
-
+    public static long FLIGHT_NUMBER_1 = 1;
     public static long FLIGHT_NUMBER_9999 = 9999;
     public static long FLIGHT_NUMBER_999 = 999;
     public static long FLIGHT_NUMBER_99 = 99;
@@ -41,8 +41,21 @@ public class Constants {
     public static long FLIGHT_NUMBER_AVAILABLE = 9996;
     public static long FLIGHT_NUMBER_9995 = 9995;
 
-    public static List<Long> flightList = new ArrayList<>();
+    // Default admin user password
+    public static String ADMIN_USER_PASSWORD_0 = "adminadmin1";
+    public static String ADMIN_USER_PASSWORD_1 = "adminadmin2";
 
+    // Default customer user password
+    public static String CUSTOMER_USER_PASSWORD_0 = "useruser1";
+    public static String CUSTOMER_USER_PASSWORD_1 = "useruser2";
+
+    // Unique List
+    public static List<Long> flightList = new ArrayList<>();
+    public static List<String> adminUserList = new ArrayList<>();
+    public static List<String> customerUserList = new ArrayList<>();
+
+    private static boolean isGetNextAdminUsername = false;
+    private static boolean isGetNextCustomerUsername = false;
 
 
     private Constants(){
@@ -58,17 +71,32 @@ public class Constants {
         return SingletonHolder.INSTANCE;
     }
 
-    public long getNextAvailableFlightNumber(){
+    public synchronized long getNextAvailableFlightNumber(){
         long flightNumber = flightList.size();
         if (flightNumber == FLIGHT_NUMBER_9999 ||
                 flightNumber == FLIGHT_NUMBER_999 ||
                 flightNumber == FLIGHT_NUMBER_99 ||
-                flightNumber == DEFAULT_FLIGHT_NUMBER){
+                flightNumber == FLIGHT_NUMBER_1){
             flightList.add(flightNumber);
             flightNumber++;
         }
         flightList.add(flightNumber);
         return flightNumber;
+    }
+
+    public synchronized String getNextAdminUsername() throws InterruptedException {
+        isGetNextAdminUsername = true;
+        int adminNumber = adminUserList.size();
+        String newAdminUsername = "auto_admin_" + adminNumber;
+        adminUserList.add(newAdminUsername);
+        return newAdminUsername;
+    }
+
+    public synchronized String getNextCustomerUsername() throws InterruptedException {
+        int customerNumber = customerUserList.size();
+        String newCustomerUsername = "auto_customer_" + customerNumber + "@carleton.ca";
+        customerUserList.add(newCustomerUsername);
+        return newCustomerUsername;
     }
 
     public Date tomorrow() {

@@ -1,38 +1,31 @@
 package com.guanhong.airlinebookingsystem.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
-import com.guanhong.airlinebookingsystem.model.Seat;
 import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
-import org.apache.tomcat.util.bcel.Const;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Time;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.sql.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -55,6 +48,12 @@ class CreateFlightTest {
 
     private static Constants constants = Constants.getInstance();
 
+    private static List<String> defaultAdminUsernames = new ArrayList<>();
+
+    private static List<String> defaultCustomerUsernames = new ArrayList<>();
+
+    private static List<Long> defaultFlights = new ArrayList<>();
+
 
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
@@ -64,46 +63,32 @@ class CreateFlightTest {
                                      @Autowired FlightRepository flightRepository) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-//        String testAdminUsername = "autoadmin1";
-//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-//        assertNull(userRepository.findUserByUsername(testAdminUsername));
-//        testAdminUsername = "autoadmin2";
-//        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-//        assertNull(userRepository.findUserByUsername(testAdminUsername));
-//        //Delete default customer user
-//        String testCustomerUsername = "auto1@test.com";
-//        User customer = userRepository.findUserByUsername(testCustomerUsername);
-//        userRepository.delete(customer);
-//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
-//        testCustomerUsername = "auto2@test.com";
-//        customer = userRepository.findUserByUsername(testCustomerUsername);
-//        userRepository.delete(customer);
-//        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-//        assertNull(customerInfoRepository.findAccountById(customer.getId()));
-
         // Create default admin user 1
-        String testAdminUsername = "autoadmin1";
-        AccountInfo newUserInfo = new AccountInfo(testAdminUsername,"adminadmin1", Role.ADMIN);
+
+        String testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         User user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
-        testAdminUsername = "autoadmin2";
-        newUserInfo = new AccountInfo(testAdminUsername,"adminadmin2", Role.ADMIN);
+        testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testAdminUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.ADMIN, user.getRole());
 
         // Create default customer user
-        String testCustomerUsername = "auto1@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser1", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -112,10 +97,11 @@ class CreateFlightTest {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
 
-        testCustomerUsername = "auto2@test.com";
-        newUserInfo = new AccountInfo(testCustomerUsername,"useruser2", Role.USER,"test", Gender.male,"2000-01-01");
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_1, Role.USER,"test", Gender.male,"2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
-        assertEquals(testCustomerUsername, res.getUsername());
+        assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
@@ -125,17 +111,16 @@ class CreateFlightTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Create default flight
-        long flightNumber = Constants.DEFAULT_FLIGHT_NUMBER;
+        long flightNumber = constants.getNextAvailableFlightNumber();
+        defaultFlights.add(flightNumber);
         String departureCity = "YYZ";
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
         int capacity = 148;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        String date = "2021-10-02";
-        Date startDate = new Date(dateFormat.parse(date).getTime());
-        date = "2021-12-28";
-        Date endDate = new Date(dateFormat.parse(date).getTime());
+        Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
@@ -151,31 +136,35 @@ class CreateFlightTest {
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightRepository flightRepository,
                                      @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
-        // Delete default admin user
-        String testAdminUsername = "autoadmin1";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        testAdminUsername = "autoadmin2";
-        userRepository.delete(userRepository.findUserByUsername(testAdminUsername));
-        assertNull(userRepository.findUserByUsername(testAdminUsername));
-        //Delete default customer user
-        String testCustomerUsername = "auto1@test.com";
-        User customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
-        testCustomerUsername = "auto2@test.com";
-        customer = userRepository.findUserByUsername(testCustomerUsername);
-        userRepository.delete(customer);
-        assertNull(userRepository.findUserByUsername(testCustomerUsername));
-        assertNull(customerInfoRepository.findCustomerInfoById(customer.getId()));
-        // Delete default fligh
-        long flightNumber = Constants.DEFAULT_FLIGHT_NUMBER;
-        Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
-        flightRepository.delete(flight);
-        assertNull(flightRepository.findFlightByflightNumber(flightNumber));
-        assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
 
+        // Delete default admin user
+        String testUsername;
+        for (int i = 0; i < defaultAdminUsernames.size(); i++){
+            testUsername = defaultAdminUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default customer user
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+            testUsername = defaultCustomerUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default flight
+        long flightNumber;
+        for (int i = 0; i < defaultFlights.size(); i++){
+            flightNumber = defaultFlights.get(i);
+            Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
+            flightRepository.delete(flight);
+            assertNull(flightRepository.findFlightByflightNumber(flightNumber));
+            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
+        }
     }
 
     @Test
@@ -194,7 +183,7 @@ class CreateFlightTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         // Test1: FlightNumber is 1
-        flightNumber = 1;
+        flightNumber = constants.FLIGHT_NUMBER_1;
         Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
                 availableSeat);
@@ -272,7 +261,7 @@ class CreateFlightTest {
         assertEquals("The flight number should not excess 4 digits.",exception.getMessage());
 
         // Test4: FlightNumber is default
-        flightNumber = Constants.DEFAULT_FLIGHT_NUMBER;
+        flightNumber = defaultFlights.get(0);
         Flight newFlight4 = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate, availableSeat);
         exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlight4));
