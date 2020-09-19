@@ -143,6 +143,7 @@ class CreateFlightTest {
         flightService.createNewFlight(newFlight);
         Flight returnedFlight = flightRepository.findFlightByflightNumber(newFlight.getFlightNumber());
         assertNotNull(returnedFlight);
+        System.out.println("Before All finished.");
     }
 
     @AfterAll
@@ -180,6 +181,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_FlightNumber_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -231,6 +233,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_FlightNumber_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         long flightNumber;
@@ -279,6 +282,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DepartureCity_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
         String departureCity = "YYZ";
@@ -321,6 +325,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DepartureCity_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
         String departureCity = "YYZ";
@@ -352,6 +357,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DestinationCity_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
         String departureCity = "YYZ";
@@ -394,6 +400,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DestinationCity_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
         String departureCity = "YYZ";
@@ -425,6 +432,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_Capacity_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -477,6 +485,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_Capacity_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
         String departureCity = "YYZ";
@@ -508,6 +517,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_Overbooking_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -564,6 +574,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_Overbooking_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -596,6 +607,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_TravelDate_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -651,6 +663,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_TravelDate_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -715,6 +728,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DepartureTime_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -758,6 +772,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_DepartureTime_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
@@ -782,6 +797,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_ArrivalTime_Success() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber ;
         String departureCity = "YYZ";
@@ -825,6 +841,7 @@ class CreateFlightTest {
     @Test
     @Transactional
     void createNewFlight_ArrivalTime_Failed() throws Exception {
+        System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
