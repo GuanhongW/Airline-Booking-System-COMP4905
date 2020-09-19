@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
+import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -484,6 +486,24 @@ class JwtUserDetailsServiceTest {
         UserCredential userCredential6 = new UserCredential("unknownauto@test.com", constants.CUSTOMER_USER_PASSWORD_1);
         assertThrows(Exception.class, ()->jwtUserDetailsService.authUser(userCredential6));
         assertEquals("INVALID_CREDENTIALS", exception.getMessage());
+    }
+
+    @Test
+    @Transactional
+    void getUserRoleTest_Success() throws Exception{
+        assertEquals(Role.ADMIN, jwtUserDetailsService.getUserRole(defaultAdminUsernames.get(0)));
+        assertEquals(Role.ADMIN, jwtUserDetailsService.getUserRole(defaultAdminUsernames.get(1)));
+        assertEquals(Role.USER, jwtUserDetailsService.getUserRole(defaultCustomerUsernames.get(0)));
+        assertEquals(Role.USER, jwtUserDetailsService.getUserRole(defaultCustomerUsernames.get(1)));
+    }
+
+    @Test
+    @Transactional
+    void getUserRoleTest_Failed(){
+        ServerException exception = assertThrows(ServerException.class, ()->jwtUserDetailsService.getUserRole("WRONGUSER"));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getHttpStatus());
+        String expectedMessage = "User cannot be found in database.";
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     private Date tomorrow(Date today) {

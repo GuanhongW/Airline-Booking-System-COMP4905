@@ -4,6 +4,7 @@ import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.Flight;
+import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.UserCredential;
 import com.guanhong.airlinebookingsystem.service.FlightService;
@@ -28,12 +29,26 @@ public class FlightController {
     private FlightService flightService;
 
     @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
+    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/createFlight", method = RequestMethod.POST)
-    public ResponseEntity createFlightController(@RequestBody Flight newFlight){
+    public ResponseEntity createFlightController(HttpServletRequest request, @RequestBody Flight newFlight){
         try{
+            final String requestTokenHeader = request.getHeader("Authorization");
+
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                Role role = jwtUserDetailsService.getUserRole(username);
+                if (!role.equals(Role.ADMIN)){
+                    log.warn("A Non-admin user: " + username + " try to create flight.");
+                    return new ResponseEntity("Only admin user can create new flights.", HttpStatus.BAD_REQUEST);
+                }
+            }
             if (newFlight == null){
                 log.error("Http Code: 400  URL: createFlight  new flight information is empty");
                 return ResponseEntity.badRequest().body("new flight information is empty");

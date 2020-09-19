@@ -433,6 +433,26 @@ public class ControllerLayerTest {
         assertEquals(400, result.getResponse().getStatus());
         expectedMessage = "";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // non-admin user try to create flights
+        jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:05:00\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"2022-09-04\",\n" +
+                "\t\"flightNumber\": "+ constants.FLIGHT_NUMBER_9995 +",\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021-04-06\"\n" +
+                "}";
+        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "Only admin user can create new flights.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
     }
 
 
