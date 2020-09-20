@@ -129,8 +129,7 @@ public class ControllerLayerTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+                capacity,overbooking,startDate,endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -345,8 +344,7 @@ public class ControllerLayerTest {
                 "\t\"endDate\": \"2022-09-04\",\n" +
                 "\t\"flightNumber\": "+ constants.FLIGHT_NUMBER_9995 +",\n" +
                 "\t\"overbooking\": 5,\n" +
-                "\t\"startDate\": \"2021-04-06\",\n" +
-                "\t\"availableSeat\": 126\n" +
+                "\t\"startDate\": \"2021-04-06\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedJSON, result.getResponse().getContentAsString(),false);
     }
@@ -464,9 +462,8 @@ public class ControllerLayerTest {
 
     @Test
     @Transactional
-    void getAvailableFlightTest_Controller_Success() throws Exception {
+    void getAvailableFlightRoutesTest_Controller_Success() throws Exception {
         // TODO: Update flight by API without like now use repositity.save()
-        //Create a flight without any available seats
         long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
         String departureCity = "YYZ";
         String destinationCity = "YVR";
@@ -477,20 +474,13 @@ public class ControllerLayerTest {
         Date startDate = constants.datePlusSomeDays(constants.today(), 5);;
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
 
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, null);
-        FlightRoute returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute1));
-        newFlightRoute1.setAvailableSeat(0);
-        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute1));
-        validFlightInfo(newFlightRoute1,flightNumber,0, true);
-
 
         // Create a flight the end date is before
         flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
 
         FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,null);
-        returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute2));
+                capacity,overbooking,startDate,endDate);
+        FlightRoute returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute2));
         newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
         newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(),  0));
         assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute2));
@@ -500,8 +490,7 @@ public class ControllerLayerTest {
         flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
 
         FlightRoute newFlightRoute3 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,new java.sql.Date(startDate.getTime()),new java.sql.Date(endDate.getTime()),
-                null);
+                capacity,overbooking, startDate, endDate);
         returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute3));
         newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 1));
         newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(),  8));
@@ -551,7 +540,7 @@ public class ControllerLayerTest {
         assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
         assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
-        assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
+
         //Verify Flights in flight table
         List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
@@ -560,6 +549,7 @@ public class ControllerLayerTest {
             for (int i = 0; i < returnedFlights.size(); i++){
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
+                assertEquals(availableSeats, flight.getAvailableSeats());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
                 FlightSeatInfo flightSeatInfo = assertDoesNotThrow(()->flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));

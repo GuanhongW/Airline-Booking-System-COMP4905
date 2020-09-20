@@ -48,6 +48,8 @@ create table flightRoute
 alter table flightRoute modify overbooking decimal(4,2) default 0 not null;
 rename table flightRoute to flight_route;
 alter table flight_route change id flight_number int not null;
+alter table flight_route drop column available_seat;
+
 
 -- Table flight
 create table flight
@@ -61,6 +63,11 @@ create table flight
 		foreign key (flight_number) references flight_route (flight_number)
 			on update cascade on delete cascade
 );
+
+alter table flight
+	add available_seats int not null;
+
+
 
 
 -- Table ticket
@@ -83,7 +90,7 @@ create table ticket
 alter table ticket
 	add flight_date date not null;
 
--- Table flightRoute seat info
+-- Table flight seat info
 create table flight_seat_info
 (
 	flight_id int not null,

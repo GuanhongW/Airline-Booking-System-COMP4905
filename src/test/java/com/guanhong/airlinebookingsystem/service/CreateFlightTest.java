@@ -67,7 +67,7 @@ class CreateFlightTest {
 
         String testUsername = constants.getNextAdminUsername();
         defaultAdminUsernames.add(testUsername);
-        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
+        AccountInfo newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -76,7 +76,7 @@ class CreateFlightTest {
 
         testUsername = constants.getNextAdminUsername();
         defaultAdminUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
+        newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -86,7 +86,7 @@ class CreateFlightTest {
         // Create default customer user
         testUsername = constants.getNextCustomerUsername();
         defaultCustomerUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "test", Gender.male, "2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -99,7 +99,7 @@ class CreateFlightTest {
 
         testUsername = constants.getNextCustomerUsername();
         defaultCustomerUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_1, Role.USER,"test", Gender.male,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_1, Role.USER, "test", Gender.male, "2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -122,9 +122,8 @@ class CreateFlightTest {
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -139,7 +138,7 @@ class CreateFlightTest {
 
         // Delete default admin user
         String testUsername;
-        for (int i = 0; i < defaultAdminUsernames.size(); i++){
+        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
             testUsername = defaultAdminUsernames.get(i);
             User user = userRepository.findUserByUsername(testUsername);
             userRepository.delete(user);
@@ -148,7 +147,7 @@ class CreateFlightTest {
         }
 
         // Delete default customer user
-        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
             testUsername = defaultCustomerUsernames.get(i);
             User user = userRepository.findUserByUsername(testUsername);
             userRepository.delete(user);
@@ -158,7 +157,7 @@ class CreateFlightTest {
 
         // Delete default flight
         long flightNumber;
-        for (int i = 0; i < defaultFlights.size(); i++){
+        for (int i = 0; i < defaultFlights.size(); i++) {
             flightNumber = defaultFlights.get(i);
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
@@ -184,39 +183,35 @@ class CreateFlightTest {
         Integer availableSeat = null;
         // Test1: FlightNumber is 1
         flightNumber = constants.FLIGHT_NUMBER_1;
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Test2: FlightNumber is 9999
         flightNumber = constants.FLIGHT_NUMBER_9999;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Test3: FlightNumber is 99
         flightNumber = constants.FLIGHT_NUMBER_99;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Test4: FlightNumber is 999
         flightNumber = constants.FLIGHT_NUMBER_999;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -238,34 +233,31 @@ class CreateFlightTest {
         Integer availableSeat = null;
         // Test1: FlightNumber is -1
         flightNumber = -1;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The flight number should not excess 4 digits.", exception.getMessage());
 
         // Test2: FlightNumber is 0
         flightNumber = 0;
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
-        assertEquals("The flight number should not excess 4 digits.",exception.getMessage());
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
+        assertEquals("The flight number should not excess 4 digits.", exception.getMessage());
 
         // Test3: FlightNumber is 10000
         flightNumber = 10000;
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute3));
-        assertEquals("The flight number should not excess 4 digits.",exception.getMessage());
+        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute3));
+        assertEquals("The flight number should not excess 4 digits.", exception.getMessage());
 
         // Test4: FlightNumber is default
         flightNumber = defaultFlights.get(0);
-        FlightRoute newFlightRoute4 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute4));
-        assertEquals("The flight number already be used.",exception.getMessage());
+        FlightRoute newFlightRoute4 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute4));
+        assertEquals("The flight number already be used.", exception.getMessage());
     }
 
     @Test
@@ -286,29 +278,29 @@ class CreateFlightTest {
 
         //Departure City's length is 1
         departureCity = "A";
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         //Departure City's lenght is 255
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         //Departure City's lenght is random
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "Ottawa";
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -329,17 +321,17 @@ class CreateFlightTest {
 
         //Departure City is null
         departureCity = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The departure city should not be empty.", exception.getMessage());
 
         //Departure City's lenght is more than 255
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("The length of departure city cannot excess than 255.", exception.getMessage());
     }
 
@@ -361,29 +353,29 @@ class CreateFlightTest {
 
         //Departure City's length is 1
         destinationCity = "A";
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         //Departure City's lenght is 255
         flightNumber = constants.getNextAvailableFlightNumber();
         destinationCity = "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         //Departure City's lenght is random
         flightNumber = constants.getNextAvailableFlightNumber();
         destinationCity = "Ottawa";
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -399,22 +391,22 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate =constants.datePlusSomeDays(constants.today(), 100);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         //Departure City is null
         destinationCity = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The destination city should not be empty.", exception.getMessage());
 
         //Departure City's lenght is more than 255
         flightNumber = constants.getNextAvailableFlightNumber();
         destinationCity = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("The length of destination city cannot excess than 255.", exception.getMessage());
     }
 
@@ -437,8 +429,8 @@ class CreateFlightTest {
         // Flight capacity is 1
         flightNumber = constants.getNextAvailableFlightNumber();
         capacity = 1;
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightInfo(validFlightRoute, flightNumber, 1);
@@ -446,29 +438,29 @@ class CreateFlightTest {
         // Flight capacity is 10
         flightNumber = constants.getNextAvailableFlightNumber();
         capacity = 10;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,10);
+        validFlightInfo(validFlightRoute, flightNumber, 10);
 
         // Flight capacity is 100
         flightNumber = constants.getNextAvailableFlightNumber();
         capacity = 100;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,106);
+        validFlightInfo(validFlightRoute, flightNumber, 106);
 
         // Flight capacity is 243
         flightNumber = constants.getNextAvailableFlightNumber();
         capacity = 243;
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,257);
+        validFlightInfo(validFlightRoute, flightNumber, 257);
     }
 
     @Test
@@ -489,17 +481,17 @@ class CreateFlightTest {
 
         // Capacity is null
         capacity = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("Flight's capacity cannot be empty.", exception.getMessage());
 
         // Capacity is 0
         flightNumber = constants.getNextAvailableFlightNumber();
         capacity = 0;
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("Flight's capacity cannot be zero.", exception.getMessage());
     }
 
@@ -522,42 +514,42 @@ class CreateFlightTest {
         // Overbooking allowance is 0
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = BigDecimal.valueOf(0);
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightRoute.setOverbooking(validFlightRoute.getOverbooking().setScale(2, RoundingMode.FLOOR));
-        validFlightInfo(validFlightRoute, flightNumber,148);
+        validFlightInfo(validFlightRoute, flightNumber, 148);
 
         // Overbooking allowance is 10
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = BigDecimal.valueOf(10);
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightRoute.setOverbooking(validFlightRoute.getOverbooking().setScale(2, RoundingMode.FLOOR));
-        validFlightInfo(validFlightRoute, flightNumber,162);
+        validFlightInfo(validFlightRoute, flightNumber, 162);
 
         // Overbooking allowance is 8.56
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = BigDecimal.valueOf(8.56);
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightRoute.setOverbooking(validFlightRoute.getOverbooking().setScale(2, RoundingMode.FLOOR));
-        validFlightInfo(validFlightRoute, flightNumber,160);
+        validFlightInfo(validFlightRoute, flightNumber, 160);
 
         // Overbooking allowance is 8.794
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = BigDecimal.valueOf(8.794);
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightRoute.setOverbooking(validFlightRoute.getOverbooking().setScale(2, RoundingMode.FLOOR));
-        validFlightInfo(validFlightRoute, flightNumber,161);
+        validFlightInfo(validFlightRoute, flightNumber, 161);
     }
 
     @Test
@@ -579,17 +571,17 @@ class CreateFlightTest {
         // Capacity is null
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("Flight's overbook allowance cannot be empty.", exception.getMessage());
 
         // Capacity is 10
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = BigDecimal.valueOf(11);
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("Flight's overbooking allowance should between 0% to 10%", exception.getMessage());
     }
 
@@ -612,41 +604,41 @@ class CreateFlightTest {
         // Start Date is Tomorrow
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.tomorrow();
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Start Date and end date is tomorrow
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.tomorrow();
         endDate = constants.tomorrow();
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Start Date is tomorrow and end date is 1 days after start date
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.tomorrow();
         endDate = constants.datePlusSomeDays(startDate, 1);
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Start Date is tomorrow and end date is 365 days after start date
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.tomorrow();
         endDate = constants.datePlusSomeDays(startDate, 365);
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -667,50 +659,50 @@ class CreateFlightTest {
 
         // Start date is null
         flightNumber = constants.getNextAvailableFlightNumber();
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,null,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, null, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("Flight's range of travel date cannot be empty.", exception.getMessage());
 
         // End date is null
         flightNumber = constants.getNextAvailableFlightNumber();
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,null, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute2));
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, null);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("Flight's range of travel date cannot be empty.", exception.getMessage());
 
         // Start date is today
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.today();
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute3));
+        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute3));
         assertEquals("The start of travel range should not before today.", exception.getMessage());
 
         // Start date is yesterday
         flightNumber = constants.getNextAvailableFlightNumber();
         startDate = constants.datePlusSomeDays(constants.today(), -1);
-        FlightRoute newFlightRoute4 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute4));
+        FlightRoute newFlightRoute4 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute4));
         assertEquals("The start of travel range should not before today.", exception.getMessage());
 
         // end date is before start date 1 day
         flightNumber = constants.getNextAvailableFlightNumber();
-        startDate = constants.datePlusSomeDays(constants.tomorrow(),1);
+        startDate = constants.datePlusSomeDays(constants.tomorrow(), 1);
         endDate = constants.tomorrow();
-        FlightRoute newFlightRoute5 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute5));
+        FlightRoute newFlightRoute5 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute5));
         assertEquals("The end of travel range should not before the start of travel range.", exception.getMessage());
 
         // end date is before start date 30 day
         flightNumber = constants.getNextAvailableFlightNumber();
-        startDate = constants.datePlusSomeDays(constants.tomorrow(),31);
-        endDate = constants.datePlusSomeDays(constants.tomorrow(),1);
-        FlightRoute newFlightRoute6 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute6));
+        startDate = constants.datePlusSomeDays(constants.tomorrow(), 31);
+        endDate = constants.datePlusSomeDays(constants.tomorrow(), 1);
+        FlightRoute newFlightRoute6 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute6));
         assertEquals("The end of travel range should not before the start of travel range.", exception.getMessage());
     }
 
@@ -733,29 +725,29 @@ class CreateFlightTest {
         // Departure time is 00:00:00
         flightNumber = constants.getNextAvailableFlightNumber();
         departureTime = Time.valueOf("00:00:00");
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Departure time is 23:59:00
         flightNumber = constants.getNextAvailableFlightNumber();
         departureTime = Time.valueOf("23:59:00");
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Departure time is 12:35:00
         flightNumber = constants.getNextAvailableFlightNumber();
         departureTime = Time.valueOf("12:35:00");
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -777,9 +769,9 @@ class CreateFlightTest {
         // Departure time is null
         flightNumber = constants.getNextAvailableFlightNumber();
         departureTime = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The departure time should not be empty.", exception.getMessage());
     }
 
@@ -788,7 +780,7 @@ class CreateFlightTest {
     void createNewFlight_ArrivalTime_Success() throws Exception {
         System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        long flightNumber ;
+        long flightNumber;
         String departureCity = "YYZ";
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
@@ -802,29 +794,29 @@ class CreateFlightTest {
         // Arrival time is 00:00:00
         flightNumber = constants.getNextAvailableFlightNumber();
         arrivalTime = Time.valueOf("00:00:00");
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Arrival time is 23:59:00
         flightNumber = constants.getNextAvailableFlightNumber();
         arrivalTime = Time.valueOf("23:59:00");
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
 
         // Arrival time is 12:35:00
         flightNumber = constants.getNextAvailableFlightNumber();
         arrivalTime = Time.valueOf("12:35:00");
-        newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber,156);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -846,12 +838,11 @@ class CreateFlightTest {
         // Departure time is null
         flightNumber = constants.getNextAvailableFlightNumber();
         arrivalTime = null;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate, availableSeat);
-        ClientException exception = assertThrows(ClientException.class, ()->flightService.createNewFlight(newFlightRoute1));
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The arrival time should not be empty.", exception.getMessage());
     }
-
 
 
 //    @Test
@@ -885,19 +876,20 @@ class CreateFlightTest {
         assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
         assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
-        assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
+
         //Verify Flights in flight table
-        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
+        List<Flight> returnedFlights = assertDoesNotThrow(() -> flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
 
         SeatList seatList;
-        for (int i = 0; i < returnedFlights.size(); i++){
+        for (int i = 0; i < returnedFlights.size(); i++) {
             Flight flight = returnedFlights.get(i);
             assertEquals(expectedDate, flight.getFlightDate());
+            assertEquals(availableSeats, flight.getAvailableSeats());
             expectedDate = constants.datePlusSomeDays(expectedDate, 1);
             // Verify Flight Seat Info
-            FlightSeatInfo flightSeatInfo = assertDoesNotThrow(()->flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
-            seatList = assertDoesNotThrow(()->flightSeatInfo.getSeatListByJson());
+            FlightSeatInfo flightSeatInfo = assertDoesNotThrow(() -> flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
+            seatList = assertDoesNotThrow(() -> flightSeatInfo.getSeatListByJson());
             assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
         }
     }

@@ -126,8 +126,7 @@ class JwtUserDetailsServiceTest {
         java.sql.Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
+                capacity,overbooking,startDate,endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);

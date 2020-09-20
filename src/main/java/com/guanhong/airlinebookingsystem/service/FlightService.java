@@ -12,6 +12,7 @@ import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +38,8 @@ public class FlightService {
     @Transactional(rollbackFor=Exception.class)
     public FlightRoute createNewFlight(FlightRoute flightRoute) throws Exception {
 
-        FlightSeatInfo returnedFlightSeatInfo;
         validNewFlightInfo(flightRoute);
         flightRoute.setOverbooking(roundOverbookingAllowance(flightRoute.getOverbooking()));
-        flightRoute.setAvailableSeat(calculateAvailableSeat(flightRoute.getCapacity(), flightRoute.getOverbooking()));
         FlightRoute returnedFlightRoute = flightRouteRepository.save(flightRoute);
         log.info("Create flight " + returnedFlightRoute.getFlightNumber() + " in the system");
         createFlightByFlightRoute(returnedFlightRoute);
@@ -49,8 +48,8 @@ public class FlightService {
 
 
 
-    public List<FlightRoute> getAllAvailableFlights() throws Exception{
-        List<FlightRoute> flightRoutes = flightRouteRepository.findAllByAvailableSeatIsGreaterThanAndEndDateAfter(0, new DateHelper().today());
+    public List<FlightRoute> getAllAvailableFlightRoutes() throws Exception{
+        List<FlightRoute> flightRoutes = flightRouteRepository.findAllByEndDateAfter(new DateHelper().today());
         return flightRoutes;
     }
 
@@ -112,12 +111,9 @@ public class FlightService {
                 throw new ClientException("The start of travel range should not before today.");
             }
         }
-        // 4. Verify if the available seat is null
-        if (flightRoute.getAvailableSeat() != null){
-            throw new ClientException("Front-end bug: available seat should be calculate by server.");
-        }
 
-        // 5. Verify departure city is not null
+
+        // 4. Verify departure city is not null
         if (flightRoute.getDepartureCity() == null){
             throw new ClientException("The departure city should not be empty.");
         }
@@ -127,7 +123,7 @@ public class FlightService {
             }
         }
 
-        //6. Verify if destination city is null
+        // 5. Verify if destination city is null
         if (flightRoute.getDestinationCity() == null){
             throw new ClientException("The destination city should not be empty.");
         }
@@ -137,12 +133,12 @@ public class FlightService {
             }
         }
 
-        //7. Verify if departure time is null
+        // 6. Verify if departure time is null
         if (flightRoute.getDepartureTime() == null){
             throw new ClientException("The departure time should not be empty.");
         }
 
-        // 8. Verify if arrival time is null
+        // 7. Verify if arrival time is null
         if (flightRoute.getArrivalTime() == null){
             throw new ClientException("The arrival time should not be empty.");
         }
@@ -152,11 +148,14 @@ public class FlightService {
     private boolean createFlightByFlightRoute(FlightRoute newFlightRoute) throws JsonProcessingException {
         DateHelper dateHelper = new DateHelper();
         Date currentDate = newFlightRoute.getStartDate();
+
+        int availableSeats = calculateAvailableSeat(newFlightRoute.getCapacity(), newFlightRoute.getOverbooking());
         String seatListJson = new SeatList(newFlightRoute.getCapacity()).toJsonString();
         List<Flight> newFlights = new ArrayList<>();
         Flight flight;
+
         while (! currentDate.after(newFlightRoute.getEndDate())){
-            flight = new Flight(newFlightRoute.getFlightNumber(), currentDate);
+            flight = new Flight(newFlightRoute.getFlightNumber(), currentDate, availableSeats);
             newFlights.add(flight);
             currentDate = dateHelper.datePlusSomeDays(currentDate,1);
         }
@@ -172,6 +171,15 @@ public class FlightService {
         log.info("Created seat info of flightRoute " + newFlightRoute.getFlightNumber() + " in the system");
 
         return true;
+    }
+
+    private boolean upadteFlightAndSeatInfo(FlightRoute originalFlightRoute, FlightRoute newFlightRoute){
+        if (originalFlightRoute.getStartDate().equals(newFlightRoute.getStartDate()) &&
+                originalFlightRoute.getEndDate().equals(newFlightRoute.getEndDate())){
+            return true;
+        }
+        return true;
+
     }
 
 }

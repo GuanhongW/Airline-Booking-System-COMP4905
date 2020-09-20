@@ -45,9 +45,6 @@ public class FlightRoute {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
-    @Column(name = "available_seat", nullable = false)
-    private Integer availableSeat;
-
     public FlightRoute(FlightRoute flightRoute) {
         this.flightNumber = flightRoute.getFlightNumber();
         this.departureCity = flightRoute.getDepartureCity();
@@ -58,7 +55,7 @@ public class FlightRoute {
         this.overbooking = flightRoute.getOverbooking();
         this.startDate = flightRoute.getStartDate();
         this.endDate = flightRoute.getEndDate();
-        this.availableSeat = flightRoute.getAvailableSeat();
+
     }
 
     public long getFlightNumber() {
@@ -133,20 +130,13 @@ public class FlightRoute {
         this.endDate = endDate;
     }
 
-    public Integer getAvailableSeat() {
-        return availableSeat;
-    }
-
-    public void setAvailableSeat(Integer availableSeat) {
-        this.availableSeat = availableSeat;
-    }
 
     public int calculateAvailableSeat(int capacity, int overbooking){
         int availableSeats = capacity + (int)Math.floor(capacity * overbooking);
         return availableSeats;
     }
 
-    public FlightRoute(long flightNumber, String departureCity, String destinationCity, Time departureTime, Time arrivalTime, Integer capacity, BigDecimal overbooking, Date startDate, Date endDate, Integer availableSeat) {
+    public FlightRoute(long flightNumber, String departureCity, String destinationCity, Time departureTime, Time arrivalTime, Integer capacity, BigDecimal overbooking, Date startDate, Date endDate) {
         this.flightNumber = flightNumber;
         this.departureCity = departureCity;
         this.destinationCity = destinationCity;
@@ -156,7 +146,7 @@ public class FlightRoute {
         this.overbooking = overbooking;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.availableSeat = availableSeat;
+
     }
 
     public String toJsonString() throws JsonProcessingException {

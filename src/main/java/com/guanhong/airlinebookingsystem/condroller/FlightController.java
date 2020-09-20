@@ -74,9 +74,9 @@ public class FlightController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/getFlights", method = RequestMethod.GET)
-    public ResponseEntity getAvailableFlights(){
+    public ResponseEntity getAvailableFlightRoutes(){
         try{
-            return new ResponseEntity(flightService.getAllAvailableFlights(), HttpStatus.OK);
+            return new ResponseEntity(flightService.getAllAvailableFlightRoutes(), HttpStatus.OK);
         }
         catch (ServerException e){
             log.error("URL: getFlights, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());

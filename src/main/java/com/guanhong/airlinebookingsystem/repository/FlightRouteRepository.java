@@ -12,5 +12,5 @@ import java.util.List;
 @Repository
 public interface FlightRouteRepository extends JpaRepository<FlightRoute, Long> {
     public FlightRoute findFlightByflightNumber(long id);
-    public List<FlightRoute> findAllByAvailableSeatIsGreaterThanAndEndDateAfter(int availableSeats, Date date);
+    public List<FlightRoute> findAllByEndDateAfter(Date date);
 }
