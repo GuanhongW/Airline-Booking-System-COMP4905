@@ -28,8 +28,8 @@ create table customer_info
 			on delete cascade
 );
 
--- Table flight
-create table flight
+-- Table flightRoute route
+create table flightRoute
 (
 	id int not null,
 	departure_city char(255) not null,
@@ -45,7 +45,23 @@ create table flight
 		primary key (id)
 );
 
-alter table flight modify overbooking decimal(4,2) default 0 not null;
+alter table flightRoute modify overbooking decimal(4,2) default 0 not null;
+rename table flightRoute to flight_route;
+alter table flight_route change id flight_number int not null;
+
+-- Table flight
+create table flight
+(
+	flight_id int auto_increment,
+	flight_number int not null,
+	flight_date date not null,
+	constraint flight_pk
+		primary key (flight_id),
+	constraint flight_flight_route_flight_number_fk
+		foreign key (flight_number) references flight_route (flight_number)
+			on update cascade on delete cascade
+);
+
 
 -- Table ticket
 create table ticket
@@ -60,11 +76,14 @@ create table ticket
 		foreign key (customer_id) references customer_info (id)
 			on delete cascade,
 	constraint ticket_flight_id_fk
-		foreign key (flight_id) references flight (id)
+		foreign key (flight_id) references flight (flight_id)
 			on delete cascade
 );
 
--- Table flight seat info
+alter table ticket
+	add flight_date date not null;
+
+-- Table flightRoute seat info
 create table flight_seat_info
 (
 	flight_id int not null,
@@ -72,9 +91,16 @@ create table flight_seat_info
 	constraint flight_seat_info_pk
 		primary key (flight_id),
 	constraint flight_seat_info_flight_id_fk
-		foreign key (flight_id) references flight (id)
+		foreign key (flight_id) references flightRoute (id)
 			on delete cascade
 );
+alter table flight_seat_info drop foreign key flight_seat_info_flight_id_fk;
+
+alter table flight_seat_info
+	add constraint flight_seat_info_flight_id_fk
+		foreign key (flight_id) references flight (flight_id)
+			on delete cascade;
+
 
 
 

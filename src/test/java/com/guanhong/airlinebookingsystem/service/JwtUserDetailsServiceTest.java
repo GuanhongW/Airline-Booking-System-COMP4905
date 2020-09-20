@@ -6,7 +6,7 @@ import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
 import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightRepository;
+import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import com.guanhong.airlinebookingsystem.repository.UserRepository;
 
@@ -63,7 +63,7 @@ class JwtUserDetailsServiceTest {
                                      @Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightService flightService,
-                                     @Autowired FlightRepository flightRepository) throws Exception {
+                                     @Autowired FlightRouteRepository flightRouteRepository) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Create default admin user 1
@@ -125,19 +125,19 @@ class JwtUserDetailsServiceTest {
         java.sql.Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         java.sql.Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
-        Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
                 availableSeat);
-        flightService.createNewFlight(newFlight);
-        Flight returnedFlight = flightRepository.findFlightByflightNumber(newFlight.getFlightNumber());
-        assertNotNull(returnedFlight);
+        flightService.createNewFlight(newFlightRoute);
+        FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+        assertNotNull(returnedFlightRoute);
         System.out.println("Before All finished.");
     }
 
     @AfterAll
     static void deleteDefaultAccount(@Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
-                                     @Autowired FlightRepository flightRepository,
+                                     @Autowired FlightRouteRepository flightRouteRepository,
                                      @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
 
         // Delete default admin user
@@ -163,10 +163,10 @@ class JwtUserDetailsServiceTest {
         long flightNumber;
         for (int i = 0; i < defaultFlights.size(); i++){
             flightNumber = defaultFlights.get(i);
-            Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
-            flightRepository.delete(flight);
-            assertNull(flightRepository.findFlightByflightNumber(flightNumber));
-            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
+            FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+            flightRouteRepository.delete(flightRoute);
+            assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightId(flightNumber));
         }
     }
 

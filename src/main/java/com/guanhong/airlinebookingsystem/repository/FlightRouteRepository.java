@@ -1,6 +1,5 @@
 package com.guanhong.airlinebookingsystem.repository;
 
-import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface FlightRepository extends JpaRepository<Flight, Long> {
-    public List<Flight> findAllByFlightNumber(long flightNumber);
+public interface FlightRouteRepository extends JpaRepository<FlightRoute, Long> {
+    public FlightRoute findFlightByflightNumber(long id);
+    public List<FlightRoute> findAllByAvailableSeatIsGreaterThanAndEndDateAfter(int availableSeats, Date date);
 }

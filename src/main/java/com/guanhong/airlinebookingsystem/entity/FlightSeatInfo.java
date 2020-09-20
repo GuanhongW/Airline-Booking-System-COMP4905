@@ -5,11 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.model.Seat;
 import com.guanhong.airlinebookingsystem.model.SeatList;
-import com.guanhong.airlinebookingsystem.model.SeatStatus;
 
 
 import javax.persistence.*;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -18,7 +16,7 @@ import java.util.List;
 public class FlightSeatInfo {
     @Id
     @Column(name = "flight_id", nullable = false)
-    private long flightNumber;
+    private long flightId;
 
     @Column(name = "seat_list")
     private String seatList;
@@ -26,17 +24,17 @@ public class FlightSeatInfo {
     public FlightSeatInfo() {
     }
 
-    public FlightSeatInfo(long flightNumber, String seatList) {
-        this.flightNumber = flightNumber;
+    public FlightSeatInfo(long flightId, String seatList) {
+        this.flightId = flightId;
         this.seatList = seatList;
     }
 
-    public long getFlightNumber() {
-        return flightNumber;
+    public long getFlightId() {
+        return flightId;
     }
 
-    public void setFlightNumber(long flightNumber) {
-        this.flightNumber = flightNumber;
+    public void setFlightId(long flightId) {
+        this.flightId = flightId;
     }
 
     public String getSeatList() {

@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.entity;
 
 import javax.persistence.*;
+import java.sql.Date;
 
 @Entity
 @Table(name = "ticket")
@@ -11,7 +12,7 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy =  GenerationType.AUTO)
     @Column(name = "id", nullable = false)
-    private long id;
+    private long ticketId;
 
     @Column(name = "customer_id", nullable = false)
     private long customerId;
@@ -19,23 +20,28 @@ public class Ticket {
 
 
     @Column(name = "flight_id", nullable = false)
-    private long flightNumber;
+    private long flightId;
 
     @Column(name = "seat_number")
     private int seatNumber;
 
-    public Ticket(long id, long customerId, long flightNumber) {
-        this.id = id;
+    @Column(name = "flight_date", nullable = false)
+    private Date flightDate;
+
+    public Ticket(long ticketId, long customerId, long flightId, Date flightDate) {
+        this.ticketId = ticketId;
         this.customerId = customerId;
-        this.flightNumber = flightNumber;
+        this.flightId = flightId;
+        this.flightDate = flightDate;
     }
 
-    public long getId() {
-        return id;
+
+    public long getTicketId() {
+        return ticketId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setTicketId(long ticketId) {
+        this.ticketId = ticketId;
     }
 
     public long getCustomerId() {
@@ -46,12 +52,12 @@ public class Ticket {
         this.customerId = customerId;
     }
 
-    public long getFlightNumber() {
-        return flightNumber;
+    public long getFlightId() {
+        return flightId;
     }
 
-    public void setFlightNumber(long flightNumber) {
-        this.flightNumber = flightNumber;
+    public void setFlightId(long flightId) {
+        this.flightId = flightId;
     }
 
     public int getSeatNumber() {

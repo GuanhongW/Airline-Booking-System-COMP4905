@@ -3,10 +3,8 @@ package com.guanhong.airlinebookingsystem.condroller;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
-import com.guanhong.airlinebookingsystem.entity.Flight;
+import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
-import com.guanhong.airlinebookingsystem.model.AccountInfo;
-import com.guanhong.airlinebookingsystem.model.UserCredential;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -36,7 +34,7 @@ public class FlightController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/createFlight", method = RequestMethod.POST)
-    public ResponseEntity createFlightController(HttpServletRequest request, @RequestBody Flight newFlight){
+    public ResponseEntity createFlightController(HttpServletRequest request, @RequestBody FlightRoute newFlightRoute){
         try{
             final String requestTokenHeader = request.getHeader("Authorization");
 
@@ -49,11 +47,11 @@ public class FlightController {
                     return new ResponseEntity("Only admin user can create new flights.", HttpStatus.BAD_REQUEST);
                 }
             }
-            if (newFlight == null){
+            if (newFlightRoute == null){
                 log.error("Http Code: 400  URL: createFlight  new flight information is empty");
                 return ResponseEntity.badRequest().body("new flight information is empty");
             }
-            return ResponseEntity.ok(flightService.createNewFlight(newFlight));
+            return ResponseEntity.ok(flightService.createNewFlight(newFlightRoute));
         }
         catch (ServerException e){
             log.error("URL: createFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
@@ -94,4 +92,6 @@ public class FlightController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
 }

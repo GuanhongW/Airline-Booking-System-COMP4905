@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
-import com.guanhong.airlinebookingsystem.repository.CustomerInfoRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
-import com.guanhong.airlinebookingsystem.repository.UserRepository;
+import com.guanhong.airlinebookingsystem.repository.*;
 import com.guanhong.airlinebookingsystem.service.Constants;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
@@ -42,9 +39,16 @@ public class ControllerLayerTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private FlightRouteRepository flightRouteRepository;
+
+    @Autowired
+    private FlightSeatInfoRepository flightSeatInfoRepository;
+
+    @Autowired
     private FlightRepository flightRepository;
 
-    @Autowired FlightSeatInfoRepository flightSeatInfoRepository;
+    @Autowired
+    private FlightService flightService;
 
     private static Constants constants = Constants.getInstance();
 
@@ -55,12 +59,14 @@ public class ControllerLayerTest {
     private static List<Long> defaultFlights = new ArrayList<>();
 
 
+
+
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
                                      @Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightService flightService,
-                                     @Autowired FlightRepository flightRepository) throws Exception {
+                                     @Autowired FlightRouteRepository flightRouteRepository) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Create default admin user 1
@@ -122,19 +128,19 @@ public class ControllerLayerTest {
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
-        Flight newFlight = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
                 availableSeat);
-        flightService.createNewFlight(newFlight);
-        Flight returnedFlight = flightRepository.findFlightByflightNumber(newFlight.getFlightNumber());
-        assertNotNull(returnedFlight);
+        flightService.createNewFlight(newFlightRoute);
+        FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+        assertNotNull(returnedFlightRoute);
         System.out.println("Before All finished.");
     }
 
     @AfterAll
     static void deleteDefaultAccount(@Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
-                                     @Autowired FlightRepository flightRepository,
+                                     @Autowired FlightRouteRepository flightRouteRepository,
                                      @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
 
         // Delete default admin user
@@ -160,10 +166,10 @@ public class ControllerLayerTest {
         long flightNumber;
         for (int i = 0; i < defaultFlights.size(); i++){
             flightNumber = defaultFlights.get(i);
-            Flight flight = flightRepository.findFlightByflightNumber(flightNumber);
-            flightRepository.delete(flight);
-            assertNull(flightRepository.findFlightByflightNumber(flightNumber));
-            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(flightNumber));
+            FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+            flightRouteRepository.delete(flightRoute);
+            assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightId(flightNumber));
         }
     }
 
@@ -459,6 +465,7 @@ public class ControllerLayerTest {
     @Test
     @Transactional
     void getAvailableFlightTest_Controller_Success() throws Exception {
+        // TODO: Update flight by API without like now use repositity.save()
         //Create a flight without any available seats
         long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
         String departureCity = "YYZ";
@@ -469,56 +476,47 @@ public class ControllerLayerTest {
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 5);;
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
-        Integer availableSeat = 0;
-        Flight newFlight1 = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate,
-                availableSeat);
-        Flight returnedFlight = assertDoesNotThrow(()->flightRepository.save(newFlight1));
-        SeatList newSeatList = new SeatList(returnedFlight.getCapacity());
-        FlightSeatInfo flightSeatInfo = new FlightSeatInfo(returnedFlight.getFlightNumber(),
-                newSeatList.toJsonString());
-        FlightSeatInfo returnedFlightSeatInfo = flightSeatInfoRepository.save(flightSeatInfo);
-        validFlightInfo(newFlight1,flightNumber,0);
+
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+                capacity,overbooking,startDate,endDate, null);
+        FlightRoute returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute1));
+        newFlightRoute1.setAvailableSeat(0);
+        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute1));
+        validFlightInfo(newFlightRoute1,flightNumber,0, true);
 
 
         // Create a flight the end date is before
         flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
-        startDate = constants.datePlusSomeDays(constants.today(), -100);
-        endDate = constants.datePlusSomeDays(constants.today(),  0);
-        availableSeat = 156;
-        Flight newFlight2 = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,new java.sql.Date(startDate.getTime()),new java.sql.Date(endDate.getTime()),
-                availableSeat);
-        returnedFlight = assertDoesNotThrow(()->flightRepository.save(newFlight2));
-        newSeatList = new SeatList(returnedFlight.getCapacity());
-        flightSeatInfo = new FlightSeatInfo(returnedFlight.getFlightNumber(),
-                newSeatList.toJsonString());
-        returnedFlightSeatInfo = flightSeatInfoRepository.save(flightSeatInfo);
-        validFlightInfo(newFlight2,flightNumber,156);
+
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+                capacity,overbooking,startDate,endDate,null);
+        returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute2));
+        newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
+        newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(),  0));
+        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute2));
+        validFlightInfo(newFlightRoute2,flightNumber,156, true);
 
 
         flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
-        startDate = constants.datePlusSomeDays(constants.today(), 1);
-        endDate = constants.datePlusSomeDays(constants.today(),  8);
-        Flight newFlight3 = new Flight(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
+
+        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,new java.sql.Date(startDate.getTime()),new java.sql.Date(endDate.getTime()),
-                availableSeat);
-        returnedFlight = assertDoesNotThrow(()->flightRepository.save(newFlight3));
-        newSeatList = new SeatList(returnedFlight.getCapacity());
-        flightSeatInfo = new FlightSeatInfo(returnedFlight.getFlightNumber(),
-                newSeatList.toJsonString());
-        returnedFlightSeatInfo = flightSeatInfoRepository.save(flightSeatInfo);
-        validFlightInfo(newFlight3,flightNumber,156);
+                null);
+        returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute3));
+        newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 1));
+        newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(),  8));
+        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute3));
+        validFlightInfo(newFlightRoute3,flightNumber,156, true);
 
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0),constants.ADMIN_USER_PASSWORD_0);
         RequestBuilder builder = get("/getFlights").header("Authorization", "Bearer " + jwt);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
         ObjectMapper mapper = new ObjectMapper();
-        List<Flight> flights = mapper.readValue(content, new TypeReference<List<Flight>>() {});
-        assertTrue(validFlightExistInList(flights, constants.FLIGHT_NUMBER_AVAILABLE));
-        assertFalse(validFlightExistInList(flights, constants.FLIGHT_NUMBER_EXPIRED));
-        assertFalse(validFlightExistInList(flights, constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT));
+        List<FlightRoute> flightRoutes = mapper.readValue(content, new TypeReference<List<FlightRoute>>() {});
+        assertTrue(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_AVAILABLE));
+        assertFalse(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_EXPIRED));
+        assertFalse(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT));
     }
 
     private String getJWTByUsername(String username, String password){
@@ -540,27 +538,41 @@ public class ControllerLayerTest {
         }
     }
 
-    private void validFlightInfo(Flight expectedFlight, long actualFlightNumber, int availableSeats) {
-        assertEquals(expectedFlight.getFlightNumber(), actualFlightNumber);
-        Flight returnedFlight = flightRepository.findFlightByflightNumber(actualFlightNumber);
-        assertNotNull(returnedFlight);
-        assertEquals(expectedFlight.getDepartureCity(), returnedFlight.getDepartureCity());
-        assertEquals(expectedFlight.getDestinationCity(), returnedFlight.getDestinationCity());
-        assertEquals(expectedFlight.getDepartureTime(), returnedFlight.getDepartureTime());
-        assertEquals(expectedFlight.getArrivalTime(), returnedFlight.getArrivalTime());
-        assertEquals(expectedFlight.getCapacity(), returnedFlight.getCapacity());
-        assertEquals(expectedFlight.getOverbooking(), returnedFlight.getOverbooking());
-        assertTrue(expectedFlight.getStartDate().equals(returnedFlight.getStartDate()));
-        assertTrue(expectedFlight.getEndDate().equals(returnedFlight.getEndDate()));
-        assertEquals(availableSeats, returnedFlight.getAvailableSeat());
-        FlightSeatInfo flightSeatInfo = assertDoesNotThrow(()->flightSeatInfoRepository.findFlightSeatInfoByFlightNumber(expectedFlight.getFlightNumber()));
-        SeatList seatList = assertDoesNotThrow(()->flightSeatInfo.getSeatListByJson());
-        assertEquals(expectedFlight.getCapacity(), seatList.getSize());
+    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
+                                 boolean isSkipSeatList) {
+        assertEquals(expectedFlightRoute.getFlightNumber(), actualFlightNumber);
+        FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(actualFlightNumber);
+        assertNotNull(returnedFlightRoute);
+        assertEquals(expectedFlightRoute.getDepartureCity(), returnedFlightRoute.getDepartureCity());
+        assertEquals(expectedFlightRoute.getDestinationCity(), returnedFlightRoute.getDestinationCity());
+        assertEquals(expectedFlightRoute.getDepartureTime(), returnedFlightRoute.getDepartureTime());
+        assertEquals(expectedFlightRoute.getArrivalTime(), returnedFlightRoute.getArrivalTime());
+        assertEquals(expectedFlightRoute.getCapacity(), returnedFlightRoute.getCapacity());
+        assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
+        assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
+        assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
+        assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
+        //Verify Flights in flight table
+        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumber(returnedFlightRoute.getFlightNumber()));
+        Date expectedDate = returnedFlightRoute.getStartDate();
+        if (isSkipSeatList == false){
+            SeatList seatList;
+            for (int i = 0; i < returnedFlights.size(); i++){
+                Flight flight = returnedFlights.get(i);
+                assertEquals(expectedDate, flight.getFlightDate());
+                expectedDate = constants.datePlusSomeDays(expectedDate, 1);
+                // Verify Flight Seat Info
+                FlightSeatInfo flightSeatInfo = assertDoesNotThrow(()->flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
+                seatList = assertDoesNotThrow(()->flightSeatInfo.getSeatListByJson());
+                assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
+            }
+        }
+
     }
 
-    private boolean validFlightExistInList(List<Flight> flightList, long flightNumber){
-        for (int i = 0; i < flightList.size(); i++){
-            if (flightList.get(i).getFlightNumber() == flightNumber){
+    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber){
+        for (int i = 0; i < flightRouteList.size(); i++){
+            if (flightRouteList.get(i).getFlightNumber() == flightNumber){
                 return true;
             }
         }
