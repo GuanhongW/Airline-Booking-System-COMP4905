@@ -120,7 +120,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
                 capacity,overbooking,startDate,endDate,
@@ -180,7 +180,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
         // Test1: FlightNumber is 1
         flightNumber = constants.FLIGHT_NUMBER_1;
@@ -234,7 +234,7 @@ class CreateFlightTest {
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
 
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
         // Test1: FlightNumber is -1
         flightNumber = -1;
@@ -281,7 +281,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         //Departure City's length is 1
@@ -324,7 +324,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         //Departure City is null
@@ -356,7 +356,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         //Departure City's length is 1
@@ -399,7 +399,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate =constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate =constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         //Departure City is null
@@ -431,7 +431,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Flight capacity is 1
@@ -484,7 +484,7 @@ class CreateFlightTest {
         Integer capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Capacity is null
@@ -516,7 +516,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Overbooking allowance is 0
@@ -573,7 +573,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Capacity is null
@@ -605,8 +605,8 @@ class CreateFlightTest {
         Time arrivalTime = Time.valueOf("12:00:00");
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
-        Date startDate = constants.datePlusSomeDays(constants.today(), 180);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Start Date is Tomorrow
@@ -662,7 +662,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Start date is null
@@ -727,7 +727,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Departure time is 00:00:00
@@ -771,7 +771,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Departure time is null
@@ -796,7 +796,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Arrival time is 00:00:00
@@ -840,7 +840,7 @@ class CreateFlightTest {
         int capacity = 148;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         Integer availableSeat = null;
 
         // Departure time is null
@@ -887,7 +887,7 @@ class CreateFlightTest {
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
         assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
         //Verify Flights in flight table
-        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumber(returnedFlightRoute.getFlightNumber()));
+        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
 
         SeatList seatList;

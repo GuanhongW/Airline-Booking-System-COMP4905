@@ -57,12 +57,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
-<!--		&lt;!&ndash;	Alibaba druid	&ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>com.alibaba</groupId>-->
-<!--			<artifactId>druid-spring-boot-starter</artifactId>-->
-<!--			<version>1.1.0</version>-->
-<!--		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>1.1.17</version>
+		</dependency>
 
 		<!--	Swagger 2	-->
 		<dependency>

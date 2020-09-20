@@ -553,7 +553,7 @@ public class ControllerLayerTest {
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
         assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
         //Verify Flights in flight table
-        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumber(returnedFlightRoute.getFlightNumber()));
+        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
         if (isSkipSeatList == false){
             SeatList seatList;

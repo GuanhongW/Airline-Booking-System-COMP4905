@@ -7,7 +7,6 @@ import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -106,7 +105,7 @@ class GetAvailableFlightTest {
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
         assertEquals(availableSeats, returnedFlightRoute.getAvailableSeat());
         //Verify Flights in flight table
-        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumber(returnedFlightRoute.getFlightNumber()));
+        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
         if (isSkipSeatList == false){
             SeatList seatList;
