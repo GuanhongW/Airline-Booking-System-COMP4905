@@ -44,13 +44,6 @@ public class FlightService {
         FlightRoute returnedFlightRoute = flightRouteRepository.save(flightRoute);
         log.info("Create flight " + returnedFlightRoute.getFlightNumber() + " in the system");
         createFlightByFlightRoute(returnedFlightRoute);
-//        if (returnedFlightRoute != null){
-//            SeatList newSeatList = new SeatList(returnedFlightRoute.getCapacity());
-//            FlightSeatInfo flightSeatInfo = new FlightSeatInfo(returnedFlightRoute.getFlightNumber(),
-//                    newSeatList.toJsonString());
-//            returnedFlightSeatInfo = flightSeatInfoRepository.save(flightSeatInfo);
-//            log.info("Created seat info of flight " + returnedFlightSeatInfo.getFlightId() + " in the system");
-//        }
         return returnedFlightRoute;
     }
 
