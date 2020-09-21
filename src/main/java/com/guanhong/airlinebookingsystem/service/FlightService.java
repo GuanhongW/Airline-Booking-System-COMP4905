@@ -53,6 +53,11 @@ public class FlightService {
         return flightRoutes;
     }
 
+    public List<Flight> getAllAvailableFlightsByFlightNumber(long flightNumber) throws Exception{
+        List<Flight> flights = flightRepository.findAllByFlightNumberAndAvailableSeatsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(flightNumber, 0, new DateHelper().today());
+        return flights;
+    }
+
     private boolean validNewFlightInfo(FlightRoute flightRoute) throws Exception {
         //  1. Valid all flight information without flight number
         validFlightInfoWOFlightNumber(flightRoute);
@@ -104,10 +109,11 @@ public class FlightService {
         }
         else {
             // Check if end date is before than start date
+            Date today = new DateHelper().today();
             if (flightRoute.getEndDate().before(flightRoute.getStartDate())){
                 throw new ClientException("The end of travel range should not before the start of travel range.");
             }
-            else if (! new DateHelper().today().before(flightRoute.getStartDate())){
+            else if (! today.equals(flightRoute.getStartDate()) && ! today.before(flightRoute.getStartDate())){
                 throw new ClientException("The start of travel range should not before today.");
             }
         }

@@ -639,6 +639,15 @@ class CreateFlightTest {
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
         validFlightInfo(validFlightRoute, flightNumber, 156);
+
+        // Start date is today
+        flightNumber = constants.getNextAvailableFlightNumber();
+        startDate = constants.today();
+        newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        validFlightRoute = new FlightRoute(newFlightRoute);
+        flightService.createNewFlight(newFlightRoute);
+        validFlightInfo(validFlightRoute, flightNumber, 156);
     }
 
     @Test
@@ -670,14 +679,6 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, null);
         exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
         assertEquals("Flight's range of travel date cannot be empty.", exception.getMessage());
-
-        // Start date is today
-        flightNumber = constants.getNextAvailableFlightNumber();
-        startDate = constants.today();
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
-        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute3));
-        assertEquals("The start of travel range should not before today.", exception.getMessage());
 
         // Start date is yesterday
         flightNumber = constants.getNextAvailableFlightNumber();

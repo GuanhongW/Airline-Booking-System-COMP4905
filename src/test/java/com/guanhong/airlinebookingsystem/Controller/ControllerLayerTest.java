@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -59,8 +61,6 @@ public class ControllerLayerTest {
     private static List<Long> defaultFlights = new ArrayList<>();
 
 
-
-
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
                                      @Autowired UserRepository userRepository,
@@ -73,7 +73,7 @@ public class ControllerLayerTest {
 
         String testUsername = constants.getNextAdminUsername();
         defaultAdminUsernames.add(testUsername);
-        AccountInfo newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
+        AccountInfo newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
         CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -82,7 +82,7 @@ public class ControllerLayerTest {
 
         testUsername = constants.getNextAdminUsername();
         defaultAdminUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
+        newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -92,7 +92,7 @@ public class ControllerLayerTest {
         // Create default customer user
         testUsername = constants.getNextCustomerUsername();
         defaultCustomerUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_0, Role.USER,"test", Gender.male,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "test", Gender.male, "2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -105,7 +105,7 @@ public class ControllerLayerTest {
 
         testUsername = constants.getNextCustomerUsername();
         defaultCustomerUsernames.add(testUsername);
-        newUserInfo = new AccountInfo(testUsername,constants.CUSTOMER_USER_PASSWORD_1, Role.USER,"test", Gender.male,"2000-01-01");
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_1, Role.USER, "test", Gender.male, "2000-01-01");
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
@@ -128,8 +128,8 @@ public class ControllerLayerTest {
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate);
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -144,7 +144,7 @@ public class ControllerLayerTest {
 
         // Delete default admin user
         String testUsername;
-        for (int i = 0; i < defaultAdminUsernames.size(); i++){
+        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
             testUsername = defaultAdminUsernames.get(i);
             User user = userRepository.findUserByUsername(testUsername);
             userRepository.delete(user);
@@ -153,7 +153,7 @@ public class ControllerLayerTest {
         }
 
         // Delete default customer user
-        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
             testUsername = defaultCustomerUsernames.get(i);
             User user = userRepository.findUserByUsername(testUsername);
             userRepository.delete(user);
@@ -163,7 +163,7 @@ public class ControllerLayerTest {
 
         // Delete default flight
         long flightNumber;
-        for (int i = 0; i < defaultFlights.size(); i++){
+        for (int i = 0; i < defaultFlights.size(); i++) {
             flightNumber = defaultFlights.get(i);
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
@@ -174,7 +174,7 @@ public class ControllerLayerTest {
 
     @Test
     @Transactional
-    void registerTest_Controller_Success() throws Exception{
+    void registerTest_Controller_Success() throws Exception {
         String requestJSON = "{\n" +
                 "  \"password\": \"adminadmin\",\n" +
                 "  \"role\": \"ADMIN\",\n" +
@@ -209,7 +209,7 @@ public class ControllerLayerTest {
 
     @Test
     @Transactional
-    void registerTest_Controller_Failed() throws Exception{
+    void registerTest_Controller_Failed() throws Exception {
         // RequestJSON is null
         RequestBuilder builder = post("/register").accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
@@ -255,10 +255,10 @@ public class ControllerLayerTest {
     }
 
     @Test
-    void authenticateTest_Controller_Success() throws Exception{
+    void authenticateTest_Controller_Success() throws Exception {
         // Login in with admin user
         String requestJSON = "{\n" +
-                "  \"password\": \""+  constants.ADMIN_USER_PASSWORD_0 +"\",\n" +
+                "  \"password\": \"" + constants.ADMIN_USER_PASSWORD_0 + "\",\n" +
                 "  \"username\": \"" + defaultAdminUsernames.get(0) + "\"\n" +
                 "}";
         RequestBuilder builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
@@ -274,7 +274,7 @@ public class ControllerLayerTest {
 
         // Login in with customer user
         requestJSON = "{\n" +
-                "  \"password\": \""+  constants.CUSTOMER_USER_PASSWORD_0 +"\",\n" +
+                "  \"password\": \"" + constants.CUSTOMER_USER_PASSWORD_0 + "\",\n" +
                 "  \"username\": \"" + defaultCustomerUsernames.get(0) + "\"\n" +
                 "}";
         builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
@@ -290,9 +290,9 @@ public class ControllerLayerTest {
     }
 
     @Test
-    void authenticateTest_Controller_Failed() throws Exception{
+    void authenticateTest_Controller_Failed() throws Exception {
         // missed password
-        String requestJSON = "{\n"  +
+        String requestJSON = "{\n" +
                 "  \"username\": \"autoadmin1\"\n" +
                 "}";
         RequestBuilder builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
@@ -301,7 +301,7 @@ public class ControllerLayerTest {
         assertEquals(400, result.getResponse().getStatus());
         String resultContent = result.getResponse().getContentAsString();
         String expectedJSON = "Username or password cannot be empty.";
-        assertEquals(expectedJSON,resultContent);
+        assertEquals(expectedJSON, resultContent);
 
         // missed username
         requestJSON = "{\n" +
@@ -313,12 +313,12 @@ public class ControllerLayerTest {
         assertEquals(400, result.getResponse().getStatus());
         resultContent = result.getResponse().getContentAsString();
         expectedJSON = "Username or password cannot be empty.";
-        assertEquals(expectedJSON,resultContent);
+        assertEquals(expectedJSON, resultContent);
     }
 
     @Test
     @Transactional
-    void createNewFlightTest_Controller_Success() throws Exception{
+    void createNewFlightTest_Controller_Success() throws Exception {
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
         String requestJSON = "{\n" +
                 "\t\"arrivalTime\": \"13:05:00\",\n" +
@@ -327,7 +327,7 @@ public class ControllerLayerTest {
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
                 "\t\"endDate\": \"2022-09-04\",\n" +
-                "\t\"flightNumber\": "+ constants.FLIGHT_NUMBER_9995 +",\n" +
+                "\t\"flightNumber\": " + constants.FLIGHT_NUMBER_9995 + ",\n" +
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-04-06\"\n" +
                 "}";
@@ -342,15 +342,15 @@ public class ControllerLayerTest {
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
                 "\t\"endDate\": \"2022-09-04\",\n" +
-                "\t\"flightNumber\": "+ constants.FLIGHT_NUMBER_9995 +",\n" +
+                "\t\"flightNumber\": " + constants.FLIGHT_NUMBER_9995 + ",\n" +
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-04-06\"\n" +
                 "}";
-        JSONAssert.assertEquals(expectedJSON, result.getResponse().getContentAsString(),false);
+        JSONAssert.assertEquals(expectedJSON, result.getResponse().getContentAsString(), false);
     }
 
     @Test
-    void createNewFlightTest_Controller_Failed() throws Exception{
+    void createNewFlightTest_Controller_Failed() throws Exception {
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
 
         // input newFlight is null
@@ -447,7 +447,7 @@ public class ControllerLayerTest {
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
                 "\t\"endDate\": \"2022-09-04\",\n" +
-                "\t\"flightNumber\": "+ constants.FLIGHT_NUMBER_9995 +",\n" +
+                "\t\"flightNumber\": " + constants.FLIGHT_NUMBER_9995 + ",\n" +
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-04-06\"\n" +
                 "}";
@@ -471,47 +471,115 @@ public class ControllerLayerTest {
         Time arrivalTime = Time.valueOf("12:00:00");
         int capacity = 148;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        Date startDate = constants.datePlusSomeDays(constants.today(), 5);;
+        Date startDate = constants.datePlusSomeDays(constants.today(), 5);
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
 
 
         // Create a flight the end date is before
         flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
 
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate);
-        FlightRoute returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute2));
-        newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
-        newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(),  0));
-        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute2));
-        validFlightInfo(newFlightRoute2,flightNumber,156, true);
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
+        newFlightRoute1.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
+        newFlightRoute1.setEndDate(constants.datePlusSomeDays(constants.today(), 0));
+        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute1));
+        validFlightInfo(newFlightRoute1, flightNumber, 156, true);
 
+        // Create a flight router both start date and end date are after today
+        flightNumber = constants.FLIGHT_NUMBER_START_DATE_EXPIRED;
 
+        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute2));
+        newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -5));
+        newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
+        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute2));
+        validFlightInfo(newFlightRoute2, flightNumber, 156, true);
+
+        // Create a flight router both start date and end date are after today
         flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
 
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking, startDate, endDate);
-        returnedFlightRoute = assertDoesNotThrow(()-> flightService.createNewFlight(newFlightRoute3));
-        newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 1));
-        newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(),  8));
-        assertDoesNotThrow(()->flightRouteRepository.save(newFlightRoute3));
-        validFlightInfo(newFlightRoute3,flightNumber,156, true);
+        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute3));
+        newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 0));
+        newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
+        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute3));
+        validFlightInfo(newFlightRoute3, flightNumber, 156, true);
 
-        String jwt = getJWTByUsername(defaultAdminUsernames.get(0),constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = get("/getFlights").header("Authorization", "Bearer " + jwt);
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        RequestBuilder builder = get("/getFlightRoutes").header("Authorization", "Bearer " + jwt);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
         ObjectMapper mapper = new ObjectMapper();
-        List<FlightRoute> flightRoutes = mapper.readValue(content, new TypeReference<List<FlightRoute>>() {});
-        assertTrue(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_AVAILABLE));
+        List<FlightRoute> flightRoutes = mapper.readValue(content, new TypeReference<List<FlightRoute>>() {
+        });
+
         assertFalse(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_EXPIRED));
         assertFalse(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT));
+        assertTrue(validFlightExistInList(flightRoutes, constants.FLIGHT_NUMBER_START_DATE_EXPIRED));
     }
 
-    private String getJWTByUsername(String username, String password){
-        try{
+    @Test
+    @Transactional
+    void getAllAvailableFlightsByFlightNumber_Success() throws Exception {
+        long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
+        String departureCity = "YYZ";
+        String destinationCity = "YVR";
+        Time departureTime = Time.valueOf("10:05:00");
+        Time arrivalTime = Time.valueOf("12:00:00");
+        int capacity = 148;
+        BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+        Date startDate = constants.datePlusSomeDays(constants.today(), 0);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 5);
+        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                capacity, overbooking, startDate, endDate);
+        FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
+        FlightRoute validFlightRoute = new FlightRoute(newFlightRoute1);
+        validFlightInfo(validFlightRoute, flightNumber, 156, false);
+
+
+        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+        // Update one flight's available seats as 0
+        flights.get(1).setAvailableSeats(0);
+        flightRepository.save(flights.get(1));
+        assertEquals(0, flightRepository.findFlightByFlightId(flights.get(1).getFlightId()).getAvailableSeats());
+        // Update one flight's start date is yesterday
+        flights.get(3).setFlightDate(constants.datePlusSomeDays(constants.today(), -1));
+        flightRepository.save(flights.get(3));
+        assertEquals(constants.datePlusSomeDays(constants.today(), -1), flightRepository.findFlightByFlightId(flights.get(3).getFlightId()).getFlightDate());
+
+        // Verify the JSON response
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        RequestBuilder builder = get("/getFlightsByFlightNumber").header("Authorization", "Bearer " + jwt).
+                param("flightNumber", String.valueOf(flightNumber));
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        String validJson = "[{\n" +
+                "\t\"flightNumber\": 9998,\n" +
+                "\t\"flightDate\": \"2020-09-20\",\n" +
+                "\t\"availableSeats\": 156\n" +
+                "}, {\n" +
+                "\t\"flightNumber\": 9998,\n" +
+                "\t\"flightDate\": \"2020-09-22\",\n" +
+                "\t\"availableSeats\": 156\n" +
+                "}, {\n" +
+                "\t\"flightNumber\": 9998,\n" +
+                "\t\"flightDate\": \"2020-09-24\",\n" +
+                "\t\"availableSeats\": 156\n" +
+                "}, {\n" +
+                "\t\"flightNumber\": 9998,\n" +
+                "\t\"flightDate\": \"2020-09-25\",\n" +
+                "\t\"availableSeats\": 156\n" +
+                "}]";
+        JSONAssert.assertEquals(validJson, content, JSONCompareMode.LENIENT);
+    }
+
+    private String getJWTByUsername(String username, String password) {
+        try {
             UserCredential user = new UserCredential(username, password);
-            RequestBuilder builders= post("/authenticate").
+            RequestBuilder builders = post("/authenticate").
                     accept(MediaType.APPLICATION_JSON).content(user.toJsonString()).
                     contentType(MediaType.APPLICATION_JSON);
             MvcResult jwtResult = mockMvc.perform(builders).andReturn();
@@ -519,13 +587,17 @@ public class ControllerLayerTest {
             ObjectMapper mapper = new ObjectMapper();
             UserLoginResponse jwt = mapper.readValue(jwtResultContent, UserLoginResponse.class);
             return jwt.getJwttoken();
-        }
-        catch (Exception e){
-            System.out.println("Class: Constants, Method: getJWTFromController: " +e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Class: Constants, Method: getJWTFromController: " + e.getMessage());
             assertFalse(true);
             return null;
         }
     }
+
+
+
+
+
 
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
                                  boolean isSkipSeatList) {
@@ -542,27 +614,27 @@ public class ControllerLayerTest {
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
 
         //Verify Flights in flight table
-        List<Flight> returnedFlights = assertDoesNotThrow(()->flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
+        List<Flight> returnedFlights = assertDoesNotThrow(() -> flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
-        if (isSkipSeatList == false){
+        if (isSkipSeatList == false) {
             SeatList seatList;
-            for (int i = 0; i < returnedFlights.size(); i++){
+            for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
                 assertEquals(availableSeats, flight.getAvailableSeats());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-                FlightSeatInfo flightSeatInfo = assertDoesNotThrow(()->flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
-                seatList = assertDoesNotThrow(()->flightSeatInfo.getSeatListByJson());
+                FlightSeatInfo flightSeatInfo = assertDoesNotThrow(() -> flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
+                seatList = assertDoesNotThrow(() -> flightSeatInfo.getSeatListByJson());
                 assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
             }
         }
 
     }
 
-    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber){
-        for (int i = 0; i < flightRouteList.size(); i++){
-            if (flightRouteList.get(i).getFlightNumber() == flightNumber){
+    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
+        for (int i = 0; i < flightRouteList.size(); i++) {
+            if (flightRouteList.get(i).getFlightNumber() == flightNumber) {
                 return true;
             }
         }

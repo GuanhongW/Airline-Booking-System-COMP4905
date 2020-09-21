@@ -21,7 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
-class GetAvailableFlightRoutesTest {
+public class GetAvailableFlightsTest {
+
+    @Autowired
+    private FlightRepository flightRepository;
 
     @Autowired
     private FlightService flightService;
@@ -32,63 +35,45 @@ class GetAvailableFlightRoutesTest {
     @Autowired
     private FlightSeatInfoRepository flightSeatInfoRepository;
 
-    @Autowired
-    private FlightRepository flightRepository;
-
     private static Constants constants = Constants.getInstance();
 
     @Test
     @Transactional
-    void getAllAvailableFlightRoutes_Success() throws Exception {
-        long flightNumber;
+    void getAllAvailableFlightsByFlightNumber_Success() throws Exception {
+        long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
         String departureCity = "YYZ";
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
         int capacity = 148;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        Date startDate = constants.datePlusSomeDays(constants.today(), 5);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 35);
-
-
-        // Create a flight the end date is before
-        flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
-
+        Date startDate = constants.datePlusSomeDays(constants.today(), 0);
+        Date endDate = constants.datePlusSomeDays(constants.today(), 5);
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
                 capacity, overbooking, startDate, endDate);
         FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
-        newFlightRoute1.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
-        newFlightRoute1.setEndDate(constants.datePlusSomeDays(constants.today(), 0));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute1));
-        validFlightInfo(newFlightRoute1, flightNumber, 156, true);
+        FlightRoute validFlightRoute = new FlightRoute(newFlightRoute1);
+        validFlightInfo(validFlightRoute, flightNumber, 156, false);
 
-        // Create a flight router both start date and end date are after today
-        flightNumber = constants.FLIGHT_NUMBER_START_DATE_EXPIRED;
 
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
-        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute2));
-        newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -5));
-        newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute2));
-        validFlightInfo(newFlightRoute2, flightNumber, 156, true);
+        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+        // Update one flight's available seats as 0
+        flights.get(1).setAvailableSeats(0);
+        flightRepository.save(flights.get(1));
+        assertEquals(0, flightRepository.findFlightByFlightId(flights.get(1).getFlightId()).getAvailableSeats());
+        // Update one flight's start date is yesterday
+        flights.get(3).setFlightDate(constants.datePlusSomeDays(constants.today(), -1));
+        flightRepository.save(flights.get(3));
+        assertEquals(constants.datePlusSomeDays(constants.today(), -1), flightRepository.findFlightByFlightId(flights.get(3).getFlightId()).getFlightDate());
 
-        // Create a flight router both start date and end date are after today
-        flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
 
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
-        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute3));
-        newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 0));
-        newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute3));
-        validFlightInfo(newFlightRoute3, flightNumber, 156, true);
-
-        assertFalse(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_EXPIRED));
-        assertTrue(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_START_DATE_EXPIRED));
-        assertTrue(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_AVAILABLE));
+        List<Flight> returnedFlights = flightService.getAllAvailableFlightsByFlightNumber(flightNumber);
+        assertEquals(4, returnedFlights.size());
+        assertEquals(constants.today(), returnedFlights.get(0).getFlightDate());
+        assertEquals(constants.datePlusSomeDays(constants.today(), 2), returnedFlights.get(1).getFlightDate());
+        assertEquals(constants.datePlusSomeDays(constants.today(), 4), returnedFlights.get(2).getFlightDate());
+        assertEquals(constants.datePlusSomeDays(constants.today(), 5), returnedFlights.get(3).getFlightDate());
     }
-
 
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
                                  boolean isSkipSeatList) {
@@ -121,14 +106,4 @@ class GetAvailableFlightRoutesTest {
             }
         }
     }
-
-    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
-        for (int i = 0; i < flightRouteList.size(); i++) {
-            if (flightRouteList.get(i).getFlightNumber() == flightNumber) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }
