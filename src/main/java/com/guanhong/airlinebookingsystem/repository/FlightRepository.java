@@ -19,5 +19,6 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
     public List<Flight> findAllByFlightNumberAndAvailableSeatsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(long flightNumber, int availableSeats, Date today);
     public List<Flight> findAllByFlightNumberOrderByFlightDate(long flightNumber);
     public Flight findFlightByFlightId(long flightId);
+    public Flight findFlightByFlightNumberAndFlightDate(long flightNumber, Date flightDate);
 }
 

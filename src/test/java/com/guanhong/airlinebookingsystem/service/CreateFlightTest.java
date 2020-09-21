@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 class CreateFlightTest {
 
     @Autowired
@@ -42,9 +40,6 @@ class CreateFlightTest {
 
     @Autowired
     private FlightRepository flightRepository;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     private static Constants constants = Constants.getInstance();
 

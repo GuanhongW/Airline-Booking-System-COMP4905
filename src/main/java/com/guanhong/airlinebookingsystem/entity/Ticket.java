@@ -1,5 +1,9 @@
 package com.guanhong.airlinebookingsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -15,25 +19,45 @@ public class Ticket {
     private long ticketId;
 
     @Column(name = "customer_id", nullable = false)
-    private long customerId;
+    private Long customerId;
 
 
 
     @Column(name = "flight_id", nullable = false)
-    private long flightId;
+    private Long flightId;
 
     @Column(name = "seat_number")
-    private int seatNumber;
+    private Integer seatNumber;
 
     @Column(name = "flight_date", nullable = false)
     private Date flightDate;
 
-    public Ticket(long ticketId, long customerId, long flightId, Date flightDate) {
-        this.ticketId = ticketId;
+    public void setSeatNumber(Integer seatNumber) {
+        this.seatNumber = seatNumber;
+    }
+
+    public Integer getSeatNumber() {
+        return seatNumber;
+    }
+
+    public Date getFlightDate() {
+        return flightDate;
+    }
+
+    public void setFlightDate(Date flightDate) {
+        this.flightDate = flightDate;
+    }
+
+    public Ticket(long customerId, long flightId, Date flightDate) {
         this.customerId = customerId;
         this.flightId = flightId;
         this.flightDate = flightDate;
     }
+
+    public Ticket(long ticketId){
+        this.ticketId = ticketId;
+    }
+
 
 
     public long getTicketId() {
@@ -44,7 +68,7 @@ public class Ticket {
         this.ticketId = ticketId;
     }
 
-    public long getCustomerId() {
+    public Long getCustomerId() {
         return customerId;
     }
 
@@ -52,7 +76,7 @@ public class Ticket {
         this.customerId = customerId;
     }
 
-    public long getFlightId() {
+    public Long getFlightId() {
         return flightId;
     }
 
@@ -60,11 +84,4 @@ public class Ticket {
         this.flightId = flightId;
     }
 
-    public int getSeatNumber() {
-        return seatNumber;
-    }
-
-    public void setSeatNumber(int seatNumber) {
-        this.seatNumber = seatNumber;
-    }
 }

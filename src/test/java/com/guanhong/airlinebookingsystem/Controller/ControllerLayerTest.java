@@ -50,6 +50,9 @@ public class ControllerLayerTest {
     private FlightRepository flightRepository;
 
     @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
+    @Autowired
     private FlightService flightService;
 
     private static Constants constants = Constants.getInstance();
@@ -523,7 +526,7 @@ public class ControllerLayerTest {
 
     @Test
     @Transactional
-    void getAllAvailableFlightsByFlightNumber_Success() throws Exception {
+    void getAllAvailableFlightsByFlightNumber_Controller_Success() throws Exception {
         long flightNumber = constants.FLIGHT_NUMBER_NO_AVAILABLE_SEAT;
         String departureCity = "YYZ";
         String destinationCity = "YVR";
@@ -556,24 +559,116 @@ public class ControllerLayerTest {
                 param("flightNumber", String.valueOf(flightNumber));
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
-        String validJson = "[{\n" +
+        String validJSON = "[{\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"flightDate\": \"2020-09-20\",\n" +
                 "\t\"availableSeats\": 156\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"flightDate\": \"2020-09-22\",\n" +
                 "\t\"availableSeats\": 156\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"flightDate\": \"2020-09-24\",\n" +
                 "\t\"availableSeats\": 156\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"flightDate\": \"2020-09-25\",\n" +
                 "\t\"availableSeats\": 156\n" +
                 "}]";
-        JSONAssert.assertEquals(validJson, content, JSONCompareMode.LENIENT);
+        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    @Transactional
+    void bookFlight_Controller_Success() throws Exception {
+        // Get all flight by Default flight number
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
+        int flightIndex = 3;
+
+        String requestJSON = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0));
+        String validJSON = "{\n" +
+                "    \"customerId\": "+ customer.getId() +",\n" +
+                "    \"flightId\": " + availableFlights.get(flightIndex).getFlightId() + ",\n" +
+                "    \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate() + "\"\n" +
+                "}";
+        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+
+    }
+
+    @Test
+    @Transactional
+    void bookFlight_Controller_Failed() throws Exception {
+        // Get all flight by Default flight number
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
+        int flightIndex = 3;
+
+        // Admin user tries to book the flight
+        String requestJSON = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        String expectedMessage = "Only customer user can book new flights.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // request json is null
+        jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight number is null
+        String requestJSON1 = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\"\n" +
+                "}";
+        RequestBuilder builder1 = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON1).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder1).andReturn();
+        content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "flight number or flight date is empty.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight date is null
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "flight number or flight date is empty.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight number is invalid
+        requestJSON = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                "  \"flightNumber\": 0\n" +
+                "}";
+        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
     }
 
     private String getJWTByUsername(String username, String password) {
@@ -593,7 +688,6 @@ public class ControllerLayerTest {
             return null;
         }
     }
-
 
 
 

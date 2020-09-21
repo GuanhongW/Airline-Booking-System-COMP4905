@@ -150,6 +150,15 @@ public class JwtUserDetailsService implements UserDetailsService {
         return user.getRole();
     }
 
+    public User getUserByUsername(String validUsername) throws ServerException {
+        User user = userRepository.findUserByUsername(validUsername);
+        if (user == null){
+            log.error("User cannot be found in database. JWT Filter may have bug");
+            throw new ServerException("User cannot be found in database.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return user;
+    }
+
 
     private boolean verifyAccountInfo(AccountInfo accountInfo) throws Exception {
         User isNewUser = userRepository.findUserByUsername(accountInfo.getUsername());

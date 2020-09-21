@@ -36,6 +36,10 @@ public class FlightController {
     @RequestMapping(value = "/createFlight", method = RequestMethod.POST)
     public ResponseEntity createFlightController(HttpServletRequest request, @RequestBody FlightRoute newFlightRoute){
         try{
+            if (newFlightRoute == null){
+                log.error("Http Code: 400  URL: createFlight  new flight information is empty");
+                return ResponseEntity.badRequest().body("new flight information is empty");
+            }
             final String requestTokenHeader = request.getHeader("Authorization");
 
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
@@ -46,10 +50,6 @@ public class FlightController {
                     log.warn("A Non-admin user: " + username + " try to create flight.");
                     return new ResponseEntity("Only admin user can create new flights.", HttpStatus.BAD_REQUEST);
                 }
-            }
-            if (newFlightRoute == null){
-                log.error("Http Code: 400  URL: createFlight  new flight information is empty");
-                return ResponseEntity.badRequest().body("new flight information is empty");
             }
             return ResponseEntity.ok(flightService.createNewFlight(newFlightRoute));
         }

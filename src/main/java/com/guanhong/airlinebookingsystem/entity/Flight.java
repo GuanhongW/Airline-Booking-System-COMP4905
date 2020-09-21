@@ -10,16 +10,16 @@ public class Flight {
     @Id
     @GeneratedValue(strategy =  GenerationType.AUTO)
     @Column(name = "flight_id", nullable = false)
-    private long flightId;
+    private Long flightId;
 
     @Column(name = "flight_number", nullable = false)
-    private long flightNumber;
+    private Long flightNumber;
 
     @Column(name = "flight_date", nullable = false)
     private Date flightDate;
 
     @Column(name = "available_seats", nullable = false)
-    private int availableSeats;
+    private Integer availableSeats;
 
     public Flight() {
     }
@@ -30,19 +30,25 @@ public class Flight {
         this.availableSeats = availableSeats;
     }
 
-    public long getFlightId() {
+    public Flight(long flightNumber, Date flightDate) {
+        this.flightNumber = flightNumber;
+        this.flightDate = flightDate;
+    }
+
+
+    public Long getFlightId() {
         return flightId;
     }
 
-    public void setFlightId(long flightId) {
+    public void setFlightId(Long flightId) {
         this.flightId = flightId;
     }
 
-    public long getFlightNumber() {
+    public Long getFlightNumber() {
         return flightNumber;
     }
 
-    public void setFlightNumber(long flightNumber) {
+    public void setFlightNumber(Long flightNumber) {
         this.flightNumber = flightNumber;
     }
 
@@ -54,11 +60,11 @@ public class Flight {
         this.flightDate = flightDate;
     }
 
-    public int getAvailableSeats() {
+    public Integer getAvailableSeats() {
         return availableSeats;
     }
 
-    public void setAvailableSeats(int availableSeats) {
+    public void setAvailableSeats(Integer availableSeats) {
         this.availableSeats = availableSeats;
     }
 }
