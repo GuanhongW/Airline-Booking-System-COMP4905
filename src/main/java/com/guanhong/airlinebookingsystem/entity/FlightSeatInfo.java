@@ -1,32 +1,40 @@
 package com.guanhong.airlinebookingsystem.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.guanhong.airlinebookingsystem.model.Seat;
-import com.guanhong.airlinebookingsystem.model.SeatList;
-
 
 import javax.persistence.*;
-import java.util.List;
 
+import java.io.Serializable;
 
 @Entity
+@IdClass(FlightSeatInfoPK.class)
 @Table(name = "flight_seat_info")
-public class FlightSeatInfo {
+
+public class FlightSeatInfo implements Serializable {
+//    @Id
+//    @GeneratedValue(strategy =  GenerationType.AUTO)
+//    @Column(name = "id", nullable = false)
+//    private long id;
+
     @Id
     @Column(name = "flight_id", nullable = false)
     private long flightId;
 
-    @Column(name = "seat_list")
-    private String seatList;
+    @Id
+    @Column(name = "seat_number", nullable = false)
+    private Integer seatNumber;
+
+    @Column(name = "seat_status",nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SeatStatus seatStatus;
+
 
     public FlightSeatInfo() {
     }
 
-    public FlightSeatInfo(long flightId, String seatList) {
+    public FlightSeatInfo(long flightId, int seatNumber, SeatStatus seatStatus) {
         this.flightId = flightId;
-        this.seatList = seatList;
+        this.seatNumber = seatNumber;
+        this.seatStatus = seatStatus;
     }
 
     public long getFlightId() {
@@ -37,17 +45,20 @@ public class FlightSeatInfo {
         this.flightId = flightId;
     }
 
-    public String getSeatList() {
-        return seatList;
+    public Integer getSeatNumber() {
+        return seatNumber;
     }
 
-    public void setSeatList(String seatList) {
-        this.seatList = seatList;
+    public void setSeatNumber(int seatNumber) {
+        this.seatNumber = seatNumber;
     }
 
-    public SeatList getSeatListByJson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        List<Seat> test = mapper.readValue(this.seatList, new TypeReference<List<Seat>>() {});
-        return new SeatList(test);
+    public SeatStatus getSeatStatus() {
+        return seatStatus;
     }
+
+    public void setSeatStatus(SeatStatus seatStatus) {
+        this.seatStatus = seatStatus;
+    }
+
 }

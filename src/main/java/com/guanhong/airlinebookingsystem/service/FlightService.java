@@ -6,13 +6,12 @@ import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.FlightSeatInfo;
 import com.guanhong.airlinebookingsystem.model.DateHelper;
-import com.guanhong.airlinebookingsystem.model.SeatList;
+import com.guanhong.airlinebookingsystem.entity.SeatStatus;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +33,9 @@ public class FlightService {
 
     @Autowired
     private FlightSeatInfoRepository flightSeatInfoRepository;
+
+    @Autowired
+    private BatchService batchService;
 
     @Transactional(rollbackFor=Exception.class)
     public FlightRoute createNewFlight(FlightRoute flightRoute) throws Exception {
@@ -157,7 +159,6 @@ public class FlightService {
         Date currentDate = newFlightRoute.getStartDate();
 
         int availableSeats = calculateAvailableSeat(newFlightRoute.getCapacity(), newFlightRoute.getOverbooking());
-        String seatListJson = new SeatList(newFlightRoute.getCapacity()).toJsonString();
         List<Flight> newFlights = new ArrayList<>();
         Flight flight;
 
@@ -171,12 +172,16 @@ public class FlightService {
         List<FlightSeatInfo> newSeatInfos = new ArrayList<>();
         FlightSeatInfo seatInfo;
         for (int i = 0; i < returnedFlights.size(); i++){
-            seatInfo = new FlightSeatInfo(returnedFlights.get(i).getFlightId(), seatListJson);
-            newSeatInfos.add(seatInfo);
+            for (int j = 1; j <= returnedFlights.get(i).getAvailableSeats(); j++){
+                seatInfo = new FlightSeatInfo(returnedFlights.get(i).getFlightId(), j, SeatStatus.AVAILABLE);
+                newSeatInfos.add(seatInfo);
+            }
         }
-        flightSeatInfoRepository.saveAll(newSeatInfos);
+        // Use batch insert, Does not check the if new SeatInfos are in the DB
+        batchService.batchInsert(newSeatInfos);
+        // Use saveAll, it will check if new SeatInfos are in the DB first.
+//        flightSeatInfoRepository.saveAll(newSeatInfos);
         log.info("Created seat info of flightRoute " + newFlightRoute.getFlightNumber() + " in the system");
-
         return true;
     }
 

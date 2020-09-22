@@ -171,7 +171,8 @@ public class ControllerLayerTest {
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
             assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
-            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightId(flightNumber));
+            List<FlightSeatInfo> emptyList = new ArrayList<>();
+            assertEquals(emptyList,flightSeatInfoRepository.findAllByFlightId(flightNumber));
         }
     }
 
@@ -329,11 +330,12 @@ public class ControllerLayerTest {
                 "\t\"departureCity\": \"YOW\",\n" +
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
-                "\t\"endDate\": \"2022-09-04\",\n" +
+                "\t\"endDate\": \"" + constants.datePlusSomeDays(constants.today(),50) + "\",\n" +
                 "\t\"flightNumber\": " + constants.FLIGHT_NUMBER_9995 + ",\n" +
                 "\t\"overbooking\": 5,\n" +
-                "\t\"startDate\": \"2021-04-06\"\n" +
+                "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),30) + "\"\n" +
                 "}";
+        System.out.println(requestJSON);
         RequestBuilder builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
@@ -344,10 +346,10 @@ public class ControllerLayerTest {
                 "\t\"departureCity\": \"YOW\",\n" +
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
-                "\t\"endDate\": \"2022-09-04\",\n" +
+                "\t\"endDate\": \"" + constants.datePlusSomeDays(constants.today(),50) + "\",\n" +
                 "\t\"flightNumber\": " + constants.FLIGHT_NUMBER_9995 + ",\n" +
                 "\t\"overbooking\": 5,\n" +
-                "\t\"startDate\": \"2021-04-06\"\n" +
+                "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),30) + "\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedJSON, result.getResponse().getContentAsString(), false);
     }
@@ -718,9 +720,8 @@ public class ControllerLayerTest {
                 assertEquals(availableSeats, flight.getAvailableSeats());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-                FlightSeatInfo flightSeatInfo = assertDoesNotThrow(() -> flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
-                seatList = assertDoesNotThrow(() -> flightSeatInfo.getSeatListByJson());
-                assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
+                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+                assertEquals(availableSeats, flightSeatInfos.size());
             }
         }
 

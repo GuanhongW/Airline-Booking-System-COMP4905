@@ -93,20 +93,33 @@ alter table ticket
 -- Table flight seat info
 create table flight_seat_info
 (
+	id int auto_increment,
 	flight_id int not null,
-	seat_list json not null,
+	seat_number int not null,
+	seat_status enum('AVAILABLE', 'UNAVAILABLE', 'BOOKED') not null,
 	constraint flight_seat_info_pk
-		primary key (flight_id),
-	constraint flight_seat_info_flight_id_fk
-		foreign key (flight_id) references flightRoute (id)
+		primary key (id),
+	constraint flight_seat_info_flight_flight_id_fk
+		foreign key (flight_id) references flight (flight_id)
 			on delete cascade
 );
-alter table flight_seat_info drop foreign key flight_seat_info_flight_id_fk;
 
-alter table flight_seat_info
-	add constraint flight_seat_info_flight_id_fk
+
+create table flight_seat_info
+(
+	flight_id int not null,
+	seat_number int not null,
+	seat_status enum('AVAILABLE', 'UNAVAILABLE', 'BOOKED') not null,
+	constraint flight_seat_info_pk
+		primary key (flight_id, seat_number),
+	constraint flight_seat_info_flight_flight_id_fk
 		foreign key (flight_id) references flight (flight_id)
-			on delete cascade;
+			on delete cascade
+);
+
+
+
+
 
 
 

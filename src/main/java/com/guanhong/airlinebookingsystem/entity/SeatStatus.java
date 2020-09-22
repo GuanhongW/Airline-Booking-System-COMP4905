@@ -1,4 +1,4 @@
-package com.guanhong.airlinebookingsystem.model;
+package com.guanhong.airlinebookingsystem.entity;
 
 public enum  SeatStatus {
     AVAILABLE,

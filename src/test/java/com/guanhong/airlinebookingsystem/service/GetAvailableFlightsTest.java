@@ -3,7 +3,6 @@ package com.guanhong.airlinebookingsystem.service;
 import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.FlightSeatInfo;
-import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
@@ -93,16 +92,14 @@ public class GetAvailableFlightsTest {
         List<Flight> returnedFlights = assertDoesNotThrow(() -> flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
         if (isSkipSeatList == false) {
-            SeatList seatList;
             for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
                 assertEquals(availableSeats, flight.getAvailableSeats());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-                FlightSeatInfo flightSeatInfo = assertDoesNotThrow(() -> flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
-                seatList = assertDoesNotThrow(() -> flightSeatInfo.getSeatListByJson());
-                assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
+                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+                assertEquals(availableSeats, flightSeatInfos.size());
             }
         }
     }

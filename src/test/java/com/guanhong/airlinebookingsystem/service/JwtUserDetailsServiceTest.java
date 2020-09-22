@@ -165,7 +165,8 @@ class JwtUserDetailsServiceTest {
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
             assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
-            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightId(flightNumber));
+            List<FlightSeatInfo> emptyList = new ArrayList<>();
+            assertEquals(emptyList,flightSeatInfoRepository.findAllByFlightId(flightNumber));
         }
     }
 

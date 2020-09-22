@@ -4,14 +4,12 @@ import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
-import com.guanhong.airlinebookingsystem.model.SeatList;
 import com.guanhong.airlinebookingsystem.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,7 +155,8 @@ class CreateFlightTest {
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
             assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
-            assertNull(flightSeatInfoRepository.findFlightSeatInfoByFlightId(flightNumber));
+            List<FlightSeatInfo> emptyList = new ArrayList<>();
+            assertEquals(emptyList,flightSeatInfoRepository.findAllByFlightId(flightNumber));
         }
     }
 
@@ -590,7 +589,7 @@ class CreateFlightTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int capacity = 20;
         BigDecimal overbooking = constants.getOverbookingByNumber(6);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
@@ -603,7 +602,7 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, endDate);
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber, 156);
+        validFlightInfo(validFlightRoute, flightNumber, 21);
 
         // Start Date and end date is tomorrow
         flightNumber = constants.getNextAvailableFlightNumber();
@@ -613,7 +612,7 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber, 156);
+        validFlightInfo(validFlightRoute, flightNumber, 21);
 
         // Start Date is tomorrow and end date is 1 days after start date
         flightNumber = constants.getNextAvailableFlightNumber();
@@ -623,7 +622,7 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber, 156);
+        validFlightInfo(validFlightRoute, flightNumber, 21);
 
         // Start Date is tomorrow and end date is 365 days after start date
         flightNumber = constants.getNextAvailableFlightNumber();
@@ -633,7 +632,7 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber, 156);
+        validFlightInfo(validFlightRoute, flightNumber, 21);
 
         // Start date is today
         flightNumber = constants.getNextAvailableFlightNumber();
@@ -642,7 +641,7 @@ class CreateFlightTest {
                 capacity, overbooking, startDate, endDate);
         validFlightRoute = new FlightRoute(newFlightRoute);
         flightService.createNewFlight(newFlightRoute);
-        validFlightInfo(validFlightRoute, flightNumber, 156);
+        validFlightInfo(validFlightRoute, flightNumber, 21);
     }
 
     @Test
@@ -876,17 +875,15 @@ class CreateFlightTest {
         //Verify Flights in flight table
         List<Flight> returnedFlights = assertDoesNotThrow(() -> flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
-
-        SeatList seatList;
+        
         for (int i = 0; i < returnedFlights.size(); i++) {
             Flight flight = returnedFlights.get(i);
             assertEquals(expectedDate, flight.getFlightDate());
             assertEquals(availableSeats, flight.getAvailableSeats());
             expectedDate = constants.datePlusSomeDays(expectedDate, 1);
             // Verify Flight Seat Info
-            FlightSeatInfo flightSeatInfo = assertDoesNotThrow(() -> flightSeatInfoRepository.findFlightSeatInfoByFlightId(flight.getFlightId()));
-            seatList = assertDoesNotThrow(() -> flightSeatInfo.getSeatListByJson());
-            assertEquals(expectedFlightRoute.getCapacity(), seatList.getSize());
+            List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+            assertEquals(availableSeats, flightSeatInfos.size());
         }
     }
 

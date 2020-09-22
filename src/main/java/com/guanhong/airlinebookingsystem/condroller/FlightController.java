@@ -48,6 +48,7 @@ public class FlightController {
                 Role role = jwtUserDetailsService.getUserRole(username);
                 if (!role.equals(Role.ADMIN)){
                     log.warn("A Non-admin user: " + username + " try to create flight.");
+                    System.out.println("Save finished: " + new java.util.Date().getTime());
                     return new ResponseEntity("Only admin user can create new flights.", HttpStatus.BAD_REQUEST);
                 }
             }
