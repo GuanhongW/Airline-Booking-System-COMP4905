@@ -67,6 +67,11 @@ create table flight
 alter table flight
 	add available_seats int not null;
 
+alter table flight
+    add version int not null;
+
+
+
 
 
 

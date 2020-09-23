@@ -713,7 +713,6 @@ public class ControllerLayerTest {
         List<Flight> returnedFlights = assertDoesNotThrow(() -> flightRepository.findAllByFlightNumberOrderByFlightDate(returnedFlightRoute.getFlightNumber()));
         Date expectedDate = returnedFlightRoute.getStartDate();
         if (isSkipSeatList == false) {
-            SeatList seatList;
             for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());

@@ -23,31 +23,32 @@ public class TicketService {
     @Autowired
     private TicketRepository ticketRepository;
 
-    @Transactional
+    @Transactional(rollbackFor=Exception.class)
     public Ticket bookFlight(Flight flight, long customerId) throws Exception {
         Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flight.getFlightNumber(), flight.getFlightDate());
+        log.error("Lock the flight row");
         if (validFlightIsAvailable(returnedFlight) == false) {
             // A valid flight ticket id should greater than 0.
             // Therefore, ticketId = 0 means the flight is full.
             int fullFlightTicketId = 0;
+            log.info("Customer " + customerId + " failed to book the ticket because the flight is full.");
             return new Ticket(fullFlightTicketId);
         } else {
-            // Todo: check if user already booked the flight
             Ticket newTicket = new Ticket(customerId, returnedFlight.getFlightId(), returnedFlight.getFlightDate());
             if (checkIsDuplicatedBooking(newTicket) == true){
                 log.error("The customer (" + customerId + ") already book the ticket for flight " + newTicket.getFlightId());
                 throw new ClientException("Customer already booked the ticket in the same flight", HttpStatus.BAD_REQUEST);
             }
+            returnedFlight.setAvailableSeats(returnedFlight.getAvailableSeats() - 1);
+            Flight newFlight = flightRepository.saveAndFlush(returnedFlight);
+            if (newFlight == null) {
+                log.error("Update flight's available seats error. (flight Id: " +
+                        returnedFlight.getFlightId() + "). Rollback all transactions.");
+                throw new ServerException("Unknown Server Exception.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
             Ticket returnedTicket = ticketRepository.save(newTicket);
             if (returnedTicket != null) {
-                returnedFlight.setAvailableSeats(returnedFlight.getAvailableSeats() - 1);
-                Flight newFlight = flightRepository.save(returnedFlight);
-                if (newFlight == null) {
-                    log.error("Update flight's available seats error. (flight Id: " +
-                            returnedFlight.getFlightId() + "). Rollback all transactions.");
-                    throw new ServerException("Unknown Server Exception.", HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-                log.info("Customer Id: " + customerId + " successfully booked the ticket in flight " + flight.getFlightId());
+                log.info("Customer Id: " + customerId + " successfully booked the ticket in flight " + returnedFlight.getFlightId());
                 return returnedTicket;
             } else {
                 log.error("Save new ticket into database error. (Customer Id: " + customerId + ", flight Id: " +

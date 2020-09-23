@@ -13,12 +13,15 @@ import com.guanhong.airlinebookingsystem.service.TicketService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.StaleStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.*;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
+
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,7 +41,9 @@ public class TicketController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/bookFlight", method = RequestMethod.POST)
-    public ResponseEntity bookFlightController(HttpServletRequest request, @RequestBody Flight flight){
+    public ResponseEntity bookFlightController(HttpServletRequest request, @RequestBody Flight flight) throws Exception {
+        int bookIndex = 0;
+        User user = null;
         try{
             if (flight == null){
                 log.error("Http Code: 400  URL: bookFlight  flight information is empty");
@@ -49,7 +54,6 @@ public class TicketController {
                 return ResponseEntity.badRequest().body("flight number or flight date is empty.");
             }
             final String requestTokenHeader = request.getHeader("Authorization");
-            User user = null;
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
                 String jwtToken = requestTokenHeader.substring(7);
                 String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
@@ -59,24 +63,48 @@ public class TicketController {
                     return new ResponseEntity("Only customer user can book new flights.", HttpStatus.BAD_REQUEST);
                 }
             }
-            return new ResponseEntity(ticketService.bookFlight(flight, user.getId()), HttpStatus.OK);
         }
         catch (ServerException e){
             log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
             return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        catch (ClientException e){
-            log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
-            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        while (bookIndex < 3){
+            try{
+                ResponseEntity res = new ResponseEntity(ticketService.bookFlight(flight, user.getId()), HttpStatus.OK);
+                log.info(user.getId() + " got the ticket in flight " + flight.getFlightNumber() + " on "+
+                        flight.getFlightDate().toString());
+                return res;
+            }
+            catch (ServerException e){
+                log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+                return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            catch (ClientException e){
+                log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+                return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+            catch (DataIntegrityViolationException e){
+                log.error(e.getMessage());
+                log.info("Create entity in customer info table is failed, rolling back in user table");
+                return new ResponseEntity("URL: bookFlight, Http Code: 500: Book a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            catch (StaleStateException e){
+                bookIndex++;
+                log.info("#" + bookIndex+1 + ": User " + user.getId() + " try to book the flight but failed by optimistic lock.");
+            }
+            catch (ObjectOptimisticLockingFailureException e){
+                bookIndex++;
+                log.info("#" + bookIndex+1 + ": User " + user.getId() + " try to book the flight but failed by optimistic lock.");
+            }
+            catch (Exception e){
+                log.error("URL: bookFlight, Http Code: 400: " + e.getMessage());
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
         }
-        catch (DataIntegrityViolationException e){
-            log.error(e.getMessage());
-            log.info("Create entity in customer info table is failed, rolling back in user table");
-            return new ResponseEntity("URL: bookFlight, Http Code: 500: Book a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        catch (Exception e){
-            log.error("URL: bookFlight, Http Code: 400: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        log.error("User: " + user.getId() + " tried book the flight " + flight.getFlightNumber() + " on " + flight.getFlightDate().toString() + "," +
+                " the system failed three times optimistic lock.");
+        return new ResponseEntity("Server is busy. Try to book flight failed.", HttpStatus.SERVICE_UNAVAILABLE);
+
+
     }
 }

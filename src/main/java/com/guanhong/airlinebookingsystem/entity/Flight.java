@@ -1,5 +1,7 @@
 package com.guanhong.airlinebookingsystem.entity;
 
+import org.hibernate.annotations.OptimisticLocking;
+
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -20,6 +22,18 @@ public class Flight {
 
     @Column(name = "available_seats", nullable = false)
     private Integer availableSeats;
+
+    @Column(name = "version")
+    @Version
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     public Flight() {
     }
