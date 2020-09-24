@@ -5,7 +5,6 @@ import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
 import com.guanhong.airlinebookingsystem.repository.*;
-import com.mysql.cj.xdevapi.Client;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -113,13 +112,13 @@ public class BookFlightTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int aircraft = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 0);
         Date endDate = constants.datePlusSomeDays(constants.today(), 10);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraft, overbooking, startDate, endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -173,20 +172,20 @@ public class BookFlightTest {
         // Book the flight for today
         int flightIndex = 0;
         Flight selectedFlight1 = new Flight(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
-        int initAvailableSeats = availableFlights.get(flightIndex).getAvailableSeats();
+        int initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         Ticket returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         assertNotNull(returnedTicked.getTicketId());
         assertNull(returnedTicked.getSeatNumber());
         assertEquals(customer.getId(), returnedTicked.getCustomerId());
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight1.getFlightDate(), returnedTicked.getFlightDate());
-        assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats());
+        assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
         // Book the last flight date in this flight
         flightIndex = availableFlights.size()-1;
         Flight selectedFlight2 = new Flight(availableFlights.get(flightIndex).getFlightNumber(),
                 availableFlights.get(flightIndex).getFlightDate());
-        initAvailableSeats = availableFlights.get(flightIndex).getAvailableSeats();
+        initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight2, customer.getId()));
         assertNotNull(returnedTicked.getTicketId());
         assertNull(returnedTicked.getSeatNumber());
@@ -194,20 +193,20 @@ public class BookFlightTest {
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight2.getFlightDate(), returnedTicked.getFlightDate());
         assertEquals(initAvailableSeats - 1,
-                flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats());
+                flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
         // Book the flight in the middle of travel date range
         flightIndex = 4;
         Flight selectedFlight3 = new Flight(availableFlights.get(flightIndex).getFlightNumber(),
                 availableFlights.get(flightIndex).getFlightDate());
-        initAvailableSeats = availableFlights.get(flightIndex).getAvailableSeats();
+        initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight3, customer.getId()));
         assertNotNull(returnedTicked.getTicketId());
         assertNull(returnedTicked.getSeatNumber());
         assertEquals(customer.getId(), returnedTicked.getCustomerId());
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight3.getFlightDate(), returnedTicked.getFlightDate());
-        assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats());
+        assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
     }
 
     @Test
@@ -289,9 +288,9 @@ public class BookFlightTest {
         // Change one flight's available seat as 0
         int flightIndex = 2;
         Flight targetFlight = availableFlights.get(flightIndex);
-        targetFlight.setAvailableSeats(0);
+        targetFlight.setAvailableTickets(0);
         assertDoesNotThrow(() -> flightRepository.save(targetFlight));
-        assertEquals(0, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats());
+        assertEquals(0, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
         // Book the flight without any available seat
 
@@ -303,7 +302,7 @@ public class BookFlightTest {
         assertNull(returnedTicket.getSeatNumber());
         assertNull(returnedTicket.getFlightDate());
         assertNull(returnedTicket.getCustomerId());
-        assertEquals(0, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats());
+        assertEquals(0, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
 
 

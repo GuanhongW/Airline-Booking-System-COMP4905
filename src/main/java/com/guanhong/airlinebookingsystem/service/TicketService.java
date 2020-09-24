@@ -1,6 +1,5 @@
 package com.guanhong.airlinebookingsystem.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.Flight;
@@ -39,7 +38,7 @@ public class TicketService {
                 log.error("The customer (" + customerId + ") already book the ticket for flight " + newTicket.getFlightId());
                 throw new ClientException("Customer already booked the ticket in the same flight", HttpStatus.BAD_REQUEST);
             }
-            returnedFlight.setAvailableSeats(returnedFlight.getAvailableSeats() - 1);
+            returnedFlight.setAvailableTickets(returnedFlight.getAvailableTickets() - 1);
             Flight newFlight = flightRepository.saveAndFlush(returnedFlight);
             if (newFlight == null) {
                 log.error("Update flight's available seats error. (flight Id: " +
@@ -66,7 +65,7 @@ public class TicketService {
                     HttpStatus.BAD_REQUEST);
         }
         // Check if the flight has available seats
-        else if (flight.getAvailableSeats() <= 0) {
+        else if (flight.getAvailableTickets() <= 0) {
             return false;
         }
         return true;

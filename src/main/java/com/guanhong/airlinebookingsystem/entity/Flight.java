@@ -1,7 +1,5 @@
 package com.guanhong.airlinebookingsystem.entity;
 
-import org.hibernate.annotations.OptimisticLocking;
-
 import javax.persistence.*;
 import java.sql.Date;
 
@@ -20,8 +18,8 @@ public class Flight {
     @Column(name = "flight_date", nullable = false)
     private Date flightDate;
 
-    @Column(name = "available_seats", nullable = false)
-    private Integer availableSeats;
+    @Column(name = "available_tickets", nullable = false)
+    private Integer availableTickets;
 
     @Column(name = "version")
     @Version
@@ -38,10 +36,10 @@ public class Flight {
     public Flight() {
     }
 
-    public Flight(long flightNumber, Date flightDate, int availableSeats) {
+    public Flight(long flightNumber, Date flightDate, int availableTickets) {
         this.flightNumber = flightNumber;
         this.flightDate = flightDate;
-        this.availableSeats = availableSeats;
+        this.availableTickets = availableTickets;
     }
 
     public Flight(long flightNumber, Date flightDate) {
@@ -74,11 +72,25 @@ public class Flight {
         this.flightDate = flightDate;
     }
 
-    public Integer getAvailableSeats() {
-        return availableSeats;
+    public Integer getAvailableTickets() {
+        return availableTickets;
     }
 
-    public void setAvailableSeats(Integer availableSeats) {
-        this.availableSeats = availableSeats;
+    public void setAvailableTickets(Integer availableTickets) {
+        this.availableTickets = availableTickets;
+    }
+
+    public void addAvailableTickets(int availableSeats){
+        this.availableTickets += availableSeats;
+    }
+
+    public boolean subtractAvailableTickets(int availableSeats){
+        if (this.availableTickets < availableSeats){
+            return false;
+        }
+        else {
+            this.availableTickets -= availableSeats;
+            return true;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.guanhong.airlinebookingsystem.Controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
@@ -11,21 +10,16 @@ import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -121,13 +115,13 @@ public class ConcurrentTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int aircraftId = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraftId, overbooking, startDate, endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -176,7 +170,7 @@ public class ConcurrentTest {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
         int flightIndex = 3;
-        int totalAvailableSeat = availableFlights.get(flightIndex).getAvailableSeats();
+        int totalAvailableSeat = availableFlights.get(flightIndex).getAvailableTickets();
 
         String requestJSON = "{\n" +
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
@@ -225,7 +219,7 @@ public class ConcurrentTest {
 
         // Verify the left ticket + booked ticket is full amount
         int bookedTicketNum = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId()).size();
-        int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableSeats();
+        int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets();
         System.out.println("Booked Ticket Num: " + bookedTicketNum);
         System.out.println("New Available Ticket: " + newAvailableTicket);
         assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
@@ -253,7 +247,7 @@ public class ConcurrentTest {
 
 
 
-    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
+    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTickets,
                                  boolean isSkipSeatList) {
         assertEquals(expectedFlightRoute.getFlightNumber(), actualFlightNumber);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(actualFlightNumber);
@@ -262,7 +256,7 @@ public class ConcurrentTest {
         assertEquals(expectedFlightRoute.getDestinationCity(), returnedFlightRoute.getDestinationCity());
         assertEquals(expectedFlightRoute.getDepartureTime(), returnedFlightRoute.getDepartureTime());
         assertEquals(expectedFlightRoute.getArrivalTime(), returnedFlightRoute.getArrivalTime());
-        assertEquals(expectedFlightRoute.getCapacity(), returnedFlightRoute.getCapacity());
+        assertEquals(expectedFlightRoute.getAircraftId(), returnedFlightRoute.getAircraftId());
         assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
         assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
@@ -274,11 +268,11 @@ public class ConcurrentTest {
             for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
-                assertEquals(availableSeats, flight.getAvailableSeats());
+                assertEquals(availableTickets, flight.getAvailableTickets());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
                 List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-                assertEquals(availableSeats, flightSeatInfos.size());
+                assertEquals(availableTickets, flightSeatInfos.size());
             }
         }
 

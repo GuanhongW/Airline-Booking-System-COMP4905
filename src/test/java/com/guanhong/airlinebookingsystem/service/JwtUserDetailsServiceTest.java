@@ -120,13 +120,13 @@ class JwtUserDetailsServiceTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int aircraft = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         java.sql.Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         java.sql.Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber,departureCity,destinationCity,departureTime,arrivalTime,
-                capacity,overbooking,startDate,endDate);
+                aircraft,overbooking,startDate,endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);

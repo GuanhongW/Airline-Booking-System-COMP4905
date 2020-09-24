@@ -126,13 +126,13 @@ public class ControllerLayerTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int aircraft = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 80);
         Date endDate = constants.datePlusSomeDays(constants.today(), 180);
         Integer availableSeat = null;
         FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraft, overbooking, startDate, endDate);
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
@@ -326,7 +326,7 @@ public class ControllerLayerTest {
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
         String requestJSON = "{\n" +
                 "\t\"arrivalTime\": \"13:05:00\",\n" +
-                "\t\"capacity\": 120,\n" +
+                "\t\"aircraftId\": 200,\n" +
                 "\t\"departureCity\": \"YOW\",\n" +
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
@@ -342,7 +342,7 @@ public class ControllerLayerTest {
         assertEquals(200, result.getResponse().getStatus());
         String expectedJSON = "{\n" +
                 "\t\"arrivalTime\": \"13:05:00\",\n" +
-                "\t\"capacity\": 120,\n" +
+                "\t\"aircraftId\": 200,\n" +
                 "\t\"departureCity\": \"YOW\",\n" +
                 "\t\"departureTime\": \"14:05:00\",\n" +
                 "\t\"destinationCity\": \"YYZ\",\n" +
@@ -474,7 +474,7 @@ public class ControllerLayerTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int capacity = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 5);
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
@@ -534,7 +534,7 @@ public class ControllerLayerTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int capacity = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 0);
         Date endDate = constants.datePlusSomeDays(constants.today(), 5);
@@ -542,14 +542,14 @@ public class ControllerLayerTest {
                 capacity, overbooking, startDate, endDate);
         FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
         FlightRoute validFlightRoute = new FlightRoute(newFlightRoute1);
-        validFlightInfo(validFlightRoute, flightNumber, 156, false);
+        validFlightInfo(validFlightRoute, flightNumber, 53, false);
 
 
         List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
         // Update one flight's available seats as 0
-        flights.get(1).setAvailableSeats(0);
+        flights.get(1).setAvailableTickets(0);
         flightRepository.save(flights.get(1));
-        assertEquals(0, flightRepository.findFlightByFlightId(flights.get(1).getFlightId()).getAvailableSeats());
+        assertEquals(0, flightRepository.findFlightByFlightId(flights.get(1).getFlightId()).getAvailableTickets());
         // Update one flight's start date is yesterday
         flights.get(3).setFlightDate(constants.datePlusSomeDays(constants.today(), -1));
         flightRepository.save(flights.get(3));
@@ -563,16 +563,16 @@ public class ControllerLayerTest {
         String content = result.getResponse().getContentAsString();
         String validJSON = "[{\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"availableSeats\": 156\n" +
+                "\t\"availableTickets\": 53\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"availableSeats\": 156\n" +
+                "\t\"availableTickets\": 53\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"availableSeats\": 156\n" +
+                "\t\"availableTickets\": 53\n" +
                 "}, {\n" +
                 "\t\"flightNumber\": 9998,\n" +
-                "\t\"availableSeats\": 156\n" +
+                "\t\"availableTickets\": 53\n" +
                 "}]";
         JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
     }
@@ -695,7 +695,7 @@ public class ControllerLayerTest {
 
 
 
-    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
+    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTicket,
                                  boolean isSkipSeatList) {
         assertEquals(expectedFlightRoute.getFlightNumber(), actualFlightNumber);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(actualFlightNumber);
@@ -704,7 +704,7 @@ public class ControllerLayerTest {
         assertEquals(expectedFlightRoute.getDestinationCity(), returnedFlightRoute.getDestinationCity());
         assertEquals(expectedFlightRoute.getDepartureTime(), returnedFlightRoute.getDepartureTime());
         assertEquals(expectedFlightRoute.getArrivalTime(), returnedFlightRoute.getArrivalTime());
-        assertEquals(expectedFlightRoute.getCapacity(), returnedFlightRoute.getCapacity());
+        assertEquals(expectedFlightRoute.getAircraftId(), returnedFlightRoute.getAircraftId());
         assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
         assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
@@ -716,11 +716,11 @@ public class ControllerLayerTest {
             for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
-                assertEquals(availableSeats, flight.getAvailableSeats());
+                assertEquals(availableTicket, flight.getAvailableTickets());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-                assertEquals(availableSeats, flightSeatInfos.size());
+//                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+//                assertEquals(availableSeats, flightSeatInfos.size());
             }
         }
 

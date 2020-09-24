@@ -50,6 +50,15 @@ rename table flightRoute to flight_route;
 alter table flight_route change id flight_number int not null;
 alter table flight_route drop column available_seat;
 
+alter table flight_route change capacity aircraft_id int not null;
+
+alter table flight_route
+	add constraint flight_route_aircraft_aircraft_id_fk
+		foreign key (aircraft_id) references aircraft (aircraft_id)
+			on update cascade on delete cascade;
+
+
+
 
 -- Table flight
 create table flight
@@ -69,6 +78,9 @@ alter table flight
 
 alter table flight
     add version int not null;
+
+alter table flight
+    change available_seats available_tickets int not null;
 
 
 
@@ -124,9 +136,31 @@ create table flight_seat_info
 
 
 
+-- Table aircraft
+create table aircraft
+(
+	aircraft_id int not null,
+	capacity int not null,
+	constraint aircraft_pk
+		primary key (aircraft_id)
+);
+
+-- Default Aircraft
+INSERT INTO aircraft (aircraft_id, capacity)
+VALUES (737, 169);
+
+INSERT INTO aircraft (aircraft_id, capacity)
+VALUES (777, 400);
+
+INSERT INTO aircraft (aircraft_id, capacity)
+VALUES (320, 146);
 
 
+INSERT INTO aircraft (aircraft_id, capacity)
+VALUES (900, 76);
 
+INSERT INTO aircraft (aircraft_id, capacity)
+VALUES (200, 50);
 
 
 

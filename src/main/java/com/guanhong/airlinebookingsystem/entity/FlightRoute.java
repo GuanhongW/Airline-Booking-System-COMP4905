@@ -3,6 +3,8 @@ package com.guanhong.airlinebookingsystem.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guanhong.airlinebookingsystem.repository.AircraftRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -31,8 +33,8 @@ public class FlightRoute {
     @Column(name = "arrival_time", nullable = false)
     private Time arrivalTime;
 
-    @Column(name = "capacity", nullable = false)
-    private Integer capacity;
+    @Column(name = "aircraft_id", nullable = false)
+    private Integer aircraftId;
 
     @Column(name = "overbooking", nullable = false)
     private BigDecimal overbooking;
@@ -51,7 +53,7 @@ public class FlightRoute {
         this.destinationCity = flightRoute.getDestinationCity();
         this.departureTime = flightRoute.getDepartureTime();
         this.arrivalTime = flightRoute.getArrivalTime();
-        this.capacity = flightRoute.getCapacity();
+        this.aircraftId = flightRoute.getAircraftId();
         this.overbooking = flightRoute.getOverbooking();
         this.startDate = flightRoute.getStartDate();
         this.endDate = flightRoute.getEndDate();
@@ -98,12 +100,12 @@ public class FlightRoute {
         this.arrivalTime = arrivalTime;
     }
 
-    public Integer getCapacity() {
-        return capacity;
+    public Integer getAircraftId() {
+        return aircraftId;
     }
 
-    public void setCapacity(Integer capacity) {
-        this.capacity = capacity;
+    public void setAircraftId(Integer aircraftId) {
+        this.aircraftId = aircraftId;
     }
 
     public BigDecimal getOverbooking() {
@@ -131,18 +133,19 @@ public class FlightRoute {
     }
 
 
-    public int calculateAvailableSeat(int capacity, int overbooking){
-        int availableSeats = capacity + (int)Math.floor(capacity * overbooking);
-        return availableSeats;
+    public int calculateAvailableTickets(int capacity){
+        int availableTickets = this.overbooking.divide(BigDecimal.valueOf(100)).multiply(BigDecimal.valueOf(capacity)).
+                add(BigDecimal.valueOf(capacity)).intValue();
+        return availableTickets;
     }
 
-    public FlightRoute(long flightNumber, String departureCity, String destinationCity, Time departureTime, Time arrivalTime, Integer capacity, BigDecimal overbooking, Date startDate, Date endDate) {
+    public FlightRoute(long flightNumber, String departureCity, String destinationCity, Time departureTime, Time arrivalTime, Integer aircraftId, BigDecimal overbooking, Date startDate, Date endDate) {
         this.flightNumber = flightNumber;
         this.departureCity = departureCity;
         this.destinationCity = destinationCity;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
-        this.capacity = capacity;
+        this.aircraftId = aircraftId;
         this.overbooking = overbooking;
         this.startDate = startDate;
         this.endDate = endDate;

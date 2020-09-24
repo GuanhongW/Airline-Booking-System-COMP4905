@@ -44,7 +44,7 @@ class GetAvailableFlightRoutesTest {
         String destinationCity = "YVR";
         Time departureTime = Time.valueOf("10:05:00");
         Time arrivalTime = Time.valueOf("12:00:00");
-        int capacity = 148;
+        int aircraft = 200;
         BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
         Date startDate = constants.datePlusSomeDays(constants.today(), 5);
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
@@ -54,7 +54,7 @@ class GetAvailableFlightRoutesTest {
         flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
 
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraft, overbooking, startDate, endDate);
         FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
         newFlightRoute1.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
         newFlightRoute1.setEndDate(constants.datePlusSomeDays(constants.today(), 0));
@@ -65,7 +65,7 @@ class GetAvailableFlightRoutesTest {
         flightNumber = constants.FLIGHT_NUMBER_START_DATE_EXPIRED;
 
         FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraft, overbooking, startDate, endDate);
         returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute2));
         newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -5));
         newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
@@ -76,7 +76,7 @@ class GetAvailableFlightRoutesTest {
         flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
 
         FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                capacity, overbooking, startDate, endDate);
+                aircraft, overbooking, startDate, endDate);
         returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute3));
         newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 0));
         newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
@@ -89,7 +89,7 @@ class GetAvailableFlightRoutesTest {
     }
 
 
-    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableSeats,
+    private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTicket,
                                  boolean isSkipSeatList) {
         assertEquals(expectedFlightRoute.getFlightNumber(), actualFlightNumber);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(actualFlightNumber);
@@ -98,7 +98,7 @@ class GetAvailableFlightRoutesTest {
         assertEquals(expectedFlightRoute.getDestinationCity(), returnedFlightRoute.getDestinationCity());
         assertEquals(expectedFlightRoute.getDepartureTime(), returnedFlightRoute.getDepartureTime());
         assertEquals(expectedFlightRoute.getArrivalTime(), returnedFlightRoute.getArrivalTime());
-        assertEquals(expectedFlightRoute.getCapacity(), returnedFlightRoute.getCapacity());
+        assertEquals(expectedFlightRoute.getAircraftId(), returnedFlightRoute.getAircraftId());
         assertEquals(expectedFlightRoute.getOverbooking(), returnedFlightRoute.getOverbooking());
         assertTrue(expectedFlightRoute.getStartDate().equals(returnedFlightRoute.getStartDate()));
         assertTrue(expectedFlightRoute.getEndDate().equals(returnedFlightRoute.getEndDate()));
@@ -110,11 +110,11 @@ class GetAvailableFlightRoutesTest {
             for (int i = 0; i < returnedFlights.size(); i++) {
                 Flight flight = returnedFlights.get(i);
                 assertEquals(expectedDate, flight.getFlightDate());
-                assertEquals(availableSeats, flight.getAvailableSeats());
+                assertEquals(availableTicket, flight.getAvailableTickets());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
                 List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-                assertEquals(availableSeats, flightSeatInfos.size());
+                assertEquals(availableTicket, flightSeatInfos.size());
             }
         }
     }

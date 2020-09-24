@@ -18,12 +18,14 @@ import javax.persistence.PersistenceContext;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Long> {
-    public List<Flight> findAllByFlightNumberAndAvailableSeatsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(long flightNumber, int availableSeats, Date today);
+    public List<Flight> findAllByFlightNumberAndAvailableTicketsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(long flightNumber, int availableSeats, Date today);
     public List<Flight> findAllByFlightNumberOrderByFlightDate(long flightNumber);
     public Flight findFlightByFlightId(long flightId);
 
 //    @Lock(value = LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     public Flight findFlightByFlightNumberAndFlightDate(long flightNumber, Date flightDate);
+
+    public List<Flight> findAllByFlightDateBetweenOrderByFlightDate(Date startDate, Date endDate);
 
 }
 
