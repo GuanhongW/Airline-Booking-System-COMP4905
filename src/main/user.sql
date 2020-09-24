@@ -108,21 +108,8 @@ alter table ticket
 	add flight_date date not null;
 
 -- Table flight seat info
-create table flight_seat_info
-(
-	id int auto_increment,
-	flight_id int not null,
-	seat_number int not null,
-	seat_status enum('AVAILABLE', 'UNAVAILABLE', 'BOOKED') not null,
-	constraint flight_seat_info_pk
-		primary key (id),
-	constraint flight_seat_info_flight_flight_id_fk
-		foreign key (flight_id) references flight (flight_id)
-			on delete cascade
-);
 
-
-create table flight_seat_info
+create table unavailable_seat_info
 (
 	flight_id int not null,
 	seat_number int not null,

@@ -1,11 +1,10 @@
 package com.guanhong.airlinebookingsystem.entity;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class FlightSeatInfoPK implements Serializable {
+public class UnavailableSeatInfoPK implements Serializable {
 
     @Column(name = "flight_id", nullable = false)
     private long flightId;
@@ -13,10 +12,10 @@ public class FlightSeatInfoPK implements Serializable {
     @Column(name = "seat_number", nullable = false)
     private Integer seatNumber;
 
-    public FlightSeatInfoPK() {
+    public UnavailableSeatInfoPK() {
     }
 
-    public FlightSeatInfoPK(long flightId, Integer seatNumber) {
+    public UnavailableSeatInfoPK(long flightId, Integer seatNumber) {
         this.flightId = flightId;
         this.seatNumber = seatNumber;
     }
@@ -41,9 +40,9 @@ public class FlightSeatInfoPK implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FlightSeatInfoPK flightSeatInfoPK = (FlightSeatInfoPK) o;
-        return Objects.equals(flightId, flightSeatInfoPK.flightId) &&
-                Objects.equals(seatNumber, flightSeatInfoPK.seatNumber);
+        UnavailableSeatInfoPK unavailableSeatInfoPK = (UnavailableSeatInfoPK) o;
+        return Objects.equals(flightId, unavailableSeatInfoPK.flightId) &&
+                Objects.equals(seatNumber, unavailableSeatInfoPK.seatNumber);
     }
 
     @Override

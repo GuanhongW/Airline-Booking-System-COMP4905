@@ -6,14 +6,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@IdClass(FlightSeatInfoPK.class)
-@Table(name = "flight_seat_info")
+@IdClass(UnavailableSeatInfoPK.class)
+@Table(name = "unavailable_seat_info")
 
-public class FlightSeatInfo implements Serializable {
-//    @Id
-//    @GeneratedValue(strategy =  GenerationType.AUTO)
-//    @Column(name = "id", nullable = false)
-//    private long id;
+public class UnavailableSeatInfo implements Serializable {
 
     @Id
     @Column(name = "flight_id", nullable = false)
@@ -28,10 +24,10 @@ public class FlightSeatInfo implements Serializable {
     private SeatStatus seatStatus;
 
 
-    public FlightSeatInfo() {
+    public UnavailableSeatInfo() {
     }
 
-    public FlightSeatInfo(long flightId, int seatNumber, SeatStatus seatStatus) {
+    public UnavailableSeatInfo(long flightId, int seatNumber, SeatStatus seatStatus) {
         this.flightId = flightId;
         this.seatNumber = seatNumber;
         this.seatStatus = seatStatus;

@@ -2,10 +2,10 @@ package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
-import com.guanhong.airlinebookingsystem.entity.FlightSeatInfo;
+import com.guanhong.airlinebookingsystem.entity.UnavailableSeatInfo;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
+import com.guanhong.airlinebookingsystem.repository.UnavailableSeatInfoRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +29,7 @@ class GetAvailableFlightRoutesTest {
     private FlightRouteRepository flightRouteRepository;
 
     @Autowired
-    private FlightSeatInfoRepository flightSeatInfoRepository;
+    private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
 
     @Autowired
     private FlightRepository flightRepository;
@@ -113,8 +113,8 @@ class GetAvailableFlightRoutesTest {
                 assertEquals(availableTicket, flight.getAvailableTickets());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-                assertEquals(availableTicket, flightSeatInfos.size());
+                List<UnavailableSeatInfo> unavailableSeatInfos = unavailableSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+                assertEquals(availableTicket, unavailableSeatInfos.size());
             }
         }
     }

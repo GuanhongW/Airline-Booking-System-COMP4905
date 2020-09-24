@@ -44,7 +44,7 @@ public class ControllerLayerTest {
     private FlightRouteRepository flightRouteRepository;
 
     @Autowired
-    private FlightSeatInfoRepository flightSeatInfoRepository;
+    private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
 
     @Autowired
     private FlightRepository flightRepository;
@@ -143,7 +143,8 @@ public class ControllerLayerTest {
     static void deleteDefaultAccount(@Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightRouteRepository flightRouteRepository,
-                                     @Autowired FlightSeatInfoRepository flightSeatInfoRepository) throws Exception {
+                                     @Autowired FlightRepository flightRepository,
+                                     @Autowired UnavailableSeatInfoRepository unavailableSeatInfoRepository) throws Exception {
 
         // Delete default admin user
         String testUsername;
@@ -168,11 +169,16 @@ public class ControllerLayerTest {
         long flightNumber;
         for (int i = 0; i < defaultFlights.size(); i++) {
             flightNumber = defaultFlights.get(i);
+            List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
             FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
             flightRouteRepository.delete(flightRoute);
             assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
-            List<FlightSeatInfo> emptyList = new ArrayList<>();
-            assertEquals(emptyList,flightSeatInfoRepository.findAllByFlightId(flightNumber));
+            List<Flight> emptyFlights = new ArrayList<>();
+            assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+            List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+            for (int j = 0; j < flights.size(); j++){
+                assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+            }
         }
     }
 
@@ -719,8 +725,8 @@ public class ControllerLayerTest {
                 assertEquals(availableTicket, flight.getAvailableTickets());
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
-//                List<FlightSeatInfo> flightSeatInfos = flightSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-//                assertEquals(availableSeats, flightSeatInfos.size());
+                List<UnavailableSeatInfo> unavailableSeatInfos = unavailableSeatInfoRepository.findAllByFlightId(flight.getFlightId());
+                assertEquals(0, unavailableSeatInfos.size());
             }
         }
 

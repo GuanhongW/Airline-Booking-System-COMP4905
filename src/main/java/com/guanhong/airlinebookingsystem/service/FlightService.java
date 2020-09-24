@@ -1,18 +1,13 @@
 package com.guanhong.airlinebookingsystem.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
-import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.DateHelper;
 import com.guanhong.airlinebookingsystem.model.AricraftConstant;
-import com.guanhong.airlinebookingsystem.repository.AircraftRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightSeatInfoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
