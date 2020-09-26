@@ -276,7 +276,7 @@ class CreateFlightTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         int availableTicket = 53;
 
-        //Departure City's length is 1
+        // Departure City's length is 1
         departureCity = "A";
         FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
                 aircraft, overbooking, startDate, endDate);
@@ -284,7 +284,7 @@ class CreateFlightTest {
         flightService.createNewFlight(newFlightRoute);
         validFlightInfo(validFlightRoute, flightNumber, availableTicket);
 
-        //Departure City's lenght is 255
+        // Departure City's lenght is 255
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
@@ -293,7 +293,7 @@ class CreateFlightTest {
         flightService.createNewFlight(newFlightRoute);
         validFlightInfo(validFlightRoute, flightNumber, availableTicket);
 
-        //Departure City's lenght is random
+        // Departure City's lenght is random
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "Ottawa";
         newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
@@ -305,7 +305,7 @@ class CreateFlightTest {
 
     @Test
     @Transactional
-    void createNewFlight_DepartureCity_Failed() throws Exception {
+    void createNewFlight_DepartureCity_Failed() {
         System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber = constants.getNextAvailableFlightNumber();
@@ -319,14 +319,14 @@ class CreateFlightTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         int availableTicket = 53;
 
-        //Departure City is null
+        // Departure City is null
         departureCity = null;
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
                 aircraft, overbooking, startDate, endDate);
         ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("The departure city should not be empty.", exception.getMessage());
 
-        //Departure City's lenght is more than 255
+        // Departure City's lenght is more than 255
         flightNumber = constants.getNextAvailableFlightNumber();
         departureCity = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111";
         FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
@@ -578,7 +578,7 @@ class CreateFlightTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         int availableTicket = 53;
 
-        // aircraft is null
+        // overbooking is null
         flightNumber = constants.getNextAvailableFlightNumber();
         overbooking = null;
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
@@ -586,12 +586,20 @@ class CreateFlightTest {
         ClientException exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute1));
         assertEquals("Flight's overbook allowance cannot be empty.", exception.getMessage());
 
-        // aircraft is 10
+        // overbooking is 10.01
         flightNumber = constants.getNextAvailableFlightNumber();
-        overbooking = BigDecimal.valueOf(11);
+        overbooking = BigDecimal.valueOf(10.01);
         FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
                 aircraft, overbooking, startDate, endDate);
         exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute2));
+        assertEquals("Flight's overbooking allowance should between 0% to 10%", exception.getMessage());
+
+        // overbooking is -0.01
+        flightNumber = constants.getNextAvailableFlightNumber();
+        overbooking = BigDecimal.valueOf(-0.01);
+        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                aircraft, overbooking, startDate, endDate);
+        exception = assertThrows(ClientException.class, () -> flightService.createNewFlight(newFlightRoute3));
         assertEquals("Flight's overbooking allowance should between 0% to 10%", exception.getMessage());
     }
 
@@ -790,7 +798,6 @@ class CreateFlightTest {
     @Transactional
     void createNewFlight_ArrivalTime_Success() throws Exception {
         System.out.println("Thread Info: " + this.getClass() + ": " + Thread.currentThread().getName());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         long flightNumber;
         String departureCity = "YYZ";
         String destinationCity = "YVR";
@@ -846,7 +853,7 @@ class CreateFlightTest {
         Date endDate = constants.datePlusSomeDays(constants.today(), 100);
         int availableTicket = 53;
 
-        // Departure time is null
+        // Arrival time is null
         flightNumber = constants.getNextAvailableFlightNumber();
         arrivalTime = null;
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
@@ -901,6 +908,7 @@ class CreateFlightTest {
             List<UnavailableSeatInfo> unavailableSeatInfos = unavailableSeatInfoRepository.findAllByFlightId(flight.getFlightId());
             assertEquals(0, unavailableSeatInfos.size());
         }
+        assertEquals(constants.datePlusSomeDays(expectedDate, -1), returnedFlightRoute.getEndDate());
     }
 
 

@@ -120,22 +120,25 @@ public class ControllerLayerTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Create default flight
-        long flightNumber = constants.getNextAvailableFlightNumber();
-        defaultFlights.add(flightNumber);
-        String departureCity = "YYZ";
-        String destinationCity = "YVR";
-        Time departureTime = Time.valueOf("10:05:00");
-        Time arrivalTime = Time.valueOf("12:00:00");
-        int aircraft = 200;
-        BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        Date startDate = constants.datePlusSomeDays(constants.today(), 80);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 180);
-        Integer availableSeat = null;
-        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                aircraft, overbooking, startDate, endDate);
-        flightService.createNewFlight(newFlightRoute);
-        FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
-        assertNotNull(returnedFlightRoute);
+        int defaultFlightsNum = 2;
+        for (int i = 0; i < defaultFlightsNum; i++) {
+            long flightNumber = constants.getNextAvailableFlightNumber();
+            defaultFlights.add(flightNumber);
+            String departureCity = "YYZ";
+            String destinationCity = "YVR";
+            Time departureTime = Time.valueOf("10:05:00");
+            Time arrivalTime = Time.valueOf("12:00:00");
+            int aircraftId = 900;
+            BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+            Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+            Date endDate = constants.datePlusSomeDays(constants.today(), 100);
+            int availableTicket = 80;
+            FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                    aircraftId, overbooking, startDate, endDate);
+            flightService.createNewFlight(newFlightRoute);
+            FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+            assertNotNull(returnedFlightRoute);
+        }
         System.out.println("Before All finished.");
     }
 
@@ -679,6 +682,171 @@ public class ControllerLayerTest {
 
     }
 
+    @Test
+    @Transactional
+    void updateFlightTest_Controller_Success() throws Exception {
+        long flightNumber = defaultFlights.get(1);
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        String requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:00:00\",\n" +
+                "\t\"aircraftId\": 737,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"12:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"" + constants.datePlusSomeDays(constants.today(),90) + "\",\n" +
+                "\t\"flightNumber\": " + flightNumber + ",\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),70) + "\"\n" +
+                "}";
+        System.out.println(requestJSON);
+        RequestBuilder builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        assertEquals(200, result.getResponse().getStatus());
+        String expectedJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:00:00\",\n" +
+                "\t\"aircraftId\": 737,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"12:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"" + constants.datePlusSomeDays(constants.today(),90) + "\",\n" +
+                "\t\"flightNumber\": " + flightNumber + ",\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),70) + "\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedJSON, result.getResponse().getContentAsString(), false);
+    }
+
+
+
+    @Test
+    @Transactional
+    void updateFlight_Controller_Failed() throws Exception {
+        // Get all flight by Default flight number
+        long flightNumber = defaultFlights.get(1);
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(flightNumber);
+        int flightIndex = 3;
+
+        // Admin user tries to book the flight
+        String requestJSON = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        RequestBuilder builder = post("/updateFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        String expectedMessage = "Only admin user can update new flights.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // request json is null
+        jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        content = result.getResponse().getContentAsString();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // start date format is not valid
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:05:00\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"2022-09-04\",\n" +
+                "\t\"flightNumber\": 9995,\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021\"\n" +
+                "}";
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // end date format is not valid
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:05:00\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"09-04\",\n" +
+                "\t\"flightNumber\": 9995,\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021-05-04\"\n" +
+                "}";
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // departureTime format is not valid
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13:05:00\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"2021-09-04\",\n" +
+                "\t\"flightNumber\": 9995,\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021-05-04\"\n" +
+                "}";
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // arrival time format is not valid
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"13\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"2021-09-04\",\n" +
+                "\t\"flightNumber\": 9995,\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021-05-04\"\n" +
+                "}";
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight number is null (Auto convert to 0)
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"15:05:00\",\n" +
+                "\t\"capacity\": 120,\n" +
+                "\t\"departureCity\": \"YOW\",\n" +
+                "\t\"departureTime\": \"14:05:00\",\n" +
+                "\t\"destinationCity\": \"YYZ\",\n" +
+                "\t\"endDate\": \"2021-09-04\",\n" +
+                "\t\"overbooking\": 5,\n" +
+                "\t\"startDate\": \"2021-05-04\"\n" +
+                "}";
+        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+                .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "flight number is empty or invalid.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+    }
+
+
     private String getJWTByUsername(String username, String password) {
         try {
             UserCredential user = new UserCredential(username, password);
@@ -696,10 +864,6 @@ public class ControllerLayerTest {
             return null;
         }
     }
-
-
-
-
 
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTicket,
                                  boolean isSkipSeatList) {

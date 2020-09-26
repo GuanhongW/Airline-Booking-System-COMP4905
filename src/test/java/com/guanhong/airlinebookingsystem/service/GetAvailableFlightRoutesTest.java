@@ -49,10 +49,8 @@ class GetAvailableFlightRoutesTest {
         Date startDate = constants.datePlusSomeDays(constants.today(), 5);
         Date endDate = constants.datePlusSomeDays(constants.today(), 35);
 
-
         // Create a flight the end date is before
         flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
-
         FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
                 aircraft, overbooking, startDate, endDate);
         FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
