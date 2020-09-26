@@ -25,7 +25,7 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
 //    @Lock(value = LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     public Flight findFlightByFlightNumberAndFlightDate(long flightNumber, Date flightDate);
 
-    public List<Flight> findAllByFlightDateBetweenOrderByFlightDate(Date startDate, Date endDate);
+    public List<Flight> findAllByFlightNumberAndFlightDateBetweenOrderByFlightDate(long flightNumber, Date startDate, Date endDate);
 
 }
 

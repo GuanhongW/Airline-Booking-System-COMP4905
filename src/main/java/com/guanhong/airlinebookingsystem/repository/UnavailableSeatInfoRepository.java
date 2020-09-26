@@ -11,5 +11,6 @@ import java.util.List;
 @Repository
 public interface UnavailableSeatInfoRepository extends JpaRepository<UnavailableSeatInfo, Long> {
     public List<UnavailableSeatInfo> findAllByFlightId(long flightId);
+    public int deleteAllByFlightId(long flightId);
 
 }

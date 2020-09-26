@@ -107,6 +107,15 @@ create table ticket
 alter table ticket
 	add flight_date date not null;
 
+alter table ticket
+	add constraint ticket_unavailable_seat_info_seat_number_flight_id_fk
+		foreign key (seat_number, flight_id) references unavailable_seat_info (seat_number, flight_id)
+			on update cascade on delete set null;
+
+
+
+
+
 -- Table flight seat info
 
 create table unavailable_seat_info
