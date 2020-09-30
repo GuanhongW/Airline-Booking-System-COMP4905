@@ -2,10 +2,11 @@ package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
-import com.guanhong.airlinebookingsystem.entity.Flight;
-import com.guanhong.airlinebookingsystem.entity.Ticket;
+import com.guanhong.airlinebookingsystem.entity.*;
+import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.TicketRepository;
+import com.guanhong.airlinebookingsystem.repository.UnavailableSeatInfoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ public class TicketService {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
 
     @Transactional(rollbackFor=Exception.class)
     public Ticket bookFlight(Flight flight, long customerId) throws Exception {
@@ -57,8 +61,24 @@ public class TicketService {
         }
     }
 
-    private boolean validFlightIsAvailable(Flight flight) throws Exception {
+    @Transactional(rollbackFor=Exception.class)
+    public Ticket bookSeat(BookSeatRequest bookSeatRequest, long customerId) throws Exception {
+        Flight flight = flightRepository.findFlightByFlightNumberAndFlightDate(bookSeatRequest.getFlightNumber(),
+                bookSeatRequest.getFlightDate());
+        // Valid if the seat is available, if it is available, create the new entity in DB
+        validSeatStatus(flight.getFlightId(), bookSeatRequest.getSeatNumber(), bookSeatRequest.getFlightNumber());
+        // Valid if the customer book the ticket
+        Ticket originalTicket = validTicket(flight.getFlightId(), customerId);
 
+        // Update ticket information in db
+        Ticket newTicket = bookSeatForTicket(originalTicket, bookSeatRequest.getSeatNumber());
+        log.info("Customer " + newTicket.getCustomerId() + " booked the seat " + newTicket.getSeatNumber() +
+                " in the flight " + newTicket.getFlightId());
+        return newTicket;
+//        return null;
+    }
+
+    private boolean validFlightIsAvailable(Flight flight) throws Exception {
         // Check if flight is in the system
         if (flight == null) {
             throw new ClientException("Selected Flight is not exist in the system. Please check the flight number and flight date again.",
@@ -72,13 +92,69 @@ public class TicketService {
     }
 
     private boolean checkIsDuplicatedBooking(Ticket newTicket) {
-        Ticket returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightIdAndFlightDate(newTicket.getCustomerId(),
-                newTicket.getFlightId(), newTicket.getFlightDate());
+        Ticket returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(newTicket.getCustomerId(),
+                newTicket.getFlightId());
         if (returnedTicket == null){
             return false;
         }
         else {
             return true;
         }
+    }
+
+    private Ticket validTicket(long flightId, long customerId) throws ClientException {
+        Ticket ticket = ticketRepository.findTicketByCustomerIdAndFlightId(customerId, flightId);
+        if (ticket == null){
+            log.info("Customer " + customerId + " does not book the ticket in flight " + flightId);
+            throw new ClientException("You have to book the ticket before booking a seat.", HttpStatus.BAD_REQUEST);
+        }
+        else {
+            return ticket;
+        }
+    }
+
+    private synchronized boolean validSeatStatus(long flightId, int seatNumber, long flightNumber) throws Exception {
+        UnavailableSeatInfo seatInfo = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
+        if (seatInfo == null){
+            //If the seat is available, reserve the seat in unavailable seat info table
+            UnavailableSeatInfo seatReservation = new UnavailableSeatInfo(flightId, seatNumber, SeatStatus.UNAVAILABLE);
+            UnavailableSeatInfo returnedSeatReservation = unavailableSeatInfoRepository.save(seatReservation);
+            if (returnedSeatReservation != null){
+                UnavailableSeatInfo lockedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumberWithPessimisticLock(flightId, seatNumber);
+                // TODO check the seat status is available
+                lockedSeat.setSeatStatus(SeatStatus.BOOKED);
+                unavailableSeatInfoRepository.save(lockedSeat);
+                return true;
+            }
+            log.error("Unavailable to create seat reservation in Unavailable Seat Info. Release the lock." );
+            throw new ServerException("Unavailable to book the seat.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        log.info("The seat " + seatNumber + " in the flight " + flightId + " is not available." );
+        throw new ClientException("The seat " + seatNumber + " in the flight " + flightNumber + " is not available.",
+                HttpStatus.BAD_REQUEST);
+    }
+
+    private Ticket bookSeatForTicket(Ticket ticket, int seatNumber) throws Exception {
+        // Check if the ticket already have a seat
+
+        // If the ticket's seatNumber is null, book the new seat
+        if (ticket.getSeatNumber() != null){
+            // Delete the current seat reservation in unavailable seat info table
+            int deleteResult = unavailableSeatInfoRepository.deleteUnavailableSeatInfoByFlightIdAndSeatNumber(ticket.getFlightId(),
+                    ticket.getSeatNumber());
+            if (deleteResult != 1){
+                log.error("Unavailable to delete the current seat reservation in unavailable_seat_info table. " +
+                        "Rollback all transactions.");
+                throw new ServerException("Unavailable to book the seat.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        ticket.setSeatNumber(seatNumber);
+        Ticket returnedTicket = ticketRepository.save(ticket);
+        if (returnedTicket != null){
+            return returnedTicket;
+        }
+        log.error("Unavailable to update seat number in the ticket table. Rollback all transaction");
+        throw new ServerException("Unavailable to book the seat.", HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 }

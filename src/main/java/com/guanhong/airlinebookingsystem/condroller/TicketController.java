@@ -86,7 +86,7 @@ public class TicketController {
             }
             catch (DataIntegrityViolationException e){
                 log.error(e.getMessage());
-                log.info("Create entity in customer info table is failed, rolling back in user table");
+                log.info("Create entity in flight or flight route table is failed, rolling back in user table");
                 return new ResponseEntity("URL: bookFlight, Http Code: 500: Book a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
             catch (StaleStateException e){
@@ -142,6 +142,13 @@ public class TicketController {
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (DataIntegrityViolationException e){
+            if (e.getRootCause().toString().contains("Duplicate entry")){
+                log.info("URL: bookSeat, Http Code: " + "The seat " + bookSeatRequest.getSeatNumber() + " in the flight " + bookSeatRequest.getFlightNumber() +
+                        " on " + bookSeatRequest.getFlightDate() +  " is not available." );
+                return new ResponseEntity("The seat " + bookSeatRequest.getSeatNumber() +
+                        " in the flight " + bookSeatRequest.getFlightNumber() +
+                        " on " + bookSeatRequest.getFlightDate() +  " is not available.", HttpStatus.BAD_REQUEST);
+            }
             log.error(e.getMessage());
             log.info("Create entity in Unavailable Seat Info table is failed, rolling back.");
             return new ResponseEntity("URL: bookSeat, Http Code: 500: Book a seat flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);

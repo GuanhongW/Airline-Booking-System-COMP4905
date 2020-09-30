@@ -216,7 +216,7 @@ public class ConcurrentTest {
         // Set up seatBuilders
         List<RequestBuilder> seatBuilders = new ArrayList<>();
         for (int i = 0; i < 5; i++){
-            int selectSeatNumber = i+1;
+            int selectSeatNumber = 1;
             requestJSON = "{\n" +
                     "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                     "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
@@ -236,19 +236,13 @@ public class ConcurrentTest {
         for (int i = 0; i < seatBuilders.size(); i++){
             int finalI0 = i;
             int finalI1 = i;
-            int seatNumber = i+1;
+            int seatNumber = 1;
             Thread thread = new Thread(){
                 public void run() {
                     try {
 //                        Thread.sleep(finalI0 * 5);
                         System.out.println(this.getName() + ": Start thread " + finalI1);
                         MvcResult result = mockMvc.perform(seatBuilders.get(finalI0)).andReturn();
-                        String content = result.getResponse().getContentAsString();
-                        String validJSON = "{\n" +
-                                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
-                                "  \"seatNumber\": " + seatNumber + "\n" +
-                                "}";
-                        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
                         System.out.println(this.getName() + ": Finish thread " + finalI1);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -271,13 +265,16 @@ public class ConcurrentTest {
 
         // Verify seat reservation
         List<UnavailableSeatInfo> seatReservation = unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId());
-        assertEquals(5, seatReservation.size());
+        assertEquals(1, seatReservation.size());
         // Verify Ticket
         List<Ticket> tickets = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId());
+        int seatAmount = 0;
         for (int i = 0; i < tickets.size(); i++){
-            int selectSeatNumber = i+1;
-            assertEquals(selectSeatNumber, tickets.get(i).getSeatNumber());
+            if (tickets.get(i).getSeatNumber() != null){
+                seatAmount++;
+            }
         }
+        assertEquals(1, seatAmount);
 
     }
 
