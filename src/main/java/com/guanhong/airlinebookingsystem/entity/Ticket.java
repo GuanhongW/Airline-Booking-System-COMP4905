@@ -1,5 +1,6 @@
 package com.guanhong.airlinebookingsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -30,6 +31,7 @@ public class Ticket {
     private Integer seatNumber;
 
     @Column(name = "flight_date", nullable = false)
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date flightDate;
 
     public void setSeatNumber(Integer seatNumber) {

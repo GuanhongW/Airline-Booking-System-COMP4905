@@ -8,6 +8,7 @@ import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.entity.User;
+import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
 import io.swagger.annotations.ApiOperation;
@@ -104,7 +105,50 @@ public class TicketController {
         log.error("User: " + user.getId() + " tried book the flight " + flight.getFlightNumber() + " on " + flight.getFlightDate().toString() + "," +
                 " the system failed three times optimistic lock.");
         return new ResponseEntity("Server is busy. Try to book flight failed.", HttpStatus.SERVICE_UNAVAILABLE);
+    }
 
-
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
+    @RequestMapping(value = "/bookSeat", method = RequestMethod.POST)
+    public ResponseEntity bookSeatController(HttpServletRequest request, @RequestBody BookSeatRequest bookSeatRequest) throws Exception {
+        try{
+            User user = null;
+            if (bookSeatRequest == null){
+                log.error("Http Code: 400  URL: bookFlight  flight information is empty");
+                return ResponseEntity.badRequest().body("flight information is empty.");
+            }
+            else if (bookSeatRequest.getFlightNumber() == null || bookSeatRequest.getFlightDate() == null){
+                log.error("Http Code: 400  URL: bookSeat  flight number or flight date is empty.");
+                return ResponseEntity.badRequest().body("Flight number or flight date is empty.");
+            }
+            final String requestTokenHeader = request.getHeader("Authorization");
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                user = jwtUserDetailsService.getUserByUsername(username);
+                if (!user.getRole().equals(Role.USER)){
+                    log.warn("A admin user: " + username + " try to create flight.");
+                    return new ResponseEntity("Only customer user can book new flights.", HttpStatus.BAD_REQUEST);
+                }
+            }
+            ResponseEntity test = ResponseEntity.ok(ticketService.bookSeat(bookSeatRequest, user.getId()));
+            return test;
+        }
+        catch (ServerException e){
+            log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
+            log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (DataIntegrityViolationException e){
+            log.error(e.getMessage());
+            log.info("Create entity in Unavailable Seat Info table is failed, rolling back.");
+            return new ResponseEntity("URL: bookSeat, Http Code: 500: Book a seat flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (Exception e){
+            log.error("URL: bookSeat, Http Code: 400: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

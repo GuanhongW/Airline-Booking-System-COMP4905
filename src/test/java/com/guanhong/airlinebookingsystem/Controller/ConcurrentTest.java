@@ -10,6 +10,8 @@ import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -91,7 +93,7 @@ public class ConcurrentTest {
         assertEquals(Role.ADMIN, user.getRole());
 
         // Create default customer user
-        int userAmount = 4;
+        int userAmount = 6;
         for (int i =  0; i < userAmount; i++){
             testUsername = constants.getNextCustomerUsername();
             defaultCustomerUsernames.add(testUsername);
@@ -172,6 +174,114 @@ public class ConcurrentTest {
     }
 
     @Test
+    void bookSeat_Concurrent_Success() throws Exception {
+        // Get all flight by Default flight number
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
+        int flightIndex = 8;
+        int totalAvailableSeat = availableFlights.get(flightIndex).getAvailableTickets();
+
+
+
+        // Set up flightBuilders
+        String requestJSON = "{\n" +
+                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        List<RequestBuilder> flightBuilders = new ArrayList<>();
+        for (int i = 0; i < 5; i++){
+            String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
+            RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+                    accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+            flightBuilders.add(builder);
+        }
+
+        // book flight
+        for (int i = 0; i < flightBuilders.size(); i++){
+            MvcResult result = mockMvc.perform(flightBuilders.get(i)).andReturn();
+            String content = result.getResponse().getContentAsString();
+            String validJSON = "{\n" +
+                    "    \"flightId\": " + availableFlights.get(flightIndex).getFlightId() + ",\n" +
+                    "    \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate() + "\"\n" +
+                    "}";
+            JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+        }
+
+        // Verify the left ticket + booked ticket is full amount
+        int bookedTicketNum = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId()).size();
+        int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets();
+        System.out.println("Booked Ticket Num: " + bookedTicketNum);
+        System.out.println("New Available Ticket: " + newAvailableTicket);
+        assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
+
+        // Set up seatBuilders
+        List<RequestBuilder> seatBuilders = new ArrayList<>();
+        for (int i = 0; i < 5; i++){
+            int selectSeatNumber = i+1;
+            requestJSON = "{\n" +
+                    "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                    "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
+                    "  \"seatNumber\": " + selectSeatNumber + "\n" +
+                    "}";
+            String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
+            RequestBuilder builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+                    accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+            seatBuilders.add(builder);
+            selectSeatNumber++;
+        }
+//        UnavailableSeatInfo unavailableSeatInfo = new UnavailableSeatInfo(availableFlights.get(flightIndex).getFlightId(),
+//                0, SeatStatus.UNAVAILABLE);
+//        unavailableSeatInfoRepository.save(unavailableSeatInfo);
+        // Start threads to book flight
+        List<Thread> threadList = new ArrayList<>();
+        for (int i = 0; i < seatBuilders.size(); i++){
+            int finalI0 = i;
+            int finalI1 = i;
+            int seatNumber = i+1;
+            Thread thread = new Thread(){
+                public void run() {
+                    try {
+//                        Thread.sleep(finalI0 * 5);
+                        System.out.println(this.getName() + ": Start thread " + finalI1);
+                        MvcResult result = mockMvc.perform(seatBuilders.get(finalI0)).andReturn();
+                        String content = result.getResponse().getContentAsString();
+                        String validJSON = "{\n" +
+                                "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
+                                "  \"seatNumber\": " + seatNumber + "\n" +
+                                "}";
+                        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+                        System.out.println(this.getName() + ": Finish thread " + finalI1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            thread.start();
+            threadList.add(thread);
+        }
+
+        try{
+            for (Thread thread: threadList){
+                thread.join();
+            }
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+        // Verify seat reservation
+        List<UnavailableSeatInfo> seatReservation = unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId());
+        assertEquals(5, seatReservation.size());
+        // Verify Ticket
+        List<Ticket> tickets = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId());
+        for (int i = 0; i < tickets.size(); i++){
+            int selectSeatNumber = i+1;
+            assertEquals(selectSeatNumber, tickets.get(i).getSeatNumber());
+        }
+
+    }
+
+    @Test
     void bookFlight_Concurrent_Success() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
@@ -230,7 +340,6 @@ public class ConcurrentTest {
         System.out.println("New Available Ticket: " + newAvailableTicket);
         assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
     }
-
 
 
     private String getJWTByUsername(String username, String password) {
