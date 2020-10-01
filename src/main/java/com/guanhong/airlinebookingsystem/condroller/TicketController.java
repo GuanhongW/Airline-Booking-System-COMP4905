@@ -113,12 +113,16 @@ public class TicketController {
         try{
             User user = null;
             if (bookSeatRequest == null){
-                log.error("Http Code: 400  URL: bookFlight  flight information is empty");
+                log.error("Http Code: 400  URL: bookSeat  flight information is empty");
                 return ResponseEntity.badRequest().body("flight information is empty.");
             }
             else if (bookSeatRequest.getFlightNumber() == null || bookSeatRequest.getFlightDate() == null){
                 log.error("Http Code: 400  URL: bookSeat  flight number or flight date is empty.");
                 return ResponseEntity.badRequest().body("Flight number or flight date is empty.");
+            }
+            else if (bookSeatRequest.getSeatNumber() == null){
+                log.error("Http Code: 400  URL: bookSeat  seat number is empty.");
+                return ResponseEntity.badRequest().body("Seat number is empty.");
             }
             final String requestTokenHeader = request.getHeader("Authorization");
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
@@ -130,8 +134,7 @@ public class TicketController {
                     return new ResponseEntity("Only customer user can book new flights.", HttpStatus.BAD_REQUEST);
                 }
             }
-            ResponseEntity test = ResponseEntity.ok(ticketService.bookSeat(bookSeatRequest, user.getId()));
-            return test;
+            return ResponseEntity.ok(ticketService.bookSeat(bookSeatRequest, user.getId()));
         }
         catch (ServerException e){
             log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
@@ -143,7 +146,7 @@ public class TicketController {
         }
         catch (DataIntegrityViolationException e){
             if (e.getRootCause().toString().contains("Duplicate entry")){
-                log.info("URL: bookSeat, Http Code: " + "The seat " + bookSeatRequest.getSeatNumber() + " in the flight " + bookSeatRequest.getFlightNumber() +
+                log.info("URL: bookSeat, Http Code: 400  The seat " + bookSeatRequest.getSeatNumber() + " in the flight " + bookSeatRequest.getFlightNumber() +
                         " on " + bookSeatRequest.getFlightDate() +  " is not available." );
                 return new ResponseEntity("The seat " + bookSeatRequest.getSeatNumber() +
                         " in the flight " + bookSeatRequest.getFlightNumber() +

@@ -171,7 +171,7 @@ public class BookSeatTest {
     }
 
     @Test
-//    @Transactional
+    @Transactional
     void bookSeatTest_Success() throws Exception {
         // Let customer book the flight
         int flightRouteIndex = 0;
@@ -211,7 +211,7 @@ public class BookSeatTest {
     }
 
     @Test
-//    @Transactional
+    @Transactional
     void bookSeat_UnavailableSeat_Failed() throws Exception {
         // Let customer book the flight
         int flightRouteIndex = 0;
@@ -278,7 +278,7 @@ public class BookSeatTest {
         // Let customer book the flight
         int flightRouteIndex = 0;
         int customerIndex = 1;
-        int flightIndex = 2;
+        int flightIndex = 3;
 
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(flightRouteIndex));

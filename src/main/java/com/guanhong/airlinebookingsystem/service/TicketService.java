@@ -65,17 +65,15 @@ public class TicketService {
     public Ticket bookSeat(BookSeatRequest bookSeatRequest, long customerId) throws Exception {
         Flight flight = flightRepository.findFlightByFlightNumberAndFlightDate(bookSeatRequest.getFlightNumber(),
                 bookSeatRequest.getFlightDate());
-        // Valid if the seat is available, if it is available, create the new entity in DB
-        validSeatStatus(flight.getFlightId(), bookSeatRequest.getSeatNumber(), bookSeatRequest.getFlightNumber());
         // Valid if the customer book the ticket
         Ticket originalTicket = validTicket(flight.getFlightId(), customerId);
-
+        // Valid if the seat is available, if it is available, create the new entity in DB
+        validSeatStatus(flight.getFlightId(), bookSeatRequest.getSeatNumber(), bookSeatRequest.getFlightNumber());
         // Update ticket information in db
         Ticket newTicket = bookSeatForTicket(originalTicket, bookSeatRequest.getSeatNumber());
         log.info("Customer " + newTicket.getCustomerId() + " booked the seat " + newTicket.getSeatNumber() +
                 " in the flight " + newTicket.getFlightId());
         return newTicket;
-//        return null;
     }
 
     private boolean validFlightIsAvailable(Flight flight) throws Exception {
@@ -117,13 +115,9 @@ public class TicketService {
         UnavailableSeatInfo seatInfo = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
         if (seatInfo == null){
             //If the seat is available, reserve the seat in unavailable seat info table
-            UnavailableSeatInfo seatReservation = new UnavailableSeatInfo(flightId, seatNumber, SeatStatus.UNAVAILABLE);
+            UnavailableSeatInfo seatReservation = new UnavailableSeatInfo(flightId, seatNumber, SeatStatus.BOOKED);
             UnavailableSeatInfo returnedSeatReservation = unavailableSeatInfoRepository.save(seatReservation);
             if (returnedSeatReservation != null){
-                UnavailableSeatInfo lockedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumberWithPessimisticLock(flightId, seatNumber);
-                // TODO check the seat status is available
-                lockedSeat.setSeatStatus(SeatStatus.BOOKED);
-                unavailableSeatInfoRepository.save(lockedSeat);
                 return true;
             }
             log.error("Unavailable to create seat reservation in Unavailable Seat Info. Release the lock." );
