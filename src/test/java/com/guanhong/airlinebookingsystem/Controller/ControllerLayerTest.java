@@ -8,6 +8,7 @@ import com.guanhong.airlinebookingsystem.repository.*;
 import com.guanhong.airlinebookingsystem.service.Constants;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
+import com.guanhong.airlinebookingsystem.service.TicketService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -63,13 +64,20 @@ public class ControllerLayerTest {
 
     private static List<Long> defaultFlights = new ArrayList<>();
 
+    private static List<Long> defaultCustomerID = new ArrayList<>();
+
+    private static int defaultFlightAmount = 10;
+
+    private static int cancelFlightIndex = 6;
+
 
     @BeforeAll
     static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
                                      @Autowired UserRepository userRepository,
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightService flightService,
-                                     @Autowired FlightRouteRepository flightRouteRepository) throws Exception {
+                                     @Autowired FlightRouteRepository flightRouteRepository,
+                                     @Autowired TicketService ticketService) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Create default admin user 1
@@ -99,6 +107,7 @@ public class ControllerLayerTest {
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
+        defaultCustomerID.add(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
         CustomerInfo customerInfo = customerInfoRepository.findById(res.getAccountId()).get();
@@ -112,6 +121,7 @@ public class ControllerLayerTest {
         res = jwtUserDetailsService.createAccount(newUserInfo);
         assertEquals(testUsername, res.getUsername());
         assertNotNull(res.getAccountId());
+        defaultCustomerID.add(res.getAccountId());
         user = userRepository.findById(res.getAccountId()).get();
         assertEquals(Role.USER, user.getRole());
         customerInfo = customerInfoRepository.findById(res.getAccountId()).get();
@@ -120,8 +130,7 @@ public class ControllerLayerTest {
         assertEquals(Gender.male, customerInfo.getGender());
 
         // Create default flight
-        int defaultFlightsNum = 2;
-        for (int i = 0; i < defaultFlightsNum; i++) {
+        for (int i = 0; i < defaultFlightAmount; i++) {
             long flightNumber = constants.getNextAvailableFlightNumber();
             defaultFlights.add(flightNumber);
             String departureCity = "YYZ";
@@ -140,6 +149,20 @@ public class ControllerLayerTest {
             assertNotNull(returnedFlightRoute);
         }
         System.out.println("Before All finished.");
+
+        // Customer book flights and seat
+        Flight selectFlight;
+        // This index should be same as the cancelFlightRouteTest_Controller_Success
+        for (int i = 0; i < defaultCustomerID.size(); i++) {
+            selectFlight = new Flight(defaultFlights.get(cancelFlightIndex), constants.datePlusSomeDays(constants.today(), i + 80));
+            Ticket returnedTicket = ticketService.bookFlight(selectFlight, defaultCustomerID.get(i));
+            assertNotNull(returnedTicket);
+            BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
+                    selectFlight.getFlightDate(), i+2);
+            returnedTicket = ticketService.bookSeat(bookSeatRequest1, defaultCustomerID.get(i));
+            assertNotNull(returnedTicket);
+        }
+        System.out.println("Booked seats for ticket");
     }
 
     @AfterAll
@@ -147,7 +170,8 @@ public class ControllerLayerTest {
                                      @Autowired CustomerInfoRepository customerInfoRepository,
                                      @Autowired FlightRouteRepository flightRouteRepository,
                                      @Autowired FlightRepository flightRepository,
-                                     @Autowired UnavailableSeatInfoRepository unavailableSeatInfoRepository) throws Exception {
+                                     @Autowired UnavailableSeatInfoRepository unavailableSeatInfoRepository,
+                                     @Autowired TicketRepository ticketRepository) throws Exception {
 
         // Delete default admin user
         String testUsername;
@@ -179,8 +203,10 @@ public class ControllerLayerTest {
             List<Flight> emptyFlights = new ArrayList<>();
             assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
             List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+            List<Ticket> emptyTicket = new ArrayList<>();
             for (int j = 0; j < flights.size(); j++){
                 assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+                assertEquals(emptyTicket, ticketRepository.findTicketsByFlightId(flights.get(j).getFlightId()));
             }
         }
     }
@@ -468,7 +494,7 @@ public class ControllerLayerTest {
         builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
-        assertEquals(400, result.getResponse().getStatus());
+        assertEquals(401, result.getResponse().getStatus());
         expectedMessage = "Only admin user can create new flights.";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
     }
@@ -629,7 +655,7 @@ public class ControllerLayerTest {
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
-        assertEquals(400, result.getResponse().getStatus());
+        assertEquals(401, result.getResponse().getStatus());
         String expectedMessage = "Only customer user can book new flights.";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
@@ -727,7 +753,7 @@ public class ControllerLayerTest {
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(flightNumber);
         int flightIndex = 3;
 
-        // Admin user tries to book the flight
+        // Customer user tries to updateFlight
         String requestJSON = "{\n" +
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
@@ -737,7 +763,7 @@ public class ControllerLayerTest {
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
-        assertEquals(400, result.getResponse().getStatus());
+        assertEquals(401, result.getResponse().getStatus());
         String expectedMessage = "Only admin user can update new flights.";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
@@ -911,7 +937,7 @@ public class ControllerLayerTest {
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
-        assertEquals(400, result.getResponse().getStatus());
+        assertEquals(401, result.getResponse().getStatus());
         String expectedMessage = "Only customer user can book new flights.";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
@@ -974,6 +1000,69 @@ public class ControllerLayerTest {
         content = result.getResponse().getContentAsString();
         assertEquals(400, result.getResponse().getStatus());
         expectedMessage = "Seat number is empty.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+    }
+
+    @Test
+    @Transactional
+    void cancelFlightRouteTest_Controller_Success() throws Exception {
+        long flightNumber = defaultFlights.get(cancelFlightIndex);
+        String requestJSON = "{\n" +
+                "  \"flightNumber\": " + flightNumber + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        RequestBuilder builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        assertEquals("true", content);
+    }
+
+    @Test
+    @Transactional
+    void cancelFlightRouteTest_Controller_Failed() throws Exception {
+        long flightNumber = constants.NON_EXISTENT_FLIGHT_NUMBER;
+        // Customer user try to cancel flight route
+        String requestJSON = "{\n" +
+                "  \"flightNumber\": " + flightNumber + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        RequestBuilder builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        assertEquals(401, result.getResponse().getStatus());
+        String expectedMessage = "Only admin user can cancle flight route.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight number is not existed
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + flightNumber + "\n" +
+                "}";
+        jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "The flight is unavailable in the system.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // Flight number is null
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + null + "\n" +
+                "}";
+        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "Flight number is empty.";
+        assertEquals(expectedMessage, result.getResponse().getContentAsString());
+
+        // FlightNumberRequest json is null
+        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        assertEquals(400, result.getResponse().getStatus());
+        expectedMessage = "";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
     }
 

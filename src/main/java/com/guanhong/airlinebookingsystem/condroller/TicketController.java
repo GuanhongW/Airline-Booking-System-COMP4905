@@ -61,7 +61,7 @@ public class TicketController {
                 user = jwtUserDetailsService.getUserByUsername(username);
                 if (!user.getRole().equals(Role.USER)){
                     log.warn("A admin user: " + username + " try to create flight.");
-                    return new ResponseEntity("Only customer user can book new flights.", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity("Only customer user can book new flights.", HttpStatus.UNAUTHORIZED);
                 }
             }
         }
@@ -131,7 +131,7 @@ public class TicketController {
                 user = jwtUserDetailsService.getUserByUsername(username);
                 if (!user.getRole().equals(Role.USER)){
                     log.warn("A admin user: " + username + " try to create flight.");
-                    return new ResponseEntity("Only customer user can book new flights.", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity("Only customer user can book new flights.", HttpStatus.UNAUTHORIZED);
                 }
             }
             return ResponseEntity.ok(ticketService.bookSeat(bookSeatRequest, user.getId()));

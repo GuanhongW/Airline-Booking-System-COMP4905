@@ -21,6 +21,7 @@ public class Constants {
     public static long FLIGHT_NUMBER_AVAILABLE = 9996;
     public static long FLIGHT_NUMBER_9995 = 9995;
     public static long FLIGHT_NUMBER_START_DATE_EXPIRED = 9994;
+    public static long NON_EXISTENT_FLIGHT_NUMBER = 9993;
 
     // Default admin user password
     public static String ADMIN_USER_PASSWORD_0 = "adminadmin1";

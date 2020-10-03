@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.sql.Date;
 
-public class BookSeatRequest {
-
-    private Long flightNumber;
+public class BookSeatRequest extends FlightNumberRequest {
 
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date flightDate;
@@ -17,18 +15,11 @@ public class BookSeatRequest {
     }
 
     public BookSeatRequest(Long flightNumber, Date flightDate, Integer seatNumber) {
-        this.flightNumber = flightNumber;
+        super(flightNumber);
         this.flightDate = flightDate;
         this.seatNumber = seatNumber;
     }
 
-    public Long getFlightNumber() {
-        return flightNumber;
-    }
-
-    public void setFlightNumber(Long flightNumber) {
-        this.flightNumber = flightNumber;
-    }
 
     public Date getFlightDate() {
         return flightDate;

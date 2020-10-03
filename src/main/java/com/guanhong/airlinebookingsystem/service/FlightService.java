@@ -5,6 +5,7 @@ import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.DateHelper;
 import com.guanhong.airlinebookingsystem.model.AricraftConstant;
+import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
 import com.guanhong.airlinebookingsystem.repository.TicketRepository;
@@ -87,6 +88,11 @@ public class FlightService {
         int availableSeat = 0;
         List<Flight> flights = flightRepository.findAllByFlightNumberAndAvailableTicketsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(flightNumber, availableSeat, new DateHelper().today());
         return flights;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean cancelFlightRoute(long flightNumber) throws Exception{
+        return false;
     }
 
     private boolean validNewFlightInfo(FlightRoute flightRoute) throws Exception {

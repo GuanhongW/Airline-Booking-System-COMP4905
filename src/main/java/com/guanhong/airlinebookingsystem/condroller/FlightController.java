@@ -5,6 +5,7 @@ import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
+import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -49,7 +50,7 @@ public class FlightController {
                 if (!role.equals(Role.ADMIN)){
                     log.warn("A Non-admin user: " + username + " try to create flight.");
                     System.out.println("Save finished: " + new java.util.Date().getTime());
-                    return new ResponseEntity("Only admin user can create new flights.", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity("Only admin user can create new flights.", HttpStatus.UNAUTHORIZED);
                 }
             }
             return ResponseEntity.ok(flightService.createNewFlight(newFlightRoute));
@@ -127,7 +128,7 @@ public class FlightController {
                 Role role = jwtUserDetailsService.getUserRole(username);
                 if (!role.equals(Role.ADMIN)){
                     log.warn("A Non-admin user: " + username + " try to update flight.");
-                    return new ResponseEntity("Only admin user can update new flights.", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity("Only admin user can update new flights.", HttpStatus.UNAUTHORIZED);
                 }
             }
             if (newFlightRoute == null){
@@ -141,11 +142,11 @@ public class FlightController {
             return ResponseEntity.ok(flightService.updateFlight(newFlightRoute));
         }
         catch (ServerException e){
-            log.error("URL: createFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            log.error("URL: updateFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
             return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (ClientException e){
-            log.error("URL: createFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            log.error("URL: updateFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (DataIntegrityViolationException e){
@@ -154,7 +155,47 @@ public class FlightController {
             return new ResponseEntity("URL: createFlight, Http Code: 500: Create a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e){
-            log.error("URL: createFlight, Http Code: 400: " + e.getMessage());
+            log.error("URL: updateFlight, Http Code: 400: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
+    @RequestMapping(value = "/cancelFlightRoute", method = RequestMethod.POST)
+    public ResponseEntity cancelFlightRouteController(HttpServletRequest request, @RequestBody FlightNumberRequest flightNumber){
+        try{
+            final String requestTokenHeader = request.getHeader("Authorization");
+
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                Role role = jwtUserDetailsService.getUserRole(username);
+                if (!role.equals(Role.ADMIN)){
+                    log.warn("A Non-admin user: " + username + " try to cancel flight route.");
+                    return new ResponseEntity("Only admin user can cancle flight route.", HttpStatus.UNAUTHORIZED);
+                }
+            }
+            if (flightNumber == null || flightNumber.getFlightNumber() == null){
+                log.error("Http Code: 400  URL: cancelFlightRoute  flight number is empty");
+                return ResponseEntity.badRequest().body("Flight number is empty.");
+            }
+            return ResponseEntity.ok(flightService.cancelFlightRoute(flightNumber.getFlightNumber()));
+        }
+        catch (ServerException e){
+            log.error("URL: cancelFlightRoute, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
+            log.error("URL: cancelFlightRoute, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (DataIntegrityViolationException e){
+            log.error(e.getMessage());
+            log.info("Create entity in customer info table is failed, rolling back in user table");
+            return new ResponseEntity("URL: cancelFlightRoute, Http Code: 500: Create a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (Exception e){
+            log.error("URL: cancelFlightRoute, Http Code: 400: " + e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
