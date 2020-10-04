@@ -6,6 +6,7 @@ import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -172,7 +173,7 @@ public class FlightController {
                 Role role = jwtUserDetailsService.getUserRole(username);
                 if (!role.equals(Role.ADMIN)){
                     log.warn("A Non-admin user: " + username + " try to cancel flight route.");
-                    return new ResponseEntity("Only admin user can cancle flight route.", HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity("Only admin user can cancel flight route.", HttpStatus.UNAUTHORIZED);
                 }
             }
             if (flightNumber == null || flightNumber.getFlightNumber() == null){
@@ -191,8 +192,8 @@ public class FlightController {
         }
         catch (DataIntegrityViolationException e){
             log.error(e.getMessage());
-            log.info("Create entity in customer info table is failed, rolling back in user table");
-            return new ResponseEntity("URL: cancelFlightRoute, Http Code: 500: Create a new flight failed because of server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.info("URL: cancelFlightRoute database error");
+            return new ResponseEntity("URL: cancelFlightRoute, Http Code: 500: Cancel flight route failed because of database error.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (Exception e){
             log.error("URL: cancelFlightRoute, Http Code: 400: " + e.getMessage());
@@ -200,4 +201,47 @@ public class FlightController {
         }
     }
 
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
+    @RequestMapping(value = "/cancelFlight", method = RequestMethod.POST)
+    public ResponseEntity cancelFlightController(HttpServletRequest request, @RequestBody FlightRequest flightRequest){
+        try{
+            final String requestTokenHeader = request.getHeader("Authorization");
+
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                Role role = jwtUserDetailsService.getUserRole(username);
+                if (!role.equals(Role.ADMIN)){
+                    log.warn("A Non-admin user: " + username + " try to cancel flight.");
+                    return new ResponseEntity("Only admin user can cancel flight.", HttpStatus.UNAUTHORIZED);
+                }
+            }
+            if (flightRequest == null){
+                log.error("Http Code: 400  URL: cancelFlight  flight information are empty");
+                return ResponseEntity.badRequest().body("Flight information are empty.");
+            }
+            else if (flightRequest.getFlightNumber() == null || flightRequest.getFlightDate() == null){
+                log.error("Http Code: 400  URL: cancelFlight  flight number or date are empty");
+                return ResponseEntity.badRequest().body("Flight number or date are empty.");
+            }
+            return ResponseEntity.ok(flightService.cancelFlight(flightRequest.getFlightNumber(),flightRequest.getFlightDate()));
+        }
+        catch (ServerException e){
+            log.error("URL: cancelFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
+            log.error("URL: cancelFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (DataIntegrityViolationException e){
+            log.error(e.getMessage());
+            log.info("URL: cancelFlight database error");
+            return new ResponseEntity("URL: cancelFlight, Http Code: 500: Cancel flight failed because of database error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (Exception e){
+            log.error("URL: cancelFlight, Http Code: 400: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

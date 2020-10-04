@@ -98,9 +98,14 @@ public class FlightService {
             return true;
         }
         else {
-            log.error("Deleting flight " + flightNumber + " is failed.");
-            throw new ClientException("The flight is unavailable in the system.", HttpStatus.BAD_REQUEST);
+            log.error("Deleting flight route" + flightNumber + " is failed.");
+            throw new ClientException("The flight route is unavailable in the system.", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean cancelFlight(long flightNumber, Date flightDate) throws Exception{
+        return false;
     }
 
     private boolean validNewFlightInfo(FlightRoute flightRoute) throws Exception {
