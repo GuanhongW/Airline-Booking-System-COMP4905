@@ -105,7 +105,15 @@ public class FlightService {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean cancelFlight(long flightNumber, Date flightDate) throws Exception{
-        return false;
+        Flight flight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber,flightDate);
+        if (flight != null){
+            flightRepository.delete(flight);
+            return true;
+        }
+        else {
+            log.error("Deleting flight " + flightNumber + " on " + flightDate.toString() + " is failed.");
+            throw new ClientException("The flight is unavailable in the system.", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private boolean validNewFlightInfo(FlightRoute flightRoute) throws Exception {
