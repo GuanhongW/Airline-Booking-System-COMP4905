@@ -2,10 +2,7 @@ package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.entity.*;
-import com.guanhong.airlinebookingsystem.model.AccountInfo;
-import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
-import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
-import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;
+import com.guanhong.airlinebookingsystem.model.*;
 import com.guanhong.airlinebookingsystem.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -146,7 +143,7 @@ public class CancelFlightTest {
         Flight selectFlight;
         for (int i = 0; i < defaultCustomerID.size(); i++) {
             selectFlight = new Flight(defaultFlights.get(bookedFlightIndex), bookedFlightDate);
-            Ticket returnedTicket = ticketService.bookFlight(selectFlight, defaultCustomerID.get(i));
+            Ticket returnedTicket = ticketService.bookFlight(new FlightRequest(selectFlight), defaultCustomerID.get(i));
             assertNotNull(returnedTicket);
             BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
                     selectFlight.getFlightDate(), i+2);

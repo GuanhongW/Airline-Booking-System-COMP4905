@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.guanhong.airlinebookingsystem.entity.Flight;
 
 import java.sql.Date;
 
@@ -15,6 +16,11 @@ public class FlightRequest extends FlightNumberRequest{
     public FlightRequest(Long flightNumber, Date flightDate) {
         super(flightNumber);
         this.flightDate = flightDate;
+    }
+
+    public FlightRequest(Flight flight){
+        super(flight.getFlightNumber());
+        this.flightDate = flight.getFlightDate();
     }
 
     public Date getFlightDate() {

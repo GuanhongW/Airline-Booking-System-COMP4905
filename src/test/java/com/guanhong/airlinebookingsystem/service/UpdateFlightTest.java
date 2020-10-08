@@ -5,6 +5,7 @@ import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.*;
 import io.swagger.models.auth.In;
 import org.junit.jupiter.api.AfterAll;
@@ -896,12 +897,15 @@ public class UpdateFlightTest {
         returnedSeatReservation.addAll(unavailableSeatInfoRepository.findAllByFlightId(flights.get(7).getFlightId()));
         assertEquals(4, returnedSeatReservation.size());
         // Default customer user book some flight and seat
-        Ticket newTicket = ticketService.bookFlight(flights.get(5), jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0)).getId());
+        FlightRequest selectFlight1 = new FlightRequest(flights.get(5));
+        FlightRequest selectFlight2 = new FlightRequest(flights.get(6));
+        Ticket newTicket = ticketService.bookFlight(selectFlight1, jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0)).getId());
         newTicket.setSeatNumber(5);
         ticketRepository.save(newTicket);
-        ticketService.bookFlight(flights.get(5), jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(1)).getId());
-        ticketService.bookFlight(flights.get(6), jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0)).getId());
-        newTicket = ticketService.bookFlight(flights.get(7), jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(1)).getId());
+        ticketService.bookFlight(selectFlight1, jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(1)).getId());
+        ticketService.bookFlight(selectFlight2, jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0)).getId());
+        FlightRequest selectFlight3 = new FlightRequest(flights.get(7));
+        newTicket = ticketService.bookFlight(selectFlight3, jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(1)).getId());
         newTicket.setSeatNumber(1);
         ticketRepository.save(newTicket);
 

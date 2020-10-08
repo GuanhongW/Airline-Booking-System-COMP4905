@@ -4,6 +4,7 @@ import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -177,7 +178,7 @@ public class BookFlightTest {
 
         // Book the flight for today
         int flightIndex = 0;
-        Flight selectedFlight1 = new Flight(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
+        FlightRequest selectedFlight1 = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
         int initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         Ticket returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         assertNotNull(returnedTicked.getTicketId());
@@ -189,7 +190,7 @@ public class BookFlightTest {
 
         // Book the last flight date in this flight
         flightIndex = availableFlights.size()-1;
-        Flight selectedFlight2 = new Flight(availableFlights.get(flightIndex).getFlightNumber(),
+        FlightRequest selectedFlight2 = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(),
                 availableFlights.get(flightIndex).getFlightDate());
         initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight2, customer.getId()));
@@ -203,7 +204,7 @@ public class BookFlightTest {
 
         // Book the flight in the middle of travel date range
         flightIndex = 4;
-        Flight selectedFlight3 = new Flight(availableFlights.get(flightIndex).getFlightNumber(),
+        FlightRequest selectedFlight3 = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(),
                 availableFlights.get(flightIndex).getFlightDate());
         initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight3, customer.getId()));
@@ -223,7 +224,7 @@ public class BookFlightTest {
         User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0));
 
         // Book the flight for yesterday
-        Flight selectedFlight1 = new Flight(availableFlights.get(0).getFlightNumber(),
+        FlightRequest selectedFlight1 = new FlightRequest(availableFlights.get(0).getFlightNumber(),
                 constants.datePlusSomeDays(availableFlights.get(0).getFlightDate(), -1));
         ClientException exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         String expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
@@ -231,7 +232,7 @@ public class BookFlightTest {
         assertEquals(expectedMessage, exception.getMessage());
 
         // Book the flight for the date after last date
-        Flight selectedFlight2 = new Flight(availableFlights.get(availableFlights.size() - 1).getFlightNumber(),
+        FlightRequest selectedFlight2 = new FlightRequest(availableFlights.get(availableFlights.size() - 1).getFlightNumber(),
                 constants.datePlusSomeDays(availableFlights.get(availableFlights.size() - 1).getFlightDate(), 1));
         exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight2, customer.getId()));
         expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
@@ -239,7 +240,7 @@ public class BookFlightTest {
         assertEquals(expectedMessage, exception.getMessage());
 
         // Book the flight with unavailable date
-        Flight selectedFlight3 = new Flight(availableFlights.get(availableFlights.size() - 1).getFlightNumber(),
+        FlightRequest selectedFlight3 = new FlightRequest(availableFlights.get(availableFlights.size() - 1).getFlightNumber(),
                 constants.datePlusSomeDays(availableFlights.get(availableFlights.size() - 1).getFlightDate(), 20));
         exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight3, customer.getId()));
         expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
@@ -247,7 +248,7 @@ public class BookFlightTest {
         assertEquals(expectedMessage, exception.getMessage());
 
         // Book the flight with unavailable date
-        Flight selectedFlight4 = new Flight(availableFlights.get(0).getFlightNumber(),
+        FlightRequest selectedFlight4 = new FlightRequest(availableFlights.get(0).getFlightNumber(),
                 constants.datePlusSomeDays(availableFlights.get(0).getFlightDate(), -20));
         exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight4, customer.getId()));
         expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
@@ -263,21 +264,21 @@ public class BookFlightTest {
         User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0));
 
         // Flight number is 0
-        Flight selectedFlight1 = new Flight(0, availableFlights.get(0).getFlightDate());
+        FlightRequest selectedFlight1 = new FlightRequest((long) 0, availableFlights.get(0).getFlightDate());
         ClientException exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         String expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
         assertEquals(expectedMessage, exception.getMessage());
 
         // Flight number is 10000
-        Flight selectedFlight2 = new Flight(10000, availableFlights.get(0).getFlightDate());
+        FlightRequest selectedFlight2 = new FlightRequest((long) 10000, availableFlights.get(0).getFlightDate());
         exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight2, customer.getId()));
         expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
         assertEquals(expectedMessage, exception.getMessage());
 
         // Flight number is 10000
-        Flight selectedFlight3 = new Flight(9748, availableFlights.get(0).getFlightDate());
+        FlightRequest selectedFlight3 = new FlightRequest((long) 9748, availableFlights.get(0).getFlightDate());
         exception = assertThrows(ClientException.class, () -> ticketService.bookFlight(selectedFlight3, customer.getId()));
         expectedMessage = "Selected Flight is not exist in the system. Please check the flight number and flight date again.";
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
@@ -300,7 +301,7 @@ public class BookFlightTest {
 
         // Book the flight without any available seat
 
-        Flight selectedFlight1 = new Flight(targetFlight.getFlightNumber(), targetFlight.getFlightDate());
+        FlightRequest selectedFlight1 = new FlightRequest(targetFlight.getFlightNumber(), targetFlight.getFlightDate());
         Ticket returnedTicket = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         int fullFlightTicketId = 0;
         assertEquals(fullFlightTicketId, returnedTicket.getTicketId());

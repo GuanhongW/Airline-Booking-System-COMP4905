@@ -9,6 +9,7 @@ import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.entity.User;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
 import io.swagger.annotations.ApiOperation;
@@ -42,15 +43,15 @@ public class TicketController {
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/bookFlight", method = RequestMethod.POST)
-    public ResponseEntity bookFlightController(HttpServletRequest request, @RequestBody Flight flight) throws Exception {
+    public ResponseEntity bookFlightController(HttpServletRequest request, @RequestBody FlightRequest flightRequest) throws Exception {
         int bookIndex = 0;
         User user = null;
         try{
-            if (flight == null){
+            if (flightRequest == null){
                 log.error("Http Code: 400  URL: bookFlight  flight information is empty");
                 return ResponseEntity.badRequest().body("flight information is empty.");
             }
-            else if (flight.getFlightNumber() == null || flight.getFlightDate() == null){
+            else if (flightRequest.getFlightNumber() == null || flightRequest.getFlightDate() == null){
                 log.error("Http Code: 400  URL: bookFlight  flight number or flight date is empty.");
                 return ResponseEntity.badRequest().body("flight number or flight date is empty.");
             }
@@ -71,9 +72,9 @@ public class TicketController {
         }
         while (bookIndex < 3){
             try{
-                ResponseEntity res = new ResponseEntity(ticketService.bookFlight(flight, user.getId()), HttpStatus.OK);
-                log.info(user.getId() + " got the ticket in flight " + flight.getFlightNumber() + " on "+
-                        flight.getFlightDate().toString());
+                ResponseEntity res = new ResponseEntity(ticketService.bookFlight(flightRequest, user.getId()), HttpStatus.OK);
+                log.info(user.getId() + " got the ticket in flight " + flightRequest.getFlightNumber() + " on "+
+                        flightRequest.getFlightDate().toString());
                 return res;
             }
             catch (ServerException e){
@@ -102,7 +103,7 @@ public class TicketController {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }
-        log.error("User: " + user.getId() + " tried book the flight " + flight.getFlightNumber() + " on " + flight.getFlightDate().toString() + "," +
+        log.error("User: " + user.getId() + " tried book the flight " + flightRequest.getFlightNumber() + " on " + flightRequest.getFlightDate().toString() + "," +
                 " the system failed three times optimistic lock.");
         return new ResponseEntity("Server is busy. Try to book flight failed.", HttpStatus.SERVICE_UNAVAILABLE);
     }

@@ -5,6 +5,7 @@ import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -138,9 +139,9 @@ public class CancelFlightRouteTest {
         System.out.println("Before All finished.");
 
         // Customer book flights and seat
-        Flight selectFlight;
+        FlightRequest selectFlight;
         for (int i = 0; i < defaultCustomerID.size(); i++) {
-            selectFlight = new Flight(defaultFlights.get(i + 1), constants.datePlusSomeDays(constants.today(), i + 80));
+            selectFlight = new FlightRequest(defaultFlights.get(i + 1), constants.datePlusSomeDays(constants.today(), i + 80));
             Ticket returnedTicket = ticketService.bookFlight(selectFlight, defaultCustomerID.get(i));
             assertNotNull(returnedTicket);
             BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),

@@ -159,7 +159,7 @@ public class ControllerLayerTest {
         // This index should be same as the cancelFlightRouteTest_Controller_Success
         for (int i = 0; i < defaultCustomerID.size(); i++) {
             selectFlight = new Flight(defaultFlights.get(cancelFlightRouteIndex), bookedFlightDate);
-            Ticket returnedTicket = ticketService.bookFlight(selectFlight, defaultCustomerID.get(i));
+            Ticket returnedTicket = ticketService.bookFlight(new FlightRequest(selectFlight), defaultCustomerID.get(i));
             assertNotNull(returnedTicket);
             BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
                     selectFlight.getFlightDate(), i+2);
@@ -169,7 +169,7 @@ public class ControllerLayerTest {
         // This index should be same as the cancelFlightTest_Controller_Success
         for (int i = 0; i < defaultCustomerID.size(); i++) {
             selectFlight = new Flight(defaultFlights.get(cancelFlightIndex), bookedFlightDate);
-            Ticket returnedTicket = ticketService.bookFlight(selectFlight, defaultCustomerID.get(i));
+            Ticket returnedTicket = ticketService.bookFlight(new FlightRequest(selectFlight), defaultCustomerID.get(i));
             assertNotNull(returnedTicket);
             BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
                     selectFlight.getFlightDate(), i+2);

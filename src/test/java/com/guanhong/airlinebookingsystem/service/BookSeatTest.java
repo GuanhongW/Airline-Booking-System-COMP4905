@@ -5,6 +5,7 @@ import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -183,7 +184,7 @@ public class BookSeatTest {
         User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(customerIndex));
 
         // Book the flight for today
-        Flight selectedFlight = new Flight(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
+        FlightRequest selectedFlight = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
         Ticket originalTicket = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight, customer.getId()));
         assertNull(originalTicket.getSeatNumber());
 
@@ -223,7 +224,7 @@ public class BookSeatTest {
         User customer2 = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(1));
 
         // Book the flight for today
-        Flight selectedFlight = new Flight(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
+        FlightRequest selectedFlight = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
         Ticket originalTicket1 = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight, customer1.getId()));
         assertNull(originalTicket1.getSeatNumber());
         Ticket originalTicket2 = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight, customer2.getId()));
@@ -285,7 +286,7 @@ public class BookSeatTest {
         User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(customerIndex));
 
         // Book the flight for one day after index date
-        Flight selectedFlight = new Flight(availableFlights.get(flightIndex+1).getFlightNumber(), availableFlights.get(flightIndex+1).getFlightDate());
+        FlightRequest selectedFlight = new FlightRequest(availableFlights.get(flightIndex+1).getFlightNumber(), availableFlights.get(flightIndex+1).getFlightDate());
         Ticket originalTicket1 = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight, customer.getId()));
         assertNull(originalTicket1.getSeatNumber());
 

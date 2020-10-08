@@ -4,6 +4,7 @@ import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.FlightRepository;
 import com.guanhong.airlinebookingsystem.repository.TicketRepository;
 import com.guanhong.airlinebookingsystem.repository.UnavailableSeatInfoRepository;
@@ -27,7 +28,7 @@ public class TicketService {
     private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
 
     @Transactional(rollbackFor=Exception.class)
-    public Ticket bookFlight(Flight flight, long customerId) throws Exception {
+    public Ticket bookFlight(FlightRequest flight, long customerId) throws Exception {
         Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flight.getFlightNumber(), flight.getFlightDate());
         log.error("Lock the flight row");
         if (validFlightIsAvailable(returnedFlight) == false) {
