@@ -77,6 +77,11 @@ public class TicketService {
         return newTicket;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public boolean cancelTicket(FlightRequest flightRequest, long customerId) throws Exception{
+        return false;
+    }
+
     private boolean validFlightIsAvailable(Flight flight) throws Exception {
         // Check if flight is in the system
         if (flight == null) {

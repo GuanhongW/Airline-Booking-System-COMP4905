@@ -170,7 +170,7 @@ public class BookFlightTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     void booFlight_Success() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
@@ -217,7 +217,7 @@ public class BookFlightTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     void booFlight_FlightDate_Failed() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
@@ -257,7 +257,7 @@ public class BookFlightTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     void booFlight_FlightNumber_Failed() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
@@ -286,7 +286,7 @@ public class BookFlightTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     void booFlight_AvailableSeat_Failed() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));

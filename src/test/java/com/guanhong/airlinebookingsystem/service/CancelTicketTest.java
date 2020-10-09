@@ -2,8 +2,12 @@ package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.entity.*;
-import com.guanhong.airlinebookingsystem.model.*;
+import com.guanhong.airlinebookingsystem.model.AccountInfo;
+import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
+import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.repository.*;
+import com.mysql.cj.xdevapi.Client;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class CancelFlightTest {
+public class CancelTicketTest {
     @Autowired
     private FlightService flightService;
 
@@ -39,7 +43,10 @@ public class CancelFlightTest {
     private FlightRepository flightRepository;
 
     @Autowired
-    UnavailableSeatInfoRepository unavailableSeatInfoRepository;
+    private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
@@ -54,9 +61,9 @@ public class CancelFlightTest {
 
     private static List<Long> defaultCustomerID = new ArrayList<>();
 
-    private static int bookedFlightIndex = 2;
+    private static int bookedFlightIndex = 4;
 
-    private static Date bookedFlightDate = constants.datePlusSomeDays(constants.today(), 85);
+    private static Date bookedFlightDate = constants.datePlusSomeDays(constants.today(), 90);
 
 
     @BeforeAll
@@ -199,63 +206,56 @@ public class CancelFlightTest {
         }
     }
 
+
     @Test
 //    @Transactional
-    void cancelFlightTest_Success() {
-        long selectedFlightNumber = defaultFlights.get(bookedFlightIndex);
+    void cancelTicketTest_Success() throws Exception {
+        long selectFlightNumber = defaultFlights.get(bookedFlightIndex);
+        int customerIndex = 0;
+        long customerId = defaultCustomerID.get(customerIndex);
 
-        // Cancel the selectFlightNumber
-        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(selectedFlightNumber);
-        List<Long> flightIds = new ArrayList<>();
-        for (int i = 0; i < flights.size(); i++) {
-            flightIds.add(flights.get(i).getFlightId());
-        }
-        long deletedFlightId = flightRepository.findFlightByFlightNumberAndFlightDate(selectedFlightNumber,bookedFlightDate).getFlightId();
-        boolean isSuccess = assertDoesNotThrow(() -> flightService.cancelFlight(selectedFlightNumber, bookedFlightDate));
-        assertTrue(isSuccess);
-        verifyFlightIsCanceled(flightIds, deletedFlightId);
+        // Get the booked ticket and seat number
+        Flight bookedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber, bookedFlightDate);
+        assertEquals(selectFlightNumber, bookedFlight.getFlightNumber());
+        assertEquals(bookedFlightDate, bookedFlight.getFlightDate());
+        Ticket bookedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customerId, bookedFlight.getFlightId());
+        assertNotNull(bookedTicket);
+        assertNotNull(bookedTicket.getSeatNumber());
+        int bookedSeatNumber = bookedTicket.getSeatNumber();
+
+        // Cancel the ticket
+        FlightRequest flightRequest = new FlightRequest(selectFlightNumber, bookedFlightDate);
+        assertTrue(ticketService.cancelTicket(flightRequest, customerId));
+
+        // Verify the ticket is not exist in the DB and the seat is available too
+        assertNull(ticketRepository.findTicketByCustomerIdAndFlightId(customerId, bookedFlight.getFlightId()));
+        assertNull(unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(bookedFlight.getFlightId(), bookedSeatNumber));
     }
 
     @Test
 //    @Transactional
-    void cancelFlightTest_Failed() {
-        long selectedFlightNumber = defaultFlights.get(bookedFlightIndex);
+    void cancelTicketTest_Failed(){
+        long selectFlightNumber = defaultFlights.get(bookedFlightIndex);
+        int customerIndex = 1;
+        long customerId = defaultCustomerID.get(customerIndex);
 
+        // Customer does not book the flight (Flight number)
+        FlightRequest flightRequest1 = new FlightRequest(selectFlightNumber+1, bookedFlightDate);
+        ClientException exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest1, customerId));
+        String exceptedMessage = "You do not book this flight.";
+        assertEquals(exceptedMessage, exception.getMessage());
 
-        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(selectedFlightNumber);
-        List<Long> flightIds = new ArrayList<>();
-        for (int i = 0; i < flights.size(); i++) {
-            flightIds.add(flights.get(i).getFlightId());
-        }
-        // Cancel the flight does not exist (flight date is incorrect)
-        ClientException exception = assertThrows(ClientException.class,() -> flightService.cancelFlight(selectedFlightNumber, constants.today()));
-        verifyFlightIsCanceled(flightIds, 0);
-        String expectedMessage = "The flight is unavailable in the system.";
-        assertEquals(expectedMessage, exception.getMessage());
+        // Customer does not book the flight (flight date)
+        FlightRequest flightRequest2 = new FlightRequest(selectFlightNumber, constants.datePlusSomeDays(bookedFlightDate, 1));
+        exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest2, customerId));
+        exceptedMessage = "You do not book this flight.";
+        assertEquals(exceptedMessage, exception.getMessage());
 
-        // Cancel the flight does not exist (flight number is incorrect)
-        exception = assertThrows(ClientException.class,() -> flightService.cancelFlight(constants.NON_EXISTENT_FLIGHT_NUMBER, bookedFlightDate));
-        verifyFlightIsCanceled(flightIds, 0);
-        expectedMessage = "The flight is unavailable in the system.";
-        assertEquals(expectedMessage, exception.getMessage());
-    }
-
-    private void verifyFlightIsCanceled(List<Long> flightIds, long deletedFlightId) {
-        for (int i = 0; i < flightIds.size(); i++){
-            if (flightIds.get(i).equals(deletedFlightId)){
-                assertNull(flightRepository.findFlightByFlightId(flightIds.get(i)));
-                List<Ticket> emptyTickets = new ArrayList<>();
-                assertEquals(emptyTickets, ticketRepository.findTicketsByFlightId(flightIds.get(i)));
-                List<UnavailableSeatInfo> emptySeatReservation = new ArrayList<>();
-                assertEquals(emptySeatReservation, unavailableSeatInfoRepository.findAllByFlightId(flightIds.get(i)));
-            }
-            else {
-                Flight flight = flightRepository.findFlightByFlightId(flightIds.get(i));
-                assertNotNull(flight);
-            }
-
-        }
-
+        // The flight does not exist in the system
+        FlightRequest flightRequest3 = new FlightRequest(constants.NON_EXISTENT_FLIGHT_NUMBER, bookedFlightDate);
+        exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest3, customerId));
+        exceptedMessage = "You do not book this flight.";
+        assertEquals(exceptedMessage, exception.getMessage());
     }
 
 }

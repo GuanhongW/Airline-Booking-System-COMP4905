@@ -162,4 +162,51 @@ public class TicketController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
+    @RequestMapping(value = "/cancelTicket", method = RequestMethod.POST)
+    public ResponseEntity cancelTicketController(HttpServletRequest request, @RequestBody FlightRequest flightRequest) throws Exception {
+        try{
+            User user = null;
+            if (flightRequest == null){
+                log.error("Http Code: 400  URL: cancelTicket  flight information is empty");
+                return ResponseEntity.badRequest().body("flight information is empty.");
+            }
+            else if (flightRequest.getFlightNumber() == null || flightRequest.getFlightDate() == null){
+                log.error("Http Code: 400  URL: cancelTicket  flight number or flight date is empty.");
+                return ResponseEntity.badRequest().body("Flight number or flight date is empty.");
+            }
+
+            final String requestTokenHeader = request.getHeader("Authorization");
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                user = jwtUserDetailsService.getUserByUsername(username);
+                if (!user.getRole().equals(Role.USER)){
+                    log.warn("A admin user: " + username + " try to cancel a tucjet.");
+                    return new ResponseEntity("Only customer user can cancel existent ticket.", HttpStatus.UNAUTHORIZED);
+                }
+            }
+            return ResponseEntity.ok(ticketService.cancelTicket(flightRequest, user.getId()));
+        }
+        catch (ServerException e){
+            log.error("URL: cancelTicket, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
+            log.error("URL: cancelTicket, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (DataIntegrityViolationException e){
+            log.error(e.getMessage());
+            log.info("Cancel the ticket in flight " + flightRequest.getFlightNumber() + " on " + flightRequest.getFlightDate() + " is failed, rolling back.");
+            return new ResponseEntity("URL: cancelTicket, Http Code: 500: Cancel the ticket in flight " +
+                    flightRequest.getFlightNumber() + " on " + flightRequest.getFlightDate() +
+                    " is failed", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (Exception e){
+            log.error("URL: cancelTicket, Http Code: 400: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
