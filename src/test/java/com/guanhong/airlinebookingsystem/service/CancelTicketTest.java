@@ -254,7 +254,7 @@ public class CancelTicketTest {
         // The flight does not exist in the system
         FlightRequest flightRequest3 = new FlightRequest(constants.NON_EXISTENT_FLIGHT_NUMBER, bookedFlightDate);
         exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest3, customerId));
-        exceptedMessage = "You do not book this flight.";
+        exceptedMessage = "The flight does not exist in the system.";
         assertEquals(exceptedMessage, exception.getMessage());
     }
 
