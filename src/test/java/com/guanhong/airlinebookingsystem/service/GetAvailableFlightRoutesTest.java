@@ -1,11 +1,13 @@
 package com.guanhong.airlinebookingsystem.service;
 
-import com.guanhong.airlinebookingsystem.entity.Flight;
-import com.guanhong.airlinebookingsystem.entity.FlightRoute;
-import com.guanhong.airlinebookingsystem.entity.UnavailableSeatInfo;
-import com.guanhong.airlinebookingsystem.repository.FlightRepository;
-import com.guanhong.airlinebookingsystem.repository.FlightRouteRepository;
-import com.guanhong.airlinebookingsystem.repository.UnavailableSeatInfoRepository;
+import com.guanhong.airlinebookingsystem.entity.*;
+import com.guanhong.airlinebookingsystem.model.AccountInfo;
+import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
+import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+import com.guanhong.airlinebookingsystem.model.FlightRequest;
+import com.guanhong.airlinebookingsystem.repository.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,56 +40,169 @@ class GetAvailableFlightRoutesTest {
 
     private static Constants constants = Constants.getInstance();
 
+    private static List<String> defaultAdminUsernames = new ArrayList<>();
+
+    private static List<String> defaultCustomerUsernames = new ArrayList<>();
+
+    private static List<Long> defaultFlights = new ArrayList<>();
+
+    private static List<Long> defaultCustomerID = new ArrayList<>();
+
+    private static int defaultFlightsNum = 10;
+
+    @BeforeAll
+    static void createDefaultAccount(@Autowired JwtUserDetailsService jwtUserDetailsService,
+                                     @Autowired UserRepository userRepository,
+                                     @Autowired CustomerInfoRepository customerInfoRepository,
+                                     @Autowired FlightService flightService,
+                                     @Autowired FlightRouteRepository flightRouteRepository,
+                                     @Autowired TicketService ticketService) throws Exception {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        // Create default admin user 1
+
+        String testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        AccountInfo newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_0, Role.ADMIN);
+        CreateUserResponse res = jwtUserDetailsService.createAccount(newUserInfo);
+        assertEquals(testUsername, res.getUsername());
+        assertNotNull(res.getAccountId());
+        User user = userRepository.findById(res.getAccountId()).get();
+        assertEquals(Role.ADMIN, user.getRole());
+
+        testUsername = constants.getNextAdminUsername();
+        defaultAdminUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername, constants.ADMIN_USER_PASSWORD_1, Role.ADMIN);
+        res = jwtUserDetailsService.createAccount(newUserInfo);
+        assertEquals(testUsername, res.getUsername());
+        assertNotNull(res.getAccountId());
+        user = userRepository.findById(res.getAccountId()).get();
+        assertEquals(Role.ADMIN, user.getRole());
+
+        // Create default customer user
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "test", Gender.male, "2000-01-01");
+        res = jwtUserDetailsService.createAccount(newUserInfo);
+        assertEquals(testUsername, res.getUsername());
+        assertNotNull(res.getAccountId());
+        defaultCustomerID.add(res.getAccountId());
+        user = userRepository.findById(res.getAccountId()).get();
+        assertEquals(Role.USER, user.getRole());
+        CustomerInfo customerInfo = customerInfoRepository.findById(res.getAccountId()).get();
+        assertEquals("test", customerInfo.getName());
+        assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
+        assertEquals(Gender.male, customerInfo.getGender());
+
+        testUsername = constants.getNextCustomerUsername();
+        defaultCustomerUsernames.add(testUsername);
+        newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_1, Role.USER, "test", Gender.male, "2000-01-01");
+        res = jwtUserDetailsService.createAccount(newUserInfo);
+        assertEquals(testUsername, res.getUsername());
+        assertNotNull(res.getAccountId());
+        defaultCustomerID.add(res.getAccountId());
+        user = userRepository.findById(res.getAccountId()).get();
+        assertEquals(Role.USER, user.getRole());
+        customerInfo = customerInfoRepository.findById(res.getAccountId()).get();
+        assertEquals("test", customerInfo.getName());
+        assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
+        assertEquals(Gender.male, customerInfo.getGender());
+
+        // Create default flight
+
+        for (int i = 0; i < defaultFlightsNum; i++) {
+            long flightNumber = constants.getNextAvailableFlightNumber();
+            defaultFlights.add(flightNumber);
+            String departureCity = "YYZ";
+            String destinationCity = "YVR";
+            Time departureTime = Time.valueOf("10:05:00");
+            Time arrivalTime = Time.valueOf("12:00:00");
+            int aircraftId = 900;
+            BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+            Date startDate = constants.datePlusSomeDays(constants.today(), 80);
+            Date endDate = constants.datePlusSomeDays(constants.today(), 100);
+            int availableTicket = 80;
+            FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                    aircraftId, overbooking, startDate, endDate);
+            flightService.createNewFlight(newFlightRoute);
+            FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+            assertNotNull(returnedFlightRoute);
+        }
+        System.out.println("Before All finished.");
+    }
+
+    @AfterAll
+    static void deleteDefaultAccount(@Autowired UserRepository userRepository,
+                                     @Autowired CustomerInfoRepository customerInfoRepository,
+                                     @Autowired FlightRouteRepository flightRouteRepository,
+                                     @Autowired FlightRepository flightRepository,
+                                     @Autowired UnavailableSeatInfoRepository unavailableSeatInfoRepository,
+                                     @Autowired TicketRepository ticketRepository) throws Exception {
+
+        // Delete default admin user
+        String testUsername;
+        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
+            testUsername = defaultAdminUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default customer user
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
+            testUsername = defaultCustomerUsernames.get(i);
+            User user = userRepository.findUserByUsername(testUsername);
+            userRepository.delete(user);
+            assertNull(userRepository.findUserByUsername(testUsername));
+            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+        }
+
+        // Delete default flight
+        long flightNumber;
+        for (int i = 0; i < defaultFlights.size(); i++) {
+            flightNumber = defaultFlights.get(i);
+            List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+            FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+            flightRouteRepository.delete(flightRoute);
+            assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+            List<Flight> emptyFlights = new ArrayList<>();
+            assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+            List<UnavailableSeatInfo> emptySeatReservation = new ArrayList<>();
+            List<Ticket> emptyTicket = new ArrayList<>();
+            for (int j = 0; j < flights.size(); j++) {
+                assertEquals(emptySeatReservation, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+                assertEquals(emptyTicket, ticketRepository.findTicketsByFlightId(flights.get(j).getFlightId()));
+            }
+        }
+    }
+
+
     @Test
     @Transactional
     void getAllAvailableFlightRoutes_Success() throws Exception {
-        long flightNumber;
-        String departureCity = "YYZ";
-        String destinationCity = "YVR";
-        Time departureTime = Time.valueOf("10:05:00");
-        Time arrivalTime = Time.valueOf("12:00:00");
-        int aircraft = 200;
-        BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
-        Date startDate = constants.datePlusSomeDays(constants.today(), 5);
-        Date endDate = constants.datePlusSomeDays(constants.today(), 35);
 
-        // Create a flight the end date is before
-        flightNumber = constants.FLIGHT_NUMBER_EXPIRED;
-        FlightRoute newFlightRoute1 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                aircraft, overbooking, startDate, endDate);
-        FlightRoute returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute1));
-        newFlightRoute1.setStartDate(constants.datePlusSomeDays(constants.today(), -100));
-        newFlightRoute1.setEndDate(constants.datePlusSomeDays(constants.today(), 0));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute1));
-        validFlightInfo(newFlightRoute1, flightNumber, 156, true);
-
-        // Create a flight router both start date and end date are after today
-        flightNumber = constants.FLIGHT_NUMBER_START_DATE_EXPIRED;
-
-        FlightRoute newFlightRoute2 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                aircraft, overbooking, startDate, endDate);
-        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute2));
-        newFlightRoute2.setStartDate(constants.datePlusSomeDays(constants.today(), -5));
-        newFlightRoute2.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute2));
-        validFlightInfo(newFlightRoute2, flightNumber, 156, true);
-
-        // Create a flight router both start date and end date are after today
-        flightNumber = constants.FLIGHT_NUMBER_AVAILABLE;
-
-        FlightRoute newFlightRoute3 = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
-                aircraft, overbooking, startDate, endDate);
-        returnedFlightRoute = assertDoesNotThrow(() -> flightService.createNewFlight(newFlightRoute3));
-        newFlightRoute3.setStartDate(constants.datePlusSomeDays(constants.today(), 0));
-        newFlightRoute3.setEndDate(constants.datePlusSomeDays(constants.today(), 8));
-        assertDoesNotThrow(() -> flightRouteRepository.save(newFlightRoute3));
-        validFlightInfo(newFlightRoute3, flightNumber, 156, true);
-
-        assertFalse(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_EXPIRED));
-        assertTrue(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_START_DATE_EXPIRED));
-        assertTrue(validFlightExistInList(flightService.getAllAvailableFlightRoutes(), constants.FLIGHT_NUMBER_AVAILABLE));
+        List<FlightRoute> flightRoutes = assertDoesNotThrow(() -> flightService.getAllAvailableFlightRoutes());
+        validAvailableFlightRouteInfo(flightRoutes);
     }
 
+
+    private void validAvailableFlightRouteInfo(List<FlightRoute> flightRoutes){
+        assertTrue(defaultFlightsNum <= flightRoutes.size());
+        int availableTicket = 80;
+        int flightInThisTestCase = 0;
+        //TODO check flight amount
+        for (int i =0; i < flightRoutes.size(); i++){
+            for (int j = 0; j < defaultFlights.size(); j++){
+                if (defaultFlights.get(j).equals(flightRoutes.get(i).getFlightNumber())){
+                    validFlightInfo(flightRoutes.get(i), defaultFlights.get(j),availableTicket,false);
+                    flightInThisTestCase++;
+                }
+            }
+
+        }
+        assertEquals(flightInThisTestCase, defaultFlightsNum);
+    }
 
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTicket,
                                  boolean isSkipSeatList) {
@@ -112,18 +229,9 @@ class GetAvailableFlightRoutesTest {
                 expectedDate = constants.datePlusSomeDays(expectedDate, 1);
                 // Verify Flight Seat Info
                 List<UnavailableSeatInfo> unavailableSeatInfos = unavailableSeatInfoRepository.findAllByFlightId(flight.getFlightId());
-                assertEquals(availableTicket, unavailableSeatInfos.size());
+                assertEquals(0, unavailableSeatInfos.size());
             }
         }
-    }
-
-    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
-        for (int i = 0; i < flightRouteList.size(); i++) {
-            if (flightRouteList.get(i).getFlightNumber() == flightNumber) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }
