@@ -250,7 +250,7 @@ public class ConcurrentTest {
         int ticketAmount = 10;
         for (int i = 0; i < ticketAmount; i++){
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
-            RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+            RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
             flightBuilders.add(builder);
         }
@@ -283,7 +283,7 @@ public class ConcurrentTest {
                     "  \"seatNumber\": " + selectSeatNumber + "\n" +
                     "}";
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
-            RequestBuilder builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+            RequestBuilder builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
             seatBuilders.add(builder);
             selectSeatNumber++;
@@ -349,7 +349,7 @@ public class ConcurrentTest {
         int ticketAmount = 10;
         for (int i = 0; i < ticketAmount; i++){
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
-            RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+            RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
             flightBuilders.add(builder);
         }
@@ -382,7 +382,7 @@ public class ConcurrentTest {
                     "  \"seatNumber\": " + selectSeatNumber + "\n" +
                     "}";
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
-            RequestBuilder builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+            RequestBuilder builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
             seatBuilders.add(builder);
             selectSeatNumber++;

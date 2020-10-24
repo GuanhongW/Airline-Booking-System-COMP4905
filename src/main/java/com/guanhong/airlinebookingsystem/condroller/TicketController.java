@@ -42,7 +42,7 @@ public class TicketController {
     private TicketService ticketService;
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/bookFlight", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/bookFlight", method = RequestMethod.POST)
     public ResponseEntity bookFlightController(HttpServletRequest request, @RequestBody FlightRequest flightRequest) throws Exception {
         int bookIndex = 0;
         User user = null;
@@ -109,7 +109,7 @@ public class TicketController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/bookSeat", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/bookSeat", method = RequestMethod.POST)
     public ResponseEntity bookSeatController(HttpServletRequest request, @RequestBody BookSeatRequest bookSeatRequest) throws Exception {
         try{
             User user = null;
@@ -164,7 +164,7 @@ public class TicketController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/cancelTicket", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/cancelTicket", method = RequestMethod.POST)
     public ResponseEntity cancelTicketController(HttpServletRequest request, @RequestBody FlightRequest flightRequest) throws Exception {
         try{
             User user = null;

@@ -35,7 +35,7 @@ public class FlightController {
     private JwtTokenUtil jwtTokenUtil;
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/createFlight", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/createFlight", method = RequestMethod.POST)
     public ResponseEntity createFlightController(HttpServletRequest request, @RequestBody FlightRoute newFlightRoute){
         try{
             if (newFlightRoute == null){
@@ -76,7 +76,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/getFlightRoutes", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/getFlightRoutes", method = RequestMethod.GET)
     public ResponseEntity getAvailableFlightRoutesController(){
         try{
             return new ResponseEntity(flightService.getAllAvailableFlightRoutes(), HttpStatus.OK);
@@ -97,7 +97,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/getFlightsByFlightNumber", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/getFlightsByFlightNumber", method = RequestMethod.GET)
     public ResponseEntity getAvailableFlightsByFlightNumberController(long flightNumber){
         try{
             return new ResponseEntity(flightService.getAllAvailableFlightsByFlightNumber(flightNumber), HttpStatus.OK);
@@ -118,7 +118,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/updateFlight", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/updateFlight", method = RequestMethod.POST)
     public ResponseEntity updateFlightController(HttpServletRequest request, @RequestBody FlightRoute newFlightRoute){
         try{
             final String requestTokenHeader = request.getHeader("Authorization");
@@ -162,7 +162,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/cancelFlightRoute", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/cancelFlightRoute", method = RequestMethod.POST)
     public ResponseEntity cancelFlightRouteController(HttpServletRequest request, @RequestBody FlightNumberRequest flightNumber){
         try{
             final String requestTokenHeader = request.getHeader("Authorization");
@@ -202,7 +202,7 @@ public class FlightController {
     }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
-    @RequestMapping(value = "/cancelFlight", method = RequestMethod.POST)
+    @RequestMapping(value = "/api/cancelFlight", method = RequestMethod.POST)
     public ResponseEntity cancelFlightController(HttpServletRequest request, @RequestBody FlightRequest flightRequest){
         try{
             final String requestTokenHeader = request.getHeader("Authorization");

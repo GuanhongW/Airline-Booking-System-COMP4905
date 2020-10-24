@@ -399,7 +399,7 @@ public class ControllerLayerTest {
                 "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),30) + "\"\n" +
                 "}";
         System.out.println(requestJSON);
-        RequestBuilder builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        RequestBuilder builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(200, result.getResponse().getStatus());
@@ -423,7 +423,7 @@ public class ControllerLayerTest {
 
         // input newFlight is null
         String requestJSON = null;
-        RequestBuilder builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        RequestBuilder builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -442,7 +442,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021\"\n" +
                 "}";
-        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -461,7 +461,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -480,7 +480,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -499,7 +499,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -519,7 +519,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-04-06\"\n" +
                 "}";
-        builder = post("/createFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/createFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(401, result.getResponse().getStatus());
@@ -577,7 +577,7 @@ public class ControllerLayerTest {
         validFlightInfo(newFlightRoute3, flightNumber, 156, true);
 
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = get("/getFlightRoutes").header("Authorization", "Bearer " + jwt);
+        RequestBuilder builder = get("/api/getFlightRoutes").header("Authorization", "Bearer " + jwt);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
         ObjectMapper mapper = new ObjectMapper();
@@ -620,7 +620,7 @@ public class ControllerLayerTest {
 
         // Verify the JSON response
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = get("/getFlightsByFlightNumber").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = get("/api/getFlightsByFlightNumber").header("Authorization", "Bearer " + jwt).
                 param("flightNumber", String.valueOf(flightNumber));
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -652,7 +652,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -679,7 +679,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -689,7 +689,7 @@ public class ControllerLayerTest {
 
         // request json is null
         jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -701,7 +701,7 @@ public class ControllerLayerTest {
         String requestJSON1 = "{\n" +
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\"\n" +
                 "}";
-        RequestBuilder builder1 = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder1 = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON1).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder1).andReturn();
         content = result.getResponse().getContentAsString();
@@ -713,7 +713,7 @@ public class ControllerLayerTest {
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
-        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -726,7 +726,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                 "  \"flightNumber\": 0\n" +
                 "}";
-        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -753,7 +753,7 @@ public class ControllerLayerTest {
                 "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),70) + "\"\n" +
                 "}";
         System.out.println(requestJSON);
-        RequestBuilder builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        RequestBuilder builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(200, result.getResponse().getStatus());
@@ -787,7 +787,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder builder = post("/updateFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -797,7 +797,7 @@ public class ControllerLayerTest {
 
         // request json is null
         jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -817,7 +817,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021\"\n" +
                 "}";
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -836,7 +836,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -855,7 +855,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -874,7 +874,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -892,7 +892,7 @@ public class ControllerLayerTest {
                 "\t\"overbooking\": 5,\n" +
                 "\t\"startDate\": \"2021-05-04\"\n" +
                 "}";
-        builder = post("/updateFlight").header("Authorization", "Bearer " + jwt)
+        builder = post("/api/updateFlight").header("Authorization", "Bearer " + jwt)
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -914,7 +914,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(customerIndex), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder flightBuilder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder flightBuilder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         // Book flight
         MvcResult result = mockMvc.perform(flightBuilder).andReturn();
@@ -932,7 +932,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
                 "  \"seatNumber\": " + selectSeatNumber + "\n" +
                 "}";
-        RequestBuilder seatBuilder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        RequestBuilder seatBuilder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(seatBuilder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -961,7 +961,7 @@ public class ControllerLayerTest {
                 "  \"seatNumber\": " + selectSeatNumber + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -971,7 +971,7 @@ public class ControllerLayerTest {
 
         // request json is null
         jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -983,7 +983,7 @@ public class ControllerLayerTest {
         String requestJSON1 = "{\n" +
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\"\n" +
                 "}";
-        RequestBuilder builder1 = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder1 = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON1).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder1).andReturn();
         content = result.getResponse().getContentAsString();
@@ -996,7 +996,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
                 "  \"seatNumber\": " + selectSeatNumber + "\n" +
                 "}";
-        builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -1009,7 +1009,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                 "  \"seatNumber\": " + selectSeatNumber + "\n" +
                 "}";
-        builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -1022,7 +1022,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
-        builder = post("/bookSeat").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/bookSeat").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         content = result.getResponse().getContentAsString();
@@ -1039,7 +1039,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + flightNumber + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -1055,7 +1055,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + flightNumber + "\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(401, result.getResponse().getStatus());
@@ -1067,7 +1067,7 @@ public class ControllerLayerTest {
                 "  \"flightNumber\": " + flightNumber + "\n" +
                 "}";
         jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1078,7 +1078,7 @@ public class ControllerLayerTest {
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + null + "\n" +
                 "}";
-        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1086,7 +1086,7 @@ public class ControllerLayerTest {
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
         // FlightNumberRequest json is null
-        builder = post("/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlightRoute").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1103,7 +1103,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -1120,7 +1120,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelFlight").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(401, result.getResponse().getStatus());
@@ -1134,7 +1134,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        builder = post("/cancelFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1145,7 +1145,7 @@ public class ControllerLayerTest {
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + flightNumber + "\n" +
                 "}";
-        builder = post("/cancelFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1153,7 +1153,7 @@ public class ControllerLayerTest {
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
         // FlightNumberRequest json is null
-        builder = post("/cancelFlight").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelFlight").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1170,7 +1170,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelTicket").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelTicket").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         String content = result.getResponse().getContentAsString();
@@ -1205,7 +1205,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        RequestBuilder builder = post("/cancelTicket").header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post("/api/cancelTicket").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         MvcResult result = mockMvc.perform(builder).andReturn();
         assertEquals(401, result.getResponse().getStatus());
@@ -1219,7 +1219,7 @@ public class ControllerLayerTest {
                 "  \"flightDate\": \"" + bookedFlightDate.toString() + "\"\n" +
                 "}";
         jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
-        builder = post("/cancelTicket").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelTicket").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1230,7 +1230,7 @@ public class ControllerLayerTest {
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + flightNumber + "\n" +
                 "}";
-        builder = post("/cancelTicket").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelTicket").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
@@ -1238,7 +1238,7 @@ public class ControllerLayerTest {
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
 
         // FlightNumberRequest json is null
-        builder = post("/cancelTicket").header("Authorization", "Bearer " + jwt).
+        builder = post("/api/cancelTicket").header("Authorization", "Bearer " + jwt).
                 accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
