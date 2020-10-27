@@ -85,7 +85,7 @@ public class FlightService {
     }
 
     public FlightRoute getFlightRoute(long flightNumber) throws Exception {
-        return null;
+        return flightRouteRepository.findFlightByflightNumber(flightNumber);
     }
 
     public List<Flight> getAllAvailableFlightsByFlightNumber(long flightNumber) throws Exception {
