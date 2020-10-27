@@ -642,6 +642,31 @@ public class ControllerLayerTest {
 
     @Test
     @Transactional
+    void getFlightRoute_Controller_Success() throws Exception {
+        long flightNumber = defaultFlights.get(0);
+
+        // Verify the JSON response
+        String jwt = getJWTByUsername(defaultAdminUsernames.get(0), constants.ADMIN_USER_PASSWORD_0);
+        RequestBuilder builder = get("/api/getFlightRoute").header("Authorization", "Bearer " + jwt).
+                param("flightNumber", String.valueOf(flightNumber));
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        String validJSON = "{\n" +
+                "\t\"arrivalTime\": \"12:00:00\",\n" +
+                "\t\"aircraftId\": 900,\n" +
+                "\t\"departureCity\": \"YYZ\",\n" +
+                "\t\"departureTime\": \"10:05:00\",\n" +
+                "\t\"destinationCity\": \"YVR\",\n" +
+                "\t\"endDate\": \"" + constants.datePlusSomeDays(constants.today(),100) + "\",\n" +
+                "\t\"flightNumber\": " + flightNumber + ",\n" +
+                "\t\"overbooking\": 6.0,\n" +
+                "\t\"startDate\": \"" + constants.datePlusSomeDays(constants.today(),80) + "\"\n" +
+                "}";
+        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    @Transactional
     void bookFlight_Controller_Success() throws Exception {
         // Get all flight by Default flight number
         List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));

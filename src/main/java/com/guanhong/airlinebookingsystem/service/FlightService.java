@@ -84,6 +84,10 @@ public class FlightService {
         return flightRoutes;
     }
 
+    public FlightRoute getFlightRoute(long flightNumber) throws Exception {
+        return null;
+    }
+
     public List<Flight> getAllAvailableFlightsByFlightNumber(long flightNumber) throws Exception {
         int availableSeat = 0;
         List<Flight> flights = flightRepository.findAllByFlightNumberAndAvailableTicketsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(flightNumber, availableSeat, new DateHelper().today());
