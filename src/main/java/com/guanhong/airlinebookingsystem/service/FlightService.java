@@ -57,7 +57,7 @@ public class FlightService {
     @Transactional(rollbackFor = Exception.class)
     public FlightRoute updateFlight(FlightRoute newFlightRoute) throws Exception {
         validFlightInfoWOFlightNumber(newFlightRoute);
-        FlightRoute existFlightRoute = flightRouteRepository.findById(newFlightRoute.getFlightNumber()).get();
+        FlightRoute existFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         if (existFlightRoute != null) {
             // Get original capacity and new capacity
             // Todo: When aircraft is small, it should update unavailable_Seat_info and ticket table
