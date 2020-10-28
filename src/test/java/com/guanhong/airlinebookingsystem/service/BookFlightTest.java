@@ -178,7 +178,8 @@ public class BookFlightTest {
 
         // Book the flight for today
         int flightIndex = 0;
-        FlightRequest selectedFlight1 = new FlightRequest(availableFlights.get(flightIndex).getFlightNumber(), availableFlights.get(flightIndex).getFlightDate());
+        long flightNumber = availableFlights.get(flightIndex).getFlightNumber();
+        FlightRequest selectedFlight1 = new FlightRequest(flightNumber, availableFlights.get(flightIndex).getFlightDate());
         int initAvailableSeats = availableFlights.get(flightIndex).getAvailableTickets();
         Ticket returnedTicked = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight1, customer.getId()));
         assertNotNull(returnedTicked.getTicketId());
@@ -186,6 +187,7 @@ public class BookFlightTest {
         assertEquals(customer.getId(), returnedTicked.getCustomerId());
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight1.getFlightDate(), returnedTicked.getFlightDate());
+        assertEquals(flightNumber, returnedTicked.getFlightNumber());
         assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
         // Book the last flight date in this flight
@@ -199,6 +201,7 @@ public class BookFlightTest {
         assertEquals(customer.getId(), returnedTicked.getCustomerId());
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight2.getFlightDate(), returnedTicked.getFlightDate());
+        assertEquals(flightNumber, returnedTicked.getFlightNumber());
         assertEquals(initAvailableSeats - 1,
                 flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
 
@@ -213,7 +216,9 @@ public class BookFlightTest {
         assertEquals(customer.getId(), returnedTicked.getCustomerId());
         assertEquals(availableFlights.get(flightIndex).getFlightId(), returnedTicked.getFlightId());
         assertEquals(selectedFlight3.getFlightDate(), returnedTicked.getFlightDate());
+        assertEquals(flightNumber, returnedTicked.getFlightNumber());
         assertEquals(initAvailableSeats - 1, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
+
     }
 
     @Test

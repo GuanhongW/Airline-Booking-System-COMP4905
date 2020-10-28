@@ -112,7 +112,8 @@ alter table ticket
 		foreign key (seat_number, flight_id) references unavailable_seat_info (seat_number, flight_id)
 			on update cascade on delete set null;
 
-
+alter table ticket
+	add flight_number int not null;
 
 
 

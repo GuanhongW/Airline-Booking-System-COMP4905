@@ -685,6 +685,7 @@ public class ControllerLayerTest {
         String validJSON = "{\n" +
                 "    \"customerId\": "+ customer.getId() +",\n" +
                 "    \"flightId\": " + availableFlights.get(flightIndex).getFlightId() + ",\n" +
+                "    \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
                 "    \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate() + "\"\n" +
                 "}";
         JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
@@ -1290,8 +1291,7 @@ public class ControllerLayerTest {
         User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0));
         String validJSON = "{\n" +
                 "    \"customerId\": "+ customer.getId() +",\n" +
-                //TODO: Change this to flight number
-//                "    \"flightId\": " + availableFlights.get(flightIndex).getFlightId() + ",\n" +
+                "    \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
                 "    \"flightDate\": \"" + constants.datePlusSomeDays(bookedFlightDate, flightIndex) + "\"\n" +
                 "}";
         JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);

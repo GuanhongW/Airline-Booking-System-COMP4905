@@ -34,6 +34,9 @@ public class Ticket {
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date flightDate;
 
+    @Column(name = "flight_number", nullable = false)
+    private Long flightNumber;
+
     public void setSeatNumber(Integer seatNumber) {
         this.seatNumber = seatNumber;
     }
@@ -50,10 +53,11 @@ public class Ticket {
         this.flightDate = flightDate;
     }
 
-    public Ticket(long customerId, long flightId, Date flightDate) {
+    public Ticket(long customerId, long flightId, Date flightDate, long flightNumber) {
         this.customerId = customerId;
         this.flightId = flightId;
         this.flightDate = flightDate;
+        this.flightNumber = flightNumber;
     }
 
     public Ticket(long ticketId){
@@ -86,4 +90,11 @@ public class Ticket {
         this.flightId = flightId;
     }
 
+    public Long getFlightNumber() {
+        return flightNumber;
+    }
+
+    public void setFlightNumber(Long flightNumber) {
+        this.flightNumber = flightNumber;
+    }
 }

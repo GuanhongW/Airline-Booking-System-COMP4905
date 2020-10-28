@@ -41,7 +41,7 @@ public class TicketService {
             log.info("Customer " + customerId + " failed to book the ticket because the flight is full.");
             return new Ticket(fullFlightTicketId);
         } else {
-            Ticket newTicket = new Ticket(customerId, returnedFlight.getFlightId(), returnedFlight.getFlightDate());
+            Ticket newTicket = new Ticket(customerId, returnedFlight.getFlightId(), returnedFlight.getFlightDate(), returnedFlight.getFlightNumber());
             if (checkIsDuplicatedBooking(newTicket) == true) {
                 log.error("The customer (" + customerId + ") already book the ticket for flight " + newTicket.getFlightId());
                 throw new ClientException("Customer already booked the ticket in the same flight", HttpStatus.BAD_REQUEST);
