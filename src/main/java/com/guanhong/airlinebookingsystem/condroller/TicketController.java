@@ -209,4 +209,35 @@ public class TicketController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
+    @RequestMapping(value = "/api/getTicketByCustomer", method = RequestMethod.GET)
+    public ResponseEntity getTicketbyCustomerId(HttpServletRequest request) throws Exception {
+        try{
+            User user = null;
+            final String requestTokenHeader = request.getHeader("Authorization");
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                String jwtToken = requestTokenHeader.substring(7);
+                String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                user = jwtUserDetailsService.getUserByUsername(username);
+                if (!user.getRole().equals(Role.USER)){
+                    log.warn("A admin user: " + username + " try to cancel a tucjet.");
+                    return new ResponseEntity("Only customer user can cancel existent ticket.", HttpStatus.UNAUTHORIZED);
+                }
+            }
+            return ResponseEntity.ok(ticketService.getAllTicketByCustomerId(user.getId()));
+        }
+        catch (ServerException e){
+            log.error("URL: cancelTicket, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        catch (ClientException e){
+            log.error("URL: cancelTicket, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e){
+            log.error("URL: cancelTicket, Http Code: 400: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

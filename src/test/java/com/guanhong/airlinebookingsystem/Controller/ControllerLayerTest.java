@@ -1271,6 +1271,49 @@ public class ControllerLayerTest {
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
     }
 
+    @Test
+    @Transactional
+    void getTicketByCustomer_Controller_Success() throws Exception {
+        // Book a new flight for default customer
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(0));
+        int flightIndex = 2;
+
+        String requestJSON = "{\n" +
+                "  \"flightDate\": \"" + constants.datePlusSomeDays(bookedFlightDate, flightIndex) + "\",\n" +
+                "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
+                "}";
+        String jwt = getJWTByUsername(defaultCustomerUsernames.get(0), constants.CUSTOMER_USER_PASSWORD_0);
+        RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        MvcResult result = mockMvc.perform(builder).andReturn();
+        String content = result.getResponse().getContentAsString();
+        User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(0));
+        String validJSON = "{\n" +
+                "    \"customerId\": "+ customer.getId() +",\n" +
+                //TODO: Change this to flight number
+//                "    \"flightId\": " + availableFlights.get(flightIndex).getFlightId() + ",\n" +
+                "    \"flightDate\": \"" + constants.datePlusSomeDays(bookedFlightDate, flightIndex) + "\"\n" +
+                "}";
+        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+
+
+
+        builder = get("/api/getTicketByCustomer").header("Authorization", "Bearer " + jwt).
+                accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON);
+        result = mockMvc.perform(builder).andReturn();
+        content = result.getResponse().getContentAsString();
+        validJSON = "[{\n" +
+                "\t\"flightDate\": " + bookedFlightDate.toString() +
+                "}, {\n" +
+                "\t\"flightDate\": " + bookedFlightDate.toString() +
+                "}, {\n" +
+                "\t\"flightDate\": " + bookedFlightDate.toString() +
+                "}, {\n" +
+                "\t\"flightDate\": " + constants.datePlusSomeDays(bookedFlightDate, flightIndex).toString() +
+                "}]";
+        JSONAssert.assertEquals(validJSON, content, JSONCompareMode.LENIENT);
+    }
+
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTicket,
                                  boolean isSkipSeatList) {
         assertEquals(expectedFlightRoute.getFlightNumber(), actualFlightNumber);

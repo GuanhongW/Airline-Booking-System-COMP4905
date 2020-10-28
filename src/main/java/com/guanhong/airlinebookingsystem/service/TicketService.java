@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class TicketService {
@@ -51,6 +53,7 @@ public class TicketService {
                         returnedFlight.getFlightId() + "). Rollback all transactions.");
                 throw new ServerException("Unknown Server Exception.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
+            // TODO: Add flight number into ticket table
             Ticket returnedTicket = ticketRepository.save(newTicket);
             if (returnedTicket != null) {
                 log.info("Customer Id: " + customerId + " successfully booked the ticket in flight " + returnedFlight.getFlightId());
@@ -109,6 +112,11 @@ public class TicketService {
             ticketRepository.delete(ticket);
         }
         return true;
+    }
+
+    @Transactional(rollbackFor =  Exception.class)
+    public List<Ticket> getAllTicketByCustomerId(long customerId) throws Exception {
+        return null;
     }
 
     private boolean validFlightIsAvailable(Flight flight) throws Exception {
