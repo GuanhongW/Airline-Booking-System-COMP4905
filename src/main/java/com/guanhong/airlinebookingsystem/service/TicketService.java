@@ -116,7 +116,7 @@ public class TicketService {
 
     @Transactional(rollbackFor =  Exception.class)
     public List<Ticket> getAllTicketByCustomerId(long customerId) throws Exception {
-        return null;
+        return ticketRepository.findTicketsByCustomerId(customerId);
     }
 
     private boolean validFlightIsAvailable(Flight flight) throws Exception {
