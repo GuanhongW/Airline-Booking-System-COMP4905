@@ -27,15 +27,18 @@ public class Ticket {
     @Column(name = "flight_id", nullable = false)
     private Long flightId;
 
-    @Column(name = "seat_number")
-    private Integer seatNumber;
+    @Column(name = "flight_number", nullable = false)
+    private Long flightNumber;
+
 
     @Column(name = "flight_date", nullable = false)
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date flightDate;
+    
+    @Column(name = "seat_number")
+    private Integer seatNumber;
 
-    @Column(name = "flight_number", nullable = false)
-    private Long flightNumber;
+
 
     public void setSeatNumber(Integer seatNumber) {
         this.seatNumber = seatNumber;
