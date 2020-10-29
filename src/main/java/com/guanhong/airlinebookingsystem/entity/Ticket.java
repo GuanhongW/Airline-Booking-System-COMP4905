@@ -34,7 +34,7 @@ public class Ticket {
     @Column(name = "flight_date", nullable = false)
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date flightDate;
-    
+
     @Column(name = "seat_number")
     private Integer seatNumber;
 

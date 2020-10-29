@@ -111,7 +111,11 @@ public class TicketService {
         else {
             ticketRepository.delete(ticket);
         }
-        return true;
+        flight.addAvailableTickets(1);
+        if (flightRepository.save(flight) != null){
+            return true;
+        }
+        return false;
     }
 
     @Transactional(rollbackFor =  Exception.class)

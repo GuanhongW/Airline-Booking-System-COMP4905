@@ -216,6 +216,7 @@ public class CancelTicketTest {
 
         // Get the booked ticket and seat number
         Flight bookedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber, bookedFlightDate);
+        int initAvailableTicketNumber = bookedFlight.getAvailableTickets();
         assertEquals(selectFlightNumber, bookedFlight.getFlightNumber());
         assertEquals(bookedFlightDate, bookedFlight.getFlightDate());
         Ticket bookedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customerId, bookedFlight.getFlightId());
@@ -230,6 +231,9 @@ public class CancelTicketTest {
         // Verify the ticket is not exist in the DB and the seat is available too
         assertNull(ticketRepository.findTicketByCustomerIdAndFlightId(customerId, bookedFlight.getFlightId()));
         assertNull(unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(bookedFlight.getFlightId(), bookedSeatNumber));
+
+        // Verify the available ticket number add 1
+        assertEquals(initAvailableTicketNumber+1, flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber, bookedFlightDate).getAvailableTickets());
     }
 
     @Test
@@ -241,15 +245,22 @@ public class CancelTicketTest {
 
         // Customer does not book the flight (Flight number)
         FlightRequest flightRequest1 = new FlightRequest(selectFlightNumber+1, bookedFlightDate);
+        int initAvailableTikcetNum = flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber+1, bookedFlightDate).getAvailableTickets();
         ClientException exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest1, customerId));
         String exceptedMessage = "You do not book this flight.";
         assertEquals(exceptedMessage, exception.getMessage());
+        assertEquals(initAvailableTikcetNum, flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber+1, bookedFlightDate).getAvailableTickets());
 
         // Customer does not book the flight (flight date)
         FlightRequest flightRequest2 = new FlightRequest(selectFlightNumber, constants.datePlusSomeDays(bookedFlightDate, 1));
+        initAvailableTikcetNum = flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber,
+                constants.datePlusSomeDays(bookedFlightDate, 1)).getAvailableTickets();
         exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest2, customerId));
         exceptedMessage = "You do not book this flight.";
         assertEquals(exceptedMessage, exception.getMessage());
+        assertEquals(initAvailableTikcetNum,
+                flightRepository.findFlightByFlightNumberAndFlightDate(selectFlightNumber,
+                        constants.datePlusSomeDays(bookedFlightDate, 1)).getAvailableTickets());
 
         // The flight does not exist in the system
         FlightRequest flightRequest3 = new FlightRequest(constants.NON_EXISTENT_FLIGHT_NUMBER, bookedFlightDate);
