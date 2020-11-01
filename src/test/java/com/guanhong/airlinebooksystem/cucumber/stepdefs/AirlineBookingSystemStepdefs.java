@@ -12,13 +12,16 @@ import com.guanhong.airlinebookingsystem.repository.UserRepository;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +32,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 
@@ -39,6 +46,7 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +58,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @CucumberContextConfiguration
 @SpringBootTest(classes = AirlineBookingSystemApplication.class)
 public class AirlineBookingSystemStepdefs {
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
+
+    TransactionStatus transaction;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -84,6 +98,9 @@ public class AirlineBookingSystemStepdefs {
 
     @Before
     public void setUp() throws Exception {
+        // Start transaction for teardown to clean all database modify
+        transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         // Create default admin user
 
@@ -133,28 +150,32 @@ public class AirlineBookingSystemStepdefs {
         assertEquals("test", customerInfo.getName());
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
+
+
     }
 
     @After
     public void teardown() {
-        // Delete default admin user
-        String testUsername;
-        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
-            testUsername = defaultAdminUsernames.get(i);
-            User user = userRepository.findUserByUsername(testUsername);
-            userRepository.delete(user);
-            assertNull(userRepository.findUserByUsername(testUsername));
-            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
-        }
+        transactionManager.rollback(transaction);
 
-        // Delete default customer user
-        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
-            testUsername = defaultCustomerUsernames.get(i);
-            User user = userRepository.findUserByUsername(testUsername);
-            userRepository.delete(user);
-            assertNull(userRepository.findUserByUsername(testUsername));
-            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
-        }
+//        // Delete default admin user
+//        String testUsername;
+//        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
+//            testUsername = defaultAdminUsernames.get(i);
+//            User user = userRepository.findUserByUsername(testUsername);
+//            userRepository.delete(user);
+//            assertNull(userRepository.findUserByUsername(testUsername));
+//            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+//        }
+//
+//        // Delete default customer user
+//        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
+//            testUsername = defaultCustomerUsernames.get(i);
+//            User user = userRepository.findUserByUsername(testUsername);
+//            userRepository.delete(user);
+//            assertNull(userRepository.findUserByUsername(testUsername));
+//            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+//        }
     }
 
     @Given("Printing the thread info for feature {string} and scenario {string}")
@@ -175,9 +196,40 @@ public class AirlineBookingSystemStepdefs {
 //        System.out.println("Thread ID: " + Thread.currentThread().getId() + ": " + defaultAdminUsernames.size());
     }
 
+    @When("^User register in the airline booking system by following credentials$")
+    public void register_request(DataTable dt) throws Exception {
+        Map<String, String> credential = dt.asMap(String.class, String.class);
+        String requestJSON="";
+        if (credential.get("role").equals("ADMIN")){
+            requestJSON = "{\n" +
+                    "  \"password\": \"" + credential.get("password") + "\",\n" +
+                    "  \"role\": \"" + credential.get("role") + "\",\n" +
+                    "  \"username\": \"" + credential.get("username") + "\"\n" +
+                    "}";
+        }
+        else if (credential.get("role").equals("USER")) {
+            requestJSON = "{\n" +
+                    "  \"birthDate\": \"" + credential.get("birthDate") + "\",\n" +
+                    "  \"gender\": \"" + credential.get("gender") + "\",\n" +
+                    "  \"name\": \"" + credential.get("name") + "\",\n" +
+                    "  \"password\": \"" + credential.get("password") + "\",\n" +
+                    "  \"role\": \"" + credential.get("role") + "\",\n" +
+                    "  \"username\": \"" + credential.get("username") + "\"\n" +
+                    "}";
+        }
+        else {
+            System.out.println("The credential's role is invalid!");
+            assertFalse(true);
+        }
+        RequestBuilder builder = post("/register").accept(MediaType.APPLICATION_JSON).
+                content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+        requestResult = mockMvc.perform(builder).andReturn();
+
+    }
+
+
     @Then("The server return status code of {int}")
     public void verify_status_code(int httpCode) {
-
         assertEquals(httpCode, requestResult.getResponse().getStatus());
     }
 
@@ -194,7 +246,23 @@ public class AirlineBookingSystemStepdefs {
             assertFalse(true);
             System.out.println("Invalid status.");
         }
+    }
 
+    @Then("^The server return the following response for register request$")
+    public void verify_response_json_register(DataTable dt) throws Exception {
+        Map<String, String> credential = dt.asMap(String.class, String.class);
+        String resultContent = requestResult.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
+        CreateUserResponse createUserResponse = mapper.readValue(resultContent, CreateUserResponse.class);
+        assertEquals(credential.get("username"), createUserResponse.getUsername());
+        assertNotNull(createUserResponse.getAccountId());
+    }
+
+    @Then("^The server return the following message$")
+    public void verify_response_message(DataTable dt) throws Exception {
+        Map<String, String> message = dt.asMap(String.class, String.class);
+        String resultContent = requestResult.getResponse().getContentAsString();
+        assertEquals(message.get("expectedMessage"), resultContent);
     }
 
 //    @When("Test test API")
