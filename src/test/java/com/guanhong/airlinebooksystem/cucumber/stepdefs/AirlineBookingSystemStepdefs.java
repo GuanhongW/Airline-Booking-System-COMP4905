@@ -16,6 +16,7 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.DataTableType;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -90,11 +91,9 @@ public class AirlineBookingSystemStepdefs {
 
     private List<Long> defaultCustomerID = new ArrayList<>();
 
-    MvcResult requestResult;
+    private MvcResult requestResult;
 
-    private String userName;
-
-    private String password;
+    private String requestJSON = "";
 
     @Before
     public void setUp() throws Exception {
@@ -184,22 +183,20 @@ public class AirlineBookingSystemStepdefs {
                 Thread.currentThread().getId(), feature, scenario);
     }
 
-    @When("User {string} login to airline booking system by password {string}")
-    public void login_request(String userName, String password) throws Exception {
-        String requestJSON = "{\n" +
-                "  \"password\": \"" + password + "\",\n" +
-                "  \"username\": \"" + userName + "\"\n" +
+    @When("^User enters following credentials in log in page$")
+    public void login_request(DataTable dt) {
+        Map<String, String> credential = dt.asMap(String.class, String.class);
+        requestJSON = "{\n" +
+                "  \"password\": \"" + credential.get("password") + "\",\n" +
+                "  \"username\": \"" + credential.get("username") + "\"\n" +
                 "}";
-        RequestBuilder builder = post("/authenticate").accept(MediaType.APPLICATION_JSON).
-                content(requestJSON).contentType(MediaType.APPLICATION_JSON);
-        requestResult = mockMvc.perform(builder).andReturn();
 //        System.out.println("Thread ID: " + Thread.currentThread().getId() + ": " + defaultAdminUsernames.size());
     }
 
-    @When("^User register in the airline booking system by following credentials$")
-    public void register_request(DataTable dt) throws Exception {
+    @When("^User enters following credentials in register page$")
+    public void register_request(DataTable dt) {
         Map<String, String> credential = dt.asMap(String.class, String.class);
-        String requestJSON="";
+
         if (credential.get("role").equals("ADMIN")){
             requestJSON = "{\n" +
                     "  \"password\": \"" + credential.get("password") + "\",\n" +
@@ -221,10 +218,25 @@ public class AirlineBookingSystemStepdefs {
             System.out.println("The credential's role is invalid!");
             assertFalse(true);
         }
-        RequestBuilder builder = post("/register").accept(MediaType.APPLICATION_JSON).
+    }
+
+    @And("User clicks the {string} button")
+    public void click_button(String button) throws Exception {
+        String url = "";
+        switch (button){
+            case "Log In":
+                url = "/authenticate";
+                break;
+            case "Register":
+                url = "/register";
+                break;
+            default:
+                System.out.println("The button is undefine!");
+                assertFalse(true);
+        }
+        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).
                 content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         requestResult = mockMvc.perform(builder).andReturn();
-
     }
 
 

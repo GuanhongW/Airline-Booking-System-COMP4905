@@ -2,10 +2,11 @@ Feature: Verify the register function of the Airline Booking System
 
   Scenario Outline: Admin user register in the system successfully
     Given Printing the thread info for feature "Register" and scenario "correct info of admin"
-    When User register in the airline booking system by following credentials
+    When User enters following credentials in register page
       | username | <username> |
       | password | <password> |
       | role     | <role>     |
+    And User clicks the "Register" button
     Then The server return status code of 200
     Then The server return the following response for register request
       | username | <username> |
@@ -16,13 +17,14 @@ Feature: Verify the register function of the Airline Booking System
 
   Scenario Outline: Customer user register in the system successfully
     Given Printing the thread info for feature "Register" and scenario "correct info of customer"
-    When User register in the airline booking system by following credentials
+    When User enters following credentials in register page
       | username  | <username>  |
       | password  | <password>  |
       | role      | <role>      |
       | gender    | <gender>    |
       | name      | <name>      |
       | birthDate | <birthDate> |
+    And User clicks the "Register" button
     Then The server return status code of 200
     Then The server return the following response for register request
       | username | <username> |
@@ -34,10 +36,11 @@ Feature: Verify the register function of the Airline Booking System
 
   Scenario Outline: Admin user register in the system with invalid infomation
     Given Printing the thread info for feature "Register" and scenario "incorrect info of admin"
-    When User register in the airline booking system by following credentials
+    When User enters following credentials in register page
       | username | <username> |
       | password | <password> |
       | role     | <role>     |
+    And User clicks the "Register" button
     Then The server return status code of 400
     Then The server return the following message
       | expectedMessage | <expectedMessage> |
@@ -53,13 +56,14 @@ Feature: Verify the register function of the Airline Booking System
 
   Scenario Outline: Customer user register in the system with invalid infomation
     Given Printing the thread info for feature "Register" and scenario "incorrect info of customer"
-    When User register in the airline booking system by following credentials
+    When User enters following credentials in register page
       | username  | <username>  |
       | password  | <password>  |
       | role      | <role>      |
       | gender    | <gender>    |
       | name      | <name>      |
       | birthDate | <birthDate> |
+    And User clicks the "Register" button
     Then The server return status code of 400
     Then The server return the following message
       | expectedMessage | <expectedMessage> |
