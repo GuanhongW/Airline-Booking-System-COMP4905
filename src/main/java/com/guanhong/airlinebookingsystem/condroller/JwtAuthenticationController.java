@@ -40,7 +40,7 @@ public class JwtAuthenticationController {
         }
         catch (Exception e){
             log.error("URL: authenticate, Http Code: 400: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
 
