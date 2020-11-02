@@ -83,6 +83,7 @@ public class AirlineBookingSystemStepdefs {
 
     private static CucumberDataGenerator dataGenerator = CucumberDataGenerator.getInstance();
 
+
     private List<String> defaultAdminUsernames = new ArrayList<>();
 
     private List<String> defaultCustomerUsernames = new ArrayList<>();
@@ -91,9 +92,15 @@ public class AirlineBookingSystemStepdefs {
 
     private List<Long> defaultCustomerID = new ArrayList<>();
 
+    private int defaultFlightAmount = 5;
+
     private MvcResult requestResult;
 
     private String requestJSON = "";
+
+    private String jwt = "";
+
+    private long selectFlightNumber;
 
     @Before
     public void setUp() throws Exception {
@@ -150,6 +157,27 @@ public class AirlineBookingSystemStepdefs {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
 
+        // Create default flight
+        for (int i = 0; i < defaultFlightAmount; i++) {
+            long flightNumber = dataGenerator.getNextAvailableFlightNumber();
+            defaultFlights.add(flightNumber);
+            String departureCity = "YYZ";
+            String destinationCity = "YVR";
+            Time departureTime = Time.valueOf("10:05:00");
+            Time arrivalTime = Time.valueOf("12:00:00");
+            int aircraftId = 900;
+            BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+            Date startDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), 80);
+            Date endDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), 100);
+            int availableTicket = 80;
+            FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                    aircraftId, overbooking, startDate, endDate);
+            flightService.createNewFlight(newFlightRoute);
+            FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+            assertNotNull(returnedFlightRoute);
+        }
+
+        System.out.println("Before All finished.");
 
     }
 
@@ -183,6 +211,37 @@ public class AirlineBookingSystemStepdefs {
                 Thread.currentThread().getId(), feature, scenario);
     }
 
+    @Given("{string} user {int} logs in to the system")
+    public void default_user_login_system(String role, int number) throws Exception {
+        String username = "";
+        String password = "";
+        if (role.equals("Admin")) {
+            username = defaultAdminUsernames.get(number - 1);
+            if (number == 2) {
+                password = dataGenerator.ADMIN_USER_PASSWORD_1;
+            } else {
+                password = dataGenerator.ADMIN_USER_PASSWORD_0;
+            }
+        } else if (role.equals("Customer")) {
+            username = defaultCustomerUsernames.get(number - 1);
+            if (number == 2) {
+                password = dataGenerator.CUSTOMER_USER_PASSWORD_1;
+            } else {
+                password = dataGenerator.CUSTOMER_USER_PASSWORD_0;
+            }
+        } else {
+            System.out.println("Role is invalid!");
+            assertFalse(true);
+        }
+        requestJSON = "{\n" +
+                "  \"password\": \"" + password + "\",\n" +
+                "  \"username\": \"" + username + "\"\n" +
+                "}";
+        click_button("Log In");
+        verify_status_code(200);
+        verify_JWT("not empty");
+    }
+
     @When("^User enters following credentials in log in page$")
     public void login_request(DataTable dt) {
         Map<String, String> credential = dt.asMap(String.class, String.class);
@@ -196,15 +255,13 @@ public class AirlineBookingSystemStepdefs {
     @When("^User enters following credentials in register page$")
     public void register_request(DataTable dt) {
         Map<String, String> credential = dt.asMap(String.class, String.class);
-
-        if (credential.get("role").equals("ADMIN")){
+        if (credential.get("role").equals("ADMIN")) {
             requestJSON = "{\n" +
                     "  \"password\": \"" + credential.get("password") + "\",\n" +
                     "  \"role\": \"" + credential.get("role") + "\",\n" +
                     "  \"username\": \"" + credential.get("username") + "\"\n" +
                     "}";
-        }
-        else if (credential.get("role").equals("USER")) {
+        } else if (credential.get("role").equals("USER")) {
             requestJSON = "{\n" +
                     "  \"birthDate\": \"" + credential.get("birthDate") + "\",\n" +
                     "  \"gender\": \"" + credential.get("gender") + "\",\n" +
@@ -213,28 +270,57 @@ public class AirlineBookingSystemStepdefs {
                     "  \"role\": \"" + credential.get("role") + "\",\n" +
                     "  \"username\": \"" + credential.get("username") + "\"\n" +
                     "}";
-        }
-        else {
+        } else {
             System.out.println("The credential's role is invalid!");
             assertFalse(true);
         }
     }
 
+    @When("^Admin user enters following information of a new flight route in create flight page$")
+    public void create_flight_route_request(DataTable dt) {
+
+
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        if (flightInfo.get("flightNumber").equals("NEXT")){
+            selectFlightNumber = dataGenerator.getNextAvailableFlightNumber();
+        }
+        else if (flightInfo.get("flightNumber").equals("DUPLICATED")){
+            selectFlightNumber = defaultFlights.get(0);
+        }
+        else {
+            selectFlightNumber = Integer.parseInt(flightInfo.get("flightNumber"));
+        }
+        requestJSON = "{\n" +
+                "\t\"arrivalTime\": \"" + flightInfo.get("arrivalTime") + "\",\n" +
+                "\t\"aircraftId\": " + flightInfo.get("aircraftId") + ",\n" +
+                "\t\"departureCity\": \"" + flightInfo.get("departureCity") + "\",\n" +
+                "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
+                "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
+                "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
+                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
+                "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
+                "}";
+    }
+
     @And("User clicks the {string} button")
     public void click_button(String button) throws Exception {
         String url = "";
-        switch (button){
+        switch (button) {
             case "Log In":
                 url = "/authenticate";
                 break;
             case "Register":
                 url = "/register";
                 break;
+            case "Create Flight":
+                url = "/api/createFlight";
+                break;
             default:
                 System.out.println("The button is undefine!");
                 assertFalse(true);
         }
-        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).
+        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + jwt).
                 content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         requestResult = mockMvc.perform(builder).andReturn();
     }
@@ -252,6 +338,7 @@ public class AirlineBookingSystemStepdefs {
             ObjectMapper mapper = new ObjectMapper();
             UserLoginResponse userLoginResponse = mapper.readValue(resultContent, UserLoginResponse.class);
             assertNotNull(userLoginResponse.getJwttoken());
+            jwt = userLoginResponse.getJwttoken();
         } else if (status.equals("empty")) {
             assertEquals("INVALID_CREDENTIALS", resultContent);
         } else {
@@ -275,6 +362,33 @@ public class AirlineBookingSystemStepdefs {
         Map<String, String> message = dt.asMap(String.class, String.class);
         String resultContent = requestResult.getResponse().getContentAsString();
         assertEquals(message.get("expectedMessage"), resultContent);
+    }
+
+    @Then("^The server return the following response for create flight request$")
+    public void verify_response_json_create_flight(DataTable dt) throws Exception{
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        String expectedJSON = "{\n" +
+                "\t\"arrivalTime\": \"" + flightInfo.get("arrivalTime") + "\",\n" +
+                "\t\"aircraftId\": " + flightInfo.get("aircraftId") + ",\n" +
+                "\t\"departureCity\": \"" + flightInfo.get("departureCity") + "\",\n" +
+                "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
+                "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
+                "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
+                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
+                "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
+                "}";
+        JSONAssert.assertEquals(expectedJSON, requestResult.getResponse().getContentAsString(), false);
+    }
+
+    @Then("^The select flight exist in the system")
+    public void verify_selectFlight_exist(){
+        assertNotNull(flightRouteRepository.findFlightByflightNumber(selectFlightNumber));
+    }
+
+    @Then("^The select flight does not exist in the system")
+    public void verify_selectFlight_not_exist(){
+        assertNull(flightRouteRepository.findFlightByflightNumber(selectFlightNumber));
     }
 
 //    @When("Test test API")
