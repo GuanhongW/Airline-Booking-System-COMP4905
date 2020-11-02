@@ -28,7 +28,18 @@ Feature: Verify the create new flight route function of the Airline Booking Syst
       | departureTime   | <departureTime>   |
       | arrivalTime     | <arrivalTime>     |
       | overbooking     | <overbooking>     |
-    And The select flight exist in the system
+    Then The selected flight in the database have the following information
+      # Flight Number will be ignored and use the auto generated one from dataGenerator
+      | flightNumber    | <flightNumber>    |
+      | departureCity   | <departureCity>   |
+      | destinationCity | <destinationCity> |
+      | aircraftId      | <aircraftId>      |
+      # startDate and endDate is how many day start from today. It also can be negative
+      | startDate       | <startDate>       |
+      | endDate         | <endDate>         |
+      | departureTime   | <departureTime>   |
+      | arrivalTime     | <arrivalTime>     |
+      | overbooking     | <overbooking>     |
 
     Examples:
       | flightNumber | departureCity | destinationCity | aircraftId | startDate | endDate | departureTime | arrivalTime | overbooking |

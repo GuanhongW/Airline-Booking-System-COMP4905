@@ -157,9 +157,9 @@ public class FlightController {
                 log.error("Http Code: 400  URL: createFlight  update flight information is empty");
                 return ResponseEntity.badRequest().body("update flight information is empty");
             }
-            else if (newFlightRoute.getFlightNumber() == 0){
+            else if (newFlightRoute.getFlightNumber() <= 0 || newFlightRoute.getFlightNumber() >= 10000){
                 log.error("Http Code: 400  URL: updateFlight  flight number is empty or invalid.");
-                return ResponseEntity.badRequest().body("flight number is empty or invalid.");
+                return ResponseEntity.badRequest().body("Flight number is empty or invalid.");
             }
             return ResponseEntity.ok(flightService.updateFlight(newFlightRoute));
         }

@@ -922,7 +922,7 @@ public class ControllerLayerTest {
                 .accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         result = mockMvc.perform(builder).andReturn();
         assertEquals(400, result.getResponse().getStatus());
-        expectedMessage = "flight number is empty or invalid.";
+        expectedMessage = "Flight number is empty or invalid.";
         assertEquals(expectedMessage, result.getResponse().getContentAsString());
     }
 
