@@ -2,6 +2,7 @@ package com.guanhong.airlinebooksystem.cucumber.stepdefs;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.AirlineBookingSystemApplication;
 import com.guanhong.airlinebookingsystem.entity.*;
@@ -23,6 +24,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -278,8 +280,6 @@ public class AirlineBookingSystemStepdefs {
 
     @When("^Admin user enters following information of a new flight route in create flight page$")
     public void create_flight_route_request(DataTable dt) {
-
-
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         if (flightInfo.get("flightNumber").equals("NEXT")){
             selectFlightNumber = dataGenerator.getNextAvailableFlightNumber();
@@ -303,6 +303,43 @@ public class AirlineBookingSystemStepdefs {
                 "}";
     }
 
+    @When("User clicks {string} in side menu")
+    public void click_side_menu(String menu) throws Exception{
+        String url = "";
+        switch (menu){
+            case "Cancel Flight":
+                url = "/api/getFlightRoutes";
+                break;
+            default:
+                System.out.println("The side menu is undefined!");
+                assertFalse(true);
+
+        }
+        RequestBuilder builder = get(url).accept(MediaType.APPLICATION_JSON).
+                header("Authorization", "Bearer " + jwt);
+        requestResult = mockMvc.perform(builder).andReturn();
+    }
+
+    @When("^Admin user enters following information to cancel new flight route in cancel flight page$")
+    public void cancel_flight_route_request(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        try {
+            String[] defaultFlightNumber = flightInfo.get("flightNumber").split(":");
+            if (defaultFlightNumber[0].equals("DEFAULT")){
+                selectFlightNumber = defaultFlights.get(Integer.parseInt(defaultFlightNumber[1])-1);
+            }
+        }
+        catch (Exception e){
+            if (flightInfo.get("flightNumber").equals("NON_EXISTENT")){
+                selectFlightNumber = dataGenerator.NON_EXISTENT_FLIGHT_NUMBER;
+            }
+            selectFlightNumber = Long.parseLong(flightInfo.get("flightNumber"));
+        }
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + selectFlightNumber + "\n" +
+                "}";
+    }
+
     @And("User clicks the {string} button")
     public void click_button(String button) throws Exception {
         String url = "";
@@ -316,11 +353,15 @@ public class AirlineBookingSystemStepdefs {
             case "Create Flight":
                 url = "/api/createFlight";
                 break;
+            case "Cancel Flight":
+                url = "/api/cancelFlightRoute";
+                break;
             default:
-                System.out.println("The button is undefine!");
+                System.out.println("The button is undefined!");
                 assertFalse(true);
         }
-        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + jwt).
+        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).
+                header("Authorization", "Bearer " + jwt).
                 content(requestJSON).contentType(MediaType.APPLICATION_JSON);
         requestResult = mockMvc.perform(builder).andReturn();
     }
@@ -389,6 +430,47 @@ public class AirlineBookingSystemStepdefs {
     @Then("^The select flight does not exist in the system")
     public void verify_selectFlight_not_exist(){
         assertNull(flightRouteRepository.findFlightByflightNumber(selectFlightNumber));
+    }
+
+    @Then("The flight {string} includes in get flight routes request")
+    public void verify_default_flight(String flightNumbers) throws Exception {
+        List<Long> flightList = new ArrayList<>();
+
+        if (flightNumbers.equals("DEFAULT")){
+            flightList.addAll(defaultFlights);
+        }
+        else {
+            try{
+                String[] flights = flightNumbers.split(", ");
+                for (String flight: flights){
+                    flightList.add(Long.parseLong(flight));
+                }
+            }
+            catch (Exception e){
+                System.out.println(e.getMessage());
+                assertFalse(true);
+            }
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<FlightRoute> flightRoutes = mapper.readValue(requestResult.getResponse().getContentAsString()
+                , new TypeReference<List<FlightRoute>>() {
+        });
+        for (Long flightNumber: flightList){
+            assertTrue(validFlightExistInList(flightRoutes, flightNumber));
+        }
+
+
+
+    }
+
+    private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
+        for (int i = 0; i < flightRouteList.size(); i++) {
+            if (flightRouteList.get(i).getFlightNumber() == flightNumber) {
+                return true;
+            }
+        }
+        return false;
     }
 
 //    @When("Test test API")

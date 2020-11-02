@@ -35,7 +35,7 @@ Feature: Verify the create new flight route function of the Airline Booking Syst
       | NEXT         | YOW           | YYZ             | 200        | 20        | 30      | 18:00:00      | 19:10:00    | 6           |
 
   Scenario Outline: Admin user create a new flight route in the airline booking system - Failed (duplicated)
-    Given Printing the thread info for feature "Create Flight Route" and scenario "Admin user creates flight route successfully"
+    Given Printing the thread info for feature "Create Flight Route" and scenario "Admin user creates flight route failed (duplicated)"
     Given "Admin" user 1 logs in to the system
     When Admin user enters following information of a new flight route in create flight page
       # Flight Number will be ignored and use the auto generated one from dataGenerator
@@ -60,7 +60,7 @@ Feature: Verify the create new flight route function of the Airline Booking Syst
       | DUPLICATED   | YOW           | YYZ             | 200        | 20        | 30      | 18:00:00      | 19:10:00    | 6           | The flight number already be used. |
 
   Scenario Outline: Admin user create a new flight route in the airline booking system - Failed
-    Given Printing the thread info for feature "Create Flight Route" and scenario "Admin user creates flight route successfully"
+    Given Printing the thread info for feature "Create Flight Route" and scenario "Admin user creates flight route failed"
     Given "Admin" user 1 logs in to the system
     When Admin user enters following information of a new flight route in create flight page
       # Flight Number will be ignored and use the auto generated one from dataGenerator
