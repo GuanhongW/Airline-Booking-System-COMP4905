@@ -94,7 +94,7 @@ public class ConcurrentTest {
 
         // Create default customer user
         int userAmount = 25;
-        for (int i =  0; i < userAmount; i++){
+        for (int i = 0; i < userAmount; i++) {
             testUsername = constants.getNextCustomerUsername();
             defaultCustomerUsernames.add(testUsername);
             newUserInfo = new AccountInfo(testUsername, constants.CUSTOMER_USER_PASSWORD_0, Role.USER, "test", Gender.male, "2000-01-01");
@@ -167,7 +167,7 @@ public class ConcurrentTest {
             List<Flight> emptyFlights = new ArrayList<>();
             assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
             List<UnavailableSeatInfo> emptyList = new ArrayList<>();
-            for (int j = 0; j < flights.size(); j++){
+            for (int j = 0; j < flights.size(); j++) {
                 assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
             }
         }
@@ -188,19 +188,19 @@ public class ConcurrentTest {
 
         // Set up builders
         List<RequestBuilder> builders = new ArrayList<>();
-        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
-            RequestBuilder builder = post("/bookFlight").header("Authorization", "Bearer " + jwt).
+            RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
             builders.add(builder);
         }
 
         // Start threads to book flight
         List<Thread> threadList = new ArrayList<>();
-        for (int i = 0; i < defaultCustomerUsernames.size(); i++){
+        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
             int finalI0 = i;
             int finalI1 = i;
-            Thread thread = new Thread(){
+            Thread thread = new Thread() {
                 public void run() {
                     try {
                         System.out.println(this.getName() + ": Start thread " + finalI1);
@@ -217,21 +217,23 @@ public class ConcurrentTest {
             threadList.add(thread);
         }
 
-        try{
-            for (Thread thread: threadList){
+        try {
+            for (Thread thread : threadList) {
                 thread.join();
             }
-        }
-        catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         // Verify the left ticket + booked ticket is full amount
+
         int bookedTicketNum = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId()).size();
         int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets();
         System.out.println("Booked Ticket Num: " + bookedTicketNum);
         System.out.println("New Available Ticket: " + newAvailableTicket);
-        assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
+        // The flight still available, so the bookedTicketNum has to greater than 0
+        assertNotEquals(0, bookedTicketNum);
+        assertEquals(totalAvailableSeat, bookedTicketNum + newAvailableTicket);
     }
 
     @Test
@@ -247,8 +249,9 @@ public class ConcurrentTest {
                 "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + "\n" +
                 "}";
         List<RequestBuilder> flightBuilders = new ArrayList<>();
-        int ticketAmount = 10;
-        for (int i = 0; i < ticketAmount; i++){
+        // Change ticket amount to change how many user try to book the same seat at the same time
+        int ticketAmount = 2;
+        for (int i = 0; i < ticketAmount; i++) {
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
             RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
@@ -256,7 +259,7 @@ public class ConcurrentTest {
         }
 
         // book flight
-        for (int i = 0; i < flightBuilders.size(); i++){
+        for (int i = 0; i < flightBuilders.size(); i++) {
             MvcResult result = mockMvc.perform(flightBuilders.get(i)).andReturn();
             String content = result.getResponse().getContentAsString();
             String validJSON = "{\n" +
@@ -271,11 +274,11 @@ public class ConcurrentTest {
         int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets();
         System.out.println("Booked Ticket Num: " + bookedTicketNum);
         System.out.println("New Available Ticket: " + newAvailableTicket);
-        assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
+        assertEquals(totalAvailableSeat, bookedTicketNum + newAvailableTicket);
 
         // Set up seatBuilders
         List<RequestBuilder> seatBuilders = new ArrayList<>();
-        for (int i = 0; i < ticketAmount; i++){
+        for (int i = 0; i < ticketAmount; i++) {
             int selectSeatNumber = 1;
             requestJSON = "{\n" +
                     "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
@@ -291,10 +294,10 @@ public class ConcurrentTest {
 
         // Start threads to book flight
         List<Thread> threadList = new ArrayList<>();
-        for (int i = 0; i < seatBuilders.size(); i++){
+        for (int i = 0; i < seatBuilders.size(); i++) {
             int finalI0 = i;
             int finalI1 = i;
-            Thread thread = new Thread(){
+            Thread thread = new Thread() {
                 public void run() {
                     try {
                         System.out.println(this.getName() + ": Start thread " + finalI1);
@@ -310,12 +313,11 @@ public class ConcurrentTest {
             threadList.add(thread);
         }
 
-        try{
-            for (Thread thread: threadList){
+        try {
+            for (Thread thread : threadList) {
                 thread.join();
             }
-        }
-        catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -325,8 +327,8 @@ public class ConcurrentTest {
         // Verify Ticket
         List<Ticket> tickets = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId());
         int seatAmount = 0;
-        for (int i = 0; i < tickets.size(); i++){
-            if (tickets.get(i).getSeatNumber() != null){
+        for (int i = 0; i < tickets.size(); i++) {
+            if (tickets.get(i).getSeatNumber() != null) {
                 seatAmount++;
             }
         }
@@ -347,7 +349,7 @@ public class ConcurrentTest {
                 "}";
         List<RequestBuilder> flightBuilders = new ArrayList<>();
         int ticketAmount = 10;
-        for (int i = 0; i < ticketAmount; i++){
+        for (int i = 0; i < ticketAmount; i++) {
             String jwt = getJWTByUsername(defaultCustomerUsernames.get(i), constants.CUSTOMER_USER_PASSWORD_0);
             RequestBuilder builder = post("/api/bookFlight").header("Authorization", "Bearer " + jwt).
                     accept(MediaType.APPLICATION_JSON).content(requestJSON).contentType(MediaType.APPLICATION_JSON);
@@ -355,7 +357,7 @@ public class ConcurrentTest {
         }
 
         // book flight
-        for (int i = 0; i < flightBuilders.size(); i++){
+        for (int i = 0; i < flightBuilders.size(); i++) {
             MvcResult result = mockMvc.perform(flightBuilders.get(i)).andReturn();
             String content = result.getResponse().getContentAsString();
             String validJSON = "{\n" +
@@ -370,12 +372,12 @@ public class ConcurrentTest {
         int newAvailableTicket = flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets();
         System.out.println("Booked Ticket Num: " + bookedTicketNum);
         System.out.println("New Available Ticket: " + newAvailableTicket);
-        assertEquals(totalAvailableSeat, bookedTicketNum+newAvailableTicket);
+        assertEquals(totalAvailableSeat, bookedTicketNum + newAvailableTicket);
 
         // Set up seatBuilders
         List<RequestBuilder> seatBuilders = new ArrayList<>();
-        for (int i = 0; i < ticketAmount; i++){
-            int selectSeatNumber = i+1;
+        for (int i = 0; i < ticketAmount; i++) {
+            int selectSeatNumber = i + 1;
             requestJSON = "{\n" +
                     "  \"flightDate\": \"" + availableFlights.get(flightIndex).getFlightDate().toString() + "\",\n" +
                     "  \"flightNumber\": " + availableFlights.get(flightIndex).getFlightNumber() + ",\n" +
@@ -390,10 +392,10 @@ public class ConcurrentTest {
 
         // Start threads to book flight
         List<Thread> threadList = new ArrayList<>();
-        for (int i = 0; i < seatBuilders.size(); i++){
+        for (int i = 0; i < seatBuilders.size(); i++) {
             int finalI0 = i;
             int finalI1 = i;
-            Thread thread = new Thread(){
+            Thread thread = new Thread() {
                 public void run() {
                     try {
                         System.out.println(this.getName() + ": Start thread " + finalI1);
@@ -409,12 +411,11 @@ public class ConcurrentTest {
             threadList.add(thread);
         }
 
-        try{
-            for (Thread thread: threadList){
+        try {
+            for (Thread thread : threadList) {
                 thread.join();
             }
-        }
-        catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -424,8 +425,8 @@ public class ConcurrentTest {
         // Verify Ticket
         List<Ticket> tickets = ticketRepository.findTicketsByFlightId(availableFlights.get(flightIndex).getFlightId());
         int seatAmount = 0;
-        for (int i = 0; i < tickets.size(); i++){
-            if (tickets.get(i).getSeatNumber() != null){
+        for (int i = 0; i < tickets.size(); i++) {
+            if (tickets.get(i).getSeatNumber() != null) {
                 seatAmount++;
             }
         }
@@ -449,7 +450,6 @@ public class ConcurrentTest {
             return null;
         }
     }
-
 
 
     private void validFlightInfo(FlightRoute expectedFlightRoute, long actualFlightNumber, int availableTickets,
