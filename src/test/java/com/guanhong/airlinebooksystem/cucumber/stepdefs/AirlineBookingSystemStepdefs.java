@@ -20,6 +20,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,10 +33,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +79,8 @@ public class AirlineBookingSystemStepdefs {
     private FlightRepository flightRepository;
     @Autowired
     private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
+    @Autowired
+    private TicketRepository ticketRepository;
 
     private static CucumberDataGenerator dataGenerator = CucumberDataGenerator.getInstance();
 
@@ -95,7 +101,9 @@ public class AirlineBookingSystemStepdefs {
 
     private String jwt = "";
 
-    private long selectFlightNumber;
+    private long selectedFlightNumber;
+
+    private int selectedFlightAvailableTickets;
 
     private FlightRoute originalFlightRoute;
 
@@ -276,7 +284,7 @@ public class AirlineBookingSystemStepdefs {
     @When("^Admin user enters following information of a new flight route in create flight page$")
     public void create_flight_route_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
-        selectFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        selectedFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
         requestJSON = "{\n" +
                 "\t\"arrivalTime\": \"" + flightInfo.get("arrivalTime") + "\",\n" +
                 "\t\"aircraftId\": " + flightInfo.get("aircraftId") + ",\n" +
@@ -284,7 +292,7 @@ public class AirlineBookingSystemStepdefs {
                 "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
                 "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
                 "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
-                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"flightNumber\": " + selectedFlightNumber + ",\n" +
                 "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
                 "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
                 "}";
@@ -293,7 +301,7 @@ public class AirlineBookingSystemStepdefs {
     @When("^Admin user enters following information of a existent flight route in update flight page$")
     public void update_flight_route_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
-        selectFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        selectedFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
         requestJSON = "{\n" +
                 "\t\"arrivalTime\": \"" + flightInfo.get("arrivalTime") + "\",\n" +
                 "\t\"aircraftId\": " + flightInfo.get("aircraftId") + ",\n" +
@@ -301,7 +309,7 @@ public class AirlineBookingSystemStepdefs {
                 "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
                 "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
                 "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
-                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"flightNumber\": " + selectedFlightNumber + ",\n" +
                 "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
                 "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
                 "}";
@@ -317,6 +325,9 @@ public class AirlineBookingSystemStepdefs {
             case "Update Flight":
                 url = "/api/getFlightRoutes";
                 break;
+            case "Book Flight":
+                url = "/api/getFlightRoutes";
+                break;
             default:
                 System.out.println("The side menu is undefined!");
                 assertFalse(true);
@@ -330,14 +341,20 @@ public class AirlineBookingSystemStepdefs {
     @When("^Admin user enters following information to cancel new flight route in cancel flight page$")
     public void cancel_flight_route_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
-        selectFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        selectedFlightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
         requestJSON = "{\n" +
-                "  \"flightNumber\": " + selectFlightNumber + "\n" +
+                "  \"flightNumber\": " + selectedFlightNumber + "\n" +
                 "}";
+    }
+
+    @When("User select flight {string}")
+    public void user_select_flight(String flightNumber) {
+        selectedFlightNumber = getSelectFlightNumber(flightNumber);
     }
 
     @And("User clicks the {string} button")
     public void click_button(String button) throws Exception {
+        boolean isPost = true;
         String url = "";
         switch (button) {
             case "Log In":
@@ -355,16 +372,52 @@ public class AirlineBookingSystemStepdefs {
             case "Update Flight":
                 url = "/api/updateFlight";
                 break;
+            case "Check Flight":
+                url = "/api/getFlightsByFlightNumber";
+                isPost = false;
+                break;
+            case "Book Flight":
+                url = "/api/bookFlight";
+                break;
             default:
                 System.out.println("The button is undefined!");
                 assertFalse(true);
         }
-        RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).
-                header("Authorization", "Bearer " + jwt).
-                content(requestJSON).contentType(MediaType.APPLICATION_JSON);
-        requestResult = mockMvc.perform(builder).andReturn();
+        if (isPost) {
+            RequestBuilder builder = post(url).accept(MediaType.APPLICATION_JSON).
+                    header("Authorization", "Bearer " + jwt).
+                    content(requestJSON).contentType(MediaType.APPLICATION_JSON);
+            requestResult = mockMvc.perform(builder).andReturn();
+        } else {
+            if (url.equals("/api/getFlightsByFlightNumber")) {
+                RequestBuilder builder = get(url).accept(MediaType.APPLICATION_JSON).
+                        header("Authorization", "Bearer " + jwt).param("flightNumber", String.valueOf(selectedFlightNumber));
+                requestResult = mockMvc.perform(builder).andReturn();
+            }
+
+        }
     }
 
+    @And("^User enters the flight date in book flight page$")
+    public void set_travel_date(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
+                "  \"flightDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate"))) + "\"\n" +
+                "}";
+    }
+
+    @And("^System record the current available ticket amount for following flight$")
+    public void record_current_availableTickets(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate")));
+        Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate);
+        selectedFlightAvailableTickets = returnedFlight.getAvailableTickets();
+    }
 
     @Then("The server return status code of {int}")
     public void verify_status_code(int httpCode) {
@@ -414,7 +467,7 @@ public class AirlineBookingSystemStepdefs {
                 "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
                 "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
                 "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
-                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"flightNumber\": " + selectedFlightNumber + ",\n" +
                 "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
                 "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
                 "}";
@@ -431,21 +484,40 @@ public class AirlineBookingSystemStepdefs {
                 "\t\"departureTime\": \"" + flightInfo.get("departureTime") + "\",\n" +
                 "\t\"destinationCity\": \"" + flightInfo.get("destinationCity") + "\",\n" +
                 "\t\"endDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))) + "\",\n" +
-                "\t\"flightNumber\": " + selectFlightNumber + ",\n" +
+                "\t\"flightNumber\": " + selectedFlightNumber + ",\n" +
                 "\t\"overbooking\": " + flightInfo.get("overbooking") + ",\n" +
                 "\t\"startDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))) + "\"\n" +
                 "}";
         JSONAssert.assertEquals(expectedJSON, requestResult.getResponse().getContentAsString(), false);
     }
 
+    @Then("^The server return the following response for book flight request$")
+    public void verify_response_json_book_flight(DataTable dt) throws Exception {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
+        Integer seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        String expectedJSON = "{\n" +
+                "\t\"flightId\": " + flightId + ",\n" +
+                "\t\"customerId\": " + customerId + ",\n" +
+                "\t\"seatNumber\": " + seatNumber + ",\n" +
+                "\t\"flightDate\": \"" + flightDate.toString() + "\",\n" +
+                "\t\"flightNumber\": " + selectedFlightNumber + "\n" +
+                "}";
+        JSONAssert.assertEquals(expectedJSON, requestResult.getResponse().getContentAsString(), JSONCompareMode.LENIENT);
+
+    }
+
     @Then("^The select flight exist in the system")
     public void verify_selectFlight_exist() {
-        assertNotNull(flightRouteRepository.findFlightByflightNumber(selectFlightNumber));
+        assertNotNull(flightRouteRepository.findFlightByflightNumber(selectedFlightNumber));
     }
 
     @Then("^The select flight does not exist in the system")
     public void verify_selectFlight_not_exist() {
-        assertNull(flightRouteRepository.findFlightByflightNumber(selectFlightNumber));
+        assertNull(flightRouteRepository.findFlightByflightNumber(selectedFlightNumber));
     }
 
     @Then("The flight {string} includes in get flight routes request")
@@ -478,7 +550,7 @@ public class AirlineBookingSystemStepdefs {
     @Then("^The selected flight in the database have the following information$")
     public void verify_selectFlight_info(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
-        FlightRoute expectedFlightRoute = new FlightRoute(selectFlightNumber,
+        FlightRoute expectedFlightRoute = new FlightRoute(selectedFlightNumber,
                 flightInfo.get("departureCity"),
                 flightInfo.get("destinationCity"),
                 Time.valueOf(flightInfo.get("departureTime")),
@@ -487,20 +559,72 @@ public class AirlineBookingSystemStepdefs {
                 BigDecimal.valueOf(Integer.parseInt(flightInfo.get("overbooking"))).setScale(2),
                 dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("startDate"))),
                 dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("endDate"))));
-        validFlightInfo(expectedFlightRoute, selectFlightNumber, 0, false, false);
+        validFlightInfo(expectedFlightRoute, selectedFlightNumber, 0, false, false);
 
     }
 
+    @Then("The server returns all flights by the flight number {string}")
+    public void verify_flights_by_flightNumber(String flightNumberStr) {
+        long flightNumber = getSelectFlightNumber(flightNumberStr);
+        FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+        LocalDate startDate = LocalDate.parse(flightRoute.getStartDate().toString());
+        LocalDate endDate = LocalDate.parse(flightRoute.getEndDate().toString());
+        long flightAmount = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        assertEquals(flightAmount, flights.size());
+    }
+
+    @Then("^User get the following ticket$")
+    public void verify_ticket(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
+        Integer seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        Ticket returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customerId, flightId);
+        assertNotNull(returnedTicket);
+        assertEquals(flightNumber, returnedTicket.getFlightNumber());
+        assertEquals(seatNumber, returnedTicket.getSeatNumber());
+        assertEquals(flightDate, returnedTicket.getFlightDate());
+        assertNotNull(returnedTicket.getTicketId());
+    }
+
+    @Then("^User does not get the following ticket$")
+    public void verify_non_ticket(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        List<Ticket> tickets = ticketRepository.findTicketsByCustomerId(customerId);
+        for (Ticket ticket : tickets) {
+            assertFalse(flightNumber == ticket.getFlightNumber() && flightDate.compareTo(ticket.getFlightDate()) == 0);
+        }
+
+    }
+
+    @Then("^Verify the change of available ticket amount of the following flight$")
+    public void verify_new_availableTickets(DataTable dt) {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate")));
+        Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate);
+        int expectedAvailableTickets = selectedFlightAvailableTickets - Integer.parseInt(flightInfo.get("tickets"));
+        assertEquals(expectedAvailableTickets, returnedFlight.getAvailableTickets());
+    }
+
     @And("User records the original flight information for flight {string}")
-    public void record_original_flight_route(String flightNumberStr){
+    public void record_original_flight_route(String flightNumberStr) {
         long flightNumber = getSelectFlightNumber(flightNumberStr);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
         originalFlightRoute = new FlightRoute(returnedFlightRoute);
     }
 
     @Then("The selected flight does not change")
-    public void veirfy_flight_does_not_change(){
-        validFlightInfo(originalFlightRoute, selectFlightNumber, 0,false,false);
+    public void veirfy_flight_does_not_change() {
+        validFlightInfo(originalFlightRoute, selectedFlightNumber, 0, false, false);
     }
 
     private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
@@ -522,8 +646,27 @@ public class AirlineBookingSystemStepdefs {
             return dataGenerator.getNextAvailableFlightNumber();
         } else if (flightNumber.equals("DUPLICATED")) {
             return defaultFlights.get(0);
+        } else if (flightNumber.equals("NON-EXISTENT")) {
+            return dataGenerator.NON_EXISTENT_FLIGHT_NUMBER;
         } else {
             return Long.parseLong(flightNumber);
+        }
+    }
+
+    private long getCustomerID(String customer) {
+        if (customer.contains("DEFAULT")) {
+            String[] customerIndex = customer.split(":");
+            return defaultCustomerID.get(Integer.parseInt(customerIndex[1]) - 1);
+        } else {
+            return defaultCustomerID.get(Integer.parseInt(customer) - 1);
+        }
+    }
+
+    private Integer getSeatNumber(String seatNumber) {
+        if (seatNumber.equals("NULL")) {
+            return null;
+        } else {
+            return Integer.parseInt(seatNumber);
         }
     }
 

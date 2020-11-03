@@ -57,7 +57,7 @@ Feature: Verify the update flight function of the Airline Booking System
       | DEFAULT:1    | YYZ           | YVR             | 900        | 80        | 82      | 10:05:00      | 12:00:00    | 6           |
 
   Scenario Outline: Admin user update an existent flight route in the airline booking system - Failed
-    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user cancel flight route successfully"
+    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user update flight route failed"
     Given "Admin" user 1 logs in to the system
     When User clicks "Update Flight" in side menu
     Then The server return status code of 200
@@ -90,7 +90,7 @@ Feature: Verify the update flight function of the Airline Booking System
       | DEFAULT:5    | YYZ           | YVR             | 900        | 80        | 82      | 10:05:00      | 12:00:00    | 10.01       | Flight's overbooking allowance should between 0% to 10%              |
 
   Scenario Outline: Admin user update an existent flight route in the airline booking system - Failed (NON-EXISTENT)
-    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user cancel flight route successfully"
+    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user Update flight route failed (NON-EXISTENT)"
     Given "Admin" user 1 logs in to the system
     When User clicks "Update Flight" in side menu
     Then The server return status code of 200

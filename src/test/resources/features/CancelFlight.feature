@@ -16,7 +16,7 @@ Feature: Verify the cancel flight function of the Airline Booking System
       | DEFAULT:1    |
 
   Scenario Outline: Admin user cancel an existent flight route in the airline booking system - Failed
-    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user cancel flight route successfully"
+    Given Printing the thread info for feature "Cancel Flight Route" and scenario "Admin user cancel flight route failed"
     Given "Admin" user 1 logs in to the system
     When User clicks "Cancel Flight" in side menu
     Then The server return status code of 200
