@@ -267,6 +267,12 @@ public class CancelTicketTest {
         exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest3, customerId));
         exceptedMessage = "The flight does not exist in the system.";
         assertEquals(exceptedMessage, exception.getMessage());
+
+        // The flight number is invalid
+        FlightRequest flightRequest4 = new FlightRequest((long)0, bookedFlightDate);
+        exception = assertThrows(ClientException.class, ()->ticketService.cancelTicket(flightRequest4, customerId));
+        exceptedMessage = "The flight does not exist in the system.";
+        assertEquals(exceptedMessage, exception.getMessage());
     }
 
 }

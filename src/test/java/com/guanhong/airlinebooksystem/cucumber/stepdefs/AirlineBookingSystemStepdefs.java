@@ -353,6 +353,9 @@ public class AirlineBookingSystemStepdefs {
             case "Book Seat":
                 url = "/api/getTicketByCustomer";
                 break;
+            case "Cancel Ticket":
+                url = "/api/getTicketByCustomer";
+                break;
             default:
                 System.out.println("The side menu is undefined!");
                 assertFalse(true);
@@ -407,6 +410,9 @@ public class AirlineBookingSystemStepdefs {
             case "Book Seat":
                 url = "/api/bookSeat";
                 break;
+            case "Cancel Ticket":
+                url = "/api/cancelTicket";
+                break;
             default:
                 System.out.println("The button is undefined!");
                 assertFalse(true);
@@ -445,6 +451,16 @@ public class AirlineBookingSystemStepdefs {
                 "  \"flightDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(),
                 Integer.parseInt(flightInfo.get("flightDate"))) + "\",\n" +
                 "  \"seatNumber\": " + getSeatNumber(flightInfo.get("seatNumber")) + "\n" +
+                "}";
+    }
+
+    @And("^User enters the following flight in cancel ticket page$")
+    public void cancel_ticket_request(DataTable dt){
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
+                "  \"flightDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate"))) + "\"\n" +
                 "}";
     }
 

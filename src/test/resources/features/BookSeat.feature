@@ -114,6 +114,10 @@ Feature: Verify the book seat function of the Airline Booking System
       | flightDate   | <flightDate>   |
     When User clicks "Book Seat" in side menu
     Then The server return status code of 200
+    Then Verify the following ticket status in the server response
+      | flightNumber    | <flightNumber> |
+      | flightDate      | <flightDate>   |
+      | existInResponse | TRUE           |
     And User enters the seat in book seat page
       | flightNumber | <flightNumber> |
       | flightDate   | <flightDate>   |
