@@ -306,6 +306,78 @@ public class BookSeatTest {
 
     }
 
+    @Test
+    @Transactional
+    void bookSeat_Invalid_Non_Existent_Flight_Failed() throws Exception {
+        // Let customer book the flight
+        int flightRouteIndex = 0;
+        int customerIndex = 1;
+        int flightIndex = 3;
+
+        // Get all flight by Default flight number
+        List<Flight> availableFlights = flightService.getAllAvailableFlightsByFlightNumber(defaultFlights.get(flightRouteIndex));
+        User customer = jwtUserDetailsService.getUserByUsername(defaultCustomerUsernames.get(customerIndex));
+
+        // Book the flight for one day after index date
+        FlightRequest selectedFlight = new FlightRequest(availableFlights.get(flightIndex+1).getFlightNumber(), availableFlights.get(flightIndex+1).getFlightDate());
+        Ticket originalTicket1 = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight, customer.getId()));
+        assertNull(originalTicket1.getSeatNumber());
+
+        // Test 1: The flight is not existed
+        int selectSeatNumber = 10;
+        BookSeatRequest bookSeatRequest1 = new BookSeatRequest(constants.NON_EXISTENT_FLIGHT_NUMBER,
+                availableFlights.get(flightIndex).getFlightDate(), selectSeatNumber);
+        ClientException exception = assertThrows(ClientException.class, ()-> ticketService.bookSeat(bookSeatRequest1, customer.getId()));
+        String expectedMessage = "The flight does not existed in the system.";
+        assertEquals(expectedMessage, exception.getMessage());
+        // Verify the ticket did not update
+        Ticket returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customer.getId(),availableFlights.get(flightIndex).getFlightId());
+        assertNull(returnedTicket);
+        // Verify the seat reservation of select index flight is empty
+        List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+        assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId()));
+
+        // Test 2: The flight number is not valid (flight number is 0)
+        BookSeatRequest bookSeatRequest2 = new BookSeatRequest((long)0,
+                availableFlights.get(flightIndex).getFlightDate(), selectSeatNumber);
+        exception = assertThrows(ClientException.class, ()-> ticketService.bookSeat(bookSeatRequest2, customer.getId()));
+        expectedMessage = "The flight does not existed in the system.";
+        assertEquals(expectedMessage, exception.getMessage());
+        // Verify the ticket did not update
+        returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customer.getId(),availableFlights.get(flightIndex).getFlightId());
+        assertNull(returnedTicket);
+        // Verify the seat reservation of select index flight is empty
+        emptyList = new ArrayList<>();
+        assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId()));
+
+        // Test 3: The flight number is not valid (flight number is -1)
+        BookSeatRequest bookSeatRequest3 = new BookSeatRequest((long)-1,
+                availableFlights.get(flightIndex).getFlightDate(), selectSeatNumber);
+        exception = assertThrows(ClientException.class, ()-> ticketService.bookSeat(bookSeatRequest3, customer.getId()));
+        expectedMessage = "The flight does not existed in the system.";
+        assertEquals(expectedMessage, exception.getMessage());
+        // Verify the ticket did not update
+        returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customer.getId(),availableFlights.get(flightIndex).getFlightId());
+        assertNull(returnedTicket);
+        // Verify the seat reservation of select index flight is empty
+        emptyList = new ArrayList<>();
+        assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId()));
+
+        // Test 4: The flight number is not valid (flight number is 10000)
+        BookSeatRequest bookSeatRequest4 = new BookSeatRequest((long)10000,
+                availableFlights.get(flightIndex).getFlightDate(), selectSeatNumber);
+        exception = assertThrows(ClientException.class, ()-> ticketService.bookSeat(bookSeatRequest4, customer.getId()));
+        expectedMessage = "The flight does not existed in the system.";
+        assertEquals(expectedMessage, exception.getMessage());
+        // Verify the ticket did not update
+        returnedTicket = ticketRepository.findTicketByCustomerIdAndFlightId(customer.getId(),availableFlights.get(flightIndex).getFlightId());
+        assertNull(returnedTicket);
+        // Verify the seat reservation of select index flight is empty
+        emptyList = new ArrayList<>();
+        assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(availableFlights.get(flightIndex).getFlightId()));
+
+    }
+
 
     private void validTicket(Ticket originalTicket, long ticketId, Integer newSeatNumber){
         Ticket newTicket = ticketRepository.findTicketByTicketId(ticketId);

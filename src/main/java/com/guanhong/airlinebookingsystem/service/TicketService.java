@@ -70,6 +70,9 @@ public class TicketService {
     public Ticket bookSeat(BookSeatRequest bookSeatRequest, long customerId) throws Exception {
         Flight flight = flightRepository.findFlightByFlightNumberAndFlightDate(bookSeatRequest.getFlightNumber(),
                 bookSeatRequest.getFlightDate());
+        if (flight == null){
+            throw new ClientException("The flight does not existed in the system.", HttpStatus.BAD_REQUEST);
+        }
         // Valid if the customer book the ticket
         Ticket originalTicket = validTicket(flight.getFlightId(), customerId);
         // Valid if the seat is available, if it is available, create the new entity in DB

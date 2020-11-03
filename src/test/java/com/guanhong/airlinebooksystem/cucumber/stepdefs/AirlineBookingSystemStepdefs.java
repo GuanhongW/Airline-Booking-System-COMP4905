@@ -17,6 +17,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.java.eo.Se;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -34,6 +35,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.xml.crypto.Data;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -247,6 +249,26 @@ public class AirlineBookingSystemStepdefs {
         verify_JWT("not empty");
     }
 
+    @Given("^User books the following flight$")
+    public void user_book_ticket(DataTable dt) throws Exception {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        bookTicket(customerId, flightNumber, flightDate);
+    }
+
+    @Given("^User book the following ticket and seat$")
+    public void user_book_ticket_seat(DataTable dt) throws Exception {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        int seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
+        bookTicket(customerId, flightNumber, flightDate);
+        bookSeat(customerId,flightNumber,flightDate,seatNumber);
+    }
+
     @When("^User enters following credentials in log in page$")
     public void login_request(DataTable dt) {
         Map<String, String> credential = dt.asMap(String.class, String.class);
@@ -328,6 +350,9 @@ public class AirlineBookingSystemStepdefs {
             case "Book Flight":
                 url = "/api/getFlightRoutes";
                 break;
+            case "Book Seat":
+                url = "/api/getTicketByCustomer";
+                break;
             default:
                 System.out.println("The side menu is undefined!");
                 assertFalse(true);
@@ -379,6 +404,9 @@ public class AirlineBookingSystemStepdefs {
             case "Book Flight":
                 url = "/api/bookFlight";
                 break;
+            case "Book Seat":
+                url = "/api/bookSeat";
+                break;
             default:
                 System.out.println("The button is undefined!");
                 assertFalse(true);
@@ -399,13 +427,24 @@ public class AirlineBookingSystemStepdefs {
     }
 
     @And("^User enters the flight date in book flight page$")
-    public void set_travel_date(DataTable dt) {
+    public void book_flight_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
 
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
                 "  \"flightDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(),
                 Integer.parseInt(flightInfo.get("flightDate"))) + "\"\n" +
+                "}";
+    }
+
+    @And("^User enters the seat in book seat page$")
+    public void book_seat_request(DataTable dt){
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        requestJSON = "{\n" +
+                "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
+                "  \"flightDate\": \"" + dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate"))) + "\",\n" +
+                "  \"seatNumber\": " + getSeatNumber(flightInfo.get("seatNumber")) + "\n" +
                 "}";
     }
 
@@ -457,6 +496,16 @@ public class AirlineBookingSystemStepdefs {
         assertEquals(message.get("expectedMessage"), resultContent);
     }
 
+    @Then("^The server return the following failed message for book seat request because of reserved seat$")
+    public void verify_response_book_seat_reservedSeat(DataTable dt) throws Exception {
+        Map<String, String> message = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(message.get("flightNumber"));
+        int seatNumber = getSeatNumber(message.get("seatNumber"));
+        String resultContent = requestResult.getResponse().getContentAsString();
+        assertEquals("The seat " + seatNumber + " in the flight " + flightNumber + " is not available.",
+                resultContent);
+    }
+
     @Then("^The server return the following response for create flight request$")
     public void verify_response_json_create_flight(DataTable dt) throws Exception {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
@@ -493,21 +542,12 @@ public class AirlineBookingSystemStepdefs {
 
     @Then("^The server return the following response for book flight request$")
     public void verify_response_json_book_flight(DataTable dt) throws Exception {
-        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
-        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
-        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
-        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
-        Integer seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
-        long customerId = getCustomerID(flightInfo.get("customer"));
-        String expectedJSON = "{\n" +
-                "\t\"flightId\": " + flightId + ",\n" +
-                "\t\"customerId\": " + customerId + ",\n" +
-                "\t\"seatNumber\": " + seatNumber + ",\n" +
-                "\t\"flightDate\": \"" + flightDate.toString() + "\",\n" +
-                "\t\"flightNumber\": " + selectedFlightNumber + "\n" +
-                "}";
-        JSONAssert.assertEquals(expectedJSON, requestResult.getResponse().getContentAsString(), JSONCompareMode.LENIENT);
+        verifyTicketResponse(dt);
+    }
 
+    @Then("^The server return the following response for book seat request$")
+    public void verify_response_json_book_seat(DataTable dt) throws Exception {
+        verifyTicketResponse(dt);
     }
 
     @Then("^The select flight exist in the system")
@@ -627,6 +667,66 @@ public class AirlineBookingSystemStepdefs {
         validFlightInfo(originalFlightRoute, selectedFlightNumber, 0, false, false);
     }
 
+    @Then("^Verify the following ticket status in the server response$")
+    public void verify_getTicket_response(DataTable dt) throws Exception {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate =dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber,flightDate).getFlightId();
+        ObjectMapper mapper = new ObjectMapper();
+        List<Ticket> returnedTicket = mapper.readValue(requestResult.getResponse().getContentAsString()
+                , new TypeReference<List<Ticket>>() {
+                });
+        boolean isExist = false;
+        for (Ticket ticket: returnedTicket){
+            if (ticket.getFlightId() == flightId){
+                isExist = true;
+            }
+        }
+        if (flightInfo.get("existInResponse").equals("TRUE")){
+            assertTrue(isExist);
+        }
+        else if (flightInfo.get("existInResponse").equals("FALSE")){
+            assertFalse(isExist);
+        }
+        else {
+            System.out.println("existInResponse is invalid! ");
+            assertFalse(true);
+        }
+
+    }
+
+    @Then("^Verify the seat status in following flight$")
+    public void verify_seat_status(DataTable dt){
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        int seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
+        UnavailableSeatInfo reservedSeat;
+        switch (flightInfo.get("seatStatus")){
+
+            case "BOOKED":
+                reservedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
+                assertNotNull(reservedSeat);
+                assertEquals(SeatStatus.BOOKED, reservedSeat.getSeatStatus());
+                break;
+            case "AVAILABLE":
+                reservedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
+                assertNull(reservedSeat);
+                break;
+            case "UNAVAILABLE":
+                reservedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
+                assertNotNull(reservedSeat);
+                assertEquals(SeatStatus.UNAVAILABLE, reservedSeat.getSeatStatus());
+                break;
+            default:
+                System.out.println("Seat Status is invalid!");
+                assertFalse(true);
+        }
+
+    }
+
     private boolean validFlightExistInList(List<FlightRoute> flightRouteList, long flightNumber) {
         for (int i = 0; i < flightRouteList.size(); i++) {
             if (flightRouteList.get(i).getFlightNumber() == flightNumber) {
@@ -702,6 +802,39 @@ public class AirlineBookingSystemStepdefs {
         }
 
     }
+
+    private void verifyTicketResponse(DataTable dt) throws Exception{
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
+        Integer seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
+        long customerId = getCustomerID(flightInfo.get("customer"));
+        String expectedJSON = "{\n" +
+                "\t\"flightId\": " + flightId + ",\n" +
+                "\t\"customerId\": " + customerId + ",\n" +
+                "\t\"seatNumber\": " + seatNumber + ",\n" +
+                "\t\"flightDate\": \"" + flightDate.toString() + "\",\n" +
+                "\t\"flightNumber\": " + flightNumber + "\n" +
+                "}";
+        JSONAssert.assertEquals(expectedJSON, requestResult.getResponse().getContentAsString(), JSONCompareMode.LENIENT);
+
+    }
+
+    private void bookTicket(long customerId, long flightNumber, Date flightDate) throws Exception {
+        Flight selectFlight = new Flight(flightNumber, flightDate);
+        Ticket returnedTicket = ticketService.bookFlight(new FlightRequest(selectFlight), customerId);
+        assertNotNull(returnedTicket);
+    }
+
+    private void bookSeat(long customerId, long flightNumber, Date flightDate, int seatNumber) throws Exception{
+        Flight selectFlight = new Flight(flightNumber, flightDate);
+        BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
+                selectFlight.getFlightDate(), seatNumber);
+        Ticket returnedTicket = ticketService.bookSeat(bookSeatRequest1, customerId);
+        assertNotNull(returnedTicket);
+    }
+
 
 //    @When("Test test API")
 //    public void test_test_API() throws Exception{
