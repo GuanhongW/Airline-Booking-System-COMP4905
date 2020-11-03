@@ -269,6 +269,18 @@ public class AirlineBookingSystemStepdefs {
         bookSeat(customerId,flightNumber,flightDate,seatNumber);
     }
 
+    @Given("^Set up the available ticket amount for the following flight$")
+    public void setUp_availableTickets(DataTable dt) throws Exception {
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        int newAvailableTickets = Integer.parseInt(flightInfo.get("availableTickets"));
+        Flight targetFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate);
+        targetFlight.setAvailableTickets(newAvailableTickets);
+        assertDoesNotThrow(() -> flightRepository.save(targetFlight));
+        assertEquals(newAvailableTickets, flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getAvailableTickets());
+    }
+
     @When("^User enters following credentials in log in page$")
     public void login_request(DataTable dt) {
         Map<String, String> credential = dt.asMap(String.class, String.class);

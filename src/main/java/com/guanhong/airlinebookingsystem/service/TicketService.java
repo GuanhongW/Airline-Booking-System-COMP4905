@@ -35,11 +35,8 @@ public class TicketService {
         Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flight.getFlightNumber(), flight.getFlightDate());
         log.error("Lock the flight row");
         if (validFlightIsAvailable(returnedFlight) == false) {
-            // A valid flight ticket id should greater than 0.
-            // Therefore, ticketId = 0 means the flight is full.
-            int fullFlightTicketId = 0;
             log.info("Customer " + customerId + " failed to book the ticket because the flight is full.");
-            return new Ticket(fullFlightTicketId);
+            throw new ServerException("Failed to book the ticket because the flight is full.", HttpStatus.SERVICE_UNAVAILABLE);
         } else {
             Ticket newTicket = new Ticket(customerId, returnedFlight.getFlightId(), returnedFlight.getFlightDate(), returnedFlight.getFlightNumber());
             if (checkIsDuplicatedBooking(newTicket) == true) {
@@ -53,7 +50,6 @@ public class TicketService {
                         returnedFlight.getFlightId() + "). Rollback all transactions.");
                 throw new ServerException("Unknown Server Exception.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            // TODO: Add flight number into ticket table
             Ticket returnedTicket = ticketRepository.save(newTicket);
             if (returnedTicket != null) {
                 log.info("Customer Id: " + customerId + " successfully booked the ticket in flight " + returnedFlight.getFlightId());

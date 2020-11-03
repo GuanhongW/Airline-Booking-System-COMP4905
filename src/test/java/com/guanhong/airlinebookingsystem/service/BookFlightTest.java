@@ -1,6 +1,7 @@
 package com.guanhong.airlinebookingsystem.service;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
+import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.AccountInfo;
 import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
@@ -307,16 +308,10 @@ public class BookFlightTest {
         // Book the flight without any available seat
 
         FlightRequest selectedFlight1 = new FlightRequest(targetFlight.getFlightNumber(), targetFlight.getFlightDate());
-        Ticket returnedTicket = assertDoesNotThrow(() -> ticketService.bookFlight(selectedFlight1, customer.getId()));
-        int fullFlightTicketId = 0;
-        assertEquals(fullFlightTicketId, returnedTicket.getTicketId());
-        assertNull(returnedTicket.getFlightId());
-        assertNull(returnedTicket.getSeatNumber());
-        assertNull(returnedTicket.getFlightDate());
-        assertNull(returnedTicket.getCustomerId());
+        ServerException exception = assertThrows(ServerException.class, () -> ticketService.bookFlight(selectedFlight1, customer.getId()));
+        String expectedMessage = "Failed to book the ticket because the flight is full.";
+        assertEquals(expectedMessage, exception.getMessage());
         assertEquals(0, flightRepository.findFlightByFlightId(availableFlights.get(flightIndex).getFlightId()).getAvailableTickets());
-
-
 
     }
 

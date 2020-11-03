@@ -79,11 +79,11 @@ public class TicketController {
             }
             catch (ServerException e){
                 log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
-                return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity(e.getMessage(), e.getHttpStatus());
             }
             catch (ClientException e){
                 log.error("URL: bookFlight, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
-                return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity(e.getMessage(), e.getHttpStatus());
             }
             catch (DataIntegrityViolationException e){
                 log.error(e.getMessage());
@@ -139,7 +139,7 @@ public class TicketController {
         }
         catch (ServerException e){
             log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
-            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(e.getMessage(), e.getHttpStatus());
         }
         catch (ClientException e){
             log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
