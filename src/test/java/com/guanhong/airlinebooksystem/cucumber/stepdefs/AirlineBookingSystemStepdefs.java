@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -60,7 +61,9 @@ public class AirlineBookingSystemStepdefs {
     @Autowired
     PlatformTransactionManager transactionManager;
 
-    TransactionStatus transaction;
+    private TransactionStatus transaction;
+
+    private TransactionStatus suspendTransaction;
 
     @Autowired
     private MockMvc mockMvc;
@@ -108,6 +111,8 @@ public class AirlineBookingSystemStepdefs {
     private int selectedFlightAvailableTickets;
 
     private FlightRoute originalFlightRoute;
+
+    private Long concurrentFlight = null;
 
     @Before
     public void setUp() throws Exception {
@@ -164,6 +169,23 @@ public class AirlineBookingSystemStepdefs {
         assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
         assertEquals(Gender.male, customerInfo.getGender());
 
+        int additionalCustomer = 2;
+        for (int i = 0; i<additionalCustomer;i++){
+            testUsername = dataGenerator.getNextCustomerUsername();
+            defaultCustomerUsernames.add(testUsername);
+            newUserInfo = new AccountInfo(testUsername, dataGenerator.CUSTOMER_USER_PASSWORD_0, Role.USER, "test", Gender.female, "2000-01-01");
+            res = jwtUserDetailsService.createAccount(newUserInfo);
+            assertEquals(testUsername, res.getUsername());
+            assertNotNull(res.getAccountId());
+            defaultCustomerID.add(res.getAccountId());
+            user = userRepository.findById(res.getAccountId()).get();
+            assertEquals(Role.USER, user.getRole());
+            customerInfo = customerInfoRepository.findById(res.getAccountId()).get();
+            assertEquals("test", customerInfo.getName());
+            assertEquals("2000-01-01", dateFormat.format(customerInfo.getBirthDate()));
+            assertEquals(Gender.female, customerInfo.getGender());
+        }
+
         // Create default flight
         for (int i = 0; i < defaultFlightAmount; i++) {
             long flightNumber = dataGenerator.getNextAvailableFlightNumber();
@@ -190,26 +212,97 @@ public class AirlineBookingSystemStepdefs {
 
     @After
     public void teardown() {
-        transactionManager.rollback(transaction);
+        if (transaction != null) {
+            transactionManager.rollback(transaction);
+            System.out.println("Rollback transaction");
+        } else {
+            // Delete default admin user
+            String testUsername;
+            for (int i = 0; i < defaultAdminUsernames.size(); i++) {
+                testUsername = defaultAdminUsernames.get(i);
+                User user = userRepository.findUserByUsername(testUsername);
+                userRepository.delete(user);
+                assertNull(userRepository.findUserByUsername(testUsername));
+                assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+            }
 
-//        // Delete default admin user
-//        String testUsername;
-//        for (int i = 0; i < defaultAdminUsernames.size(); i++) {
-//            testUsername = defaultAdminUsernames.get(i);
-//            User user = userRepository.findUserByUsername(testUsername);
-//            userRepository.delete(user);
-//            assertNull(userRepository.findUserByUsername(testUsername));
-//            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
-//        }
-//
-//        // Delete default customer user
-//        for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
-//            testUsername = defaultCustomerUsernames.get(i);
-//            User user = userRepository.findUserByUsername(testUsername);
-//            userRepository.delete(user);
-//            assertNull(userRepository.findUserByUsername(testUsername));
-//            assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
-//        }
+            // Delete default customer user
+            for (int i = 0; i < defaultCustomerUsernames.size(); i++) {
+                testUsername = defaultCustomerUsernames.get(i);
+                User user = userRepository.findUserByUsername(testUsername);
+                userRepository.delete(user);
+                assertNull(userRepository.findUserByUsername(testUsername));
+                assertNull(customerInfoRepository.findCustomerInfoById(user.getId()));
+            }
+
+            // Delete default flight
+            long flightNumber;
+            for (int i = 0; i < defaultFlights.size(); i++) {
+                flightNumber = defaultFlights.get(i);
+                List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+                FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+                flightRouteRepository.delete(flightRoute);
+                assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+                List<Flight> emptyFlights = new ArrayList<>();
+                assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+                List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+                for (int j = 0; j < flights.size(); j++) {
+                    assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+                }
+            }
+
+            if (concurrentFlight != null){
+                flightNumber = concurrentFlight;
+                List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+                FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+                flightRouteRepository.delete(flightRoute);
+                assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+                List<Flight> emptyFlights = new ArrayList<>();
+                assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+                List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+                for (int j = 0; j < flights.size(); j++) {
+                    assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+                }
+            }
+        }
+
+    }
+
+    @And("System clean concurrent flight {string}")
+    public void clean_concurrent_flight(String flightNumberStr){
+        long flightNumber = getSelectFlightNumber(flightNumberStr);
+        List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+        FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+        flightRouteRepository.delete(flightRoute);
+        assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+        List<Flight> emptyFlights = new ArrayList<>();
+        assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+        List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+        for (int j = 0; j < flights.size(); j++) {
+            assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+        }
+    }
+
+    @Then("System create a flight for concurrency test {string}")
+    public void create_concurrency_flight(String testName) throws Exception {
+        long flightNumber = dataGenerator.getNextAvailableFlightNumber();
+        dataGenerator.addConcurrentFlight(testName, flightNumber);
+        concurrentFlight = flightNumber;
+        System.out.println("The concurrent flight number: " + flightNumber);
+        String departureCity = "YYZ";
+        String destinationCity = "YVR";
+        Time departureTime = Time.valueOf("10:05:00");
+        Time arrivalTime = Time.valueOf("12:00:00");
+        int aircraftId = 900;
+        BigDecimal overbooking = BigDecimal.valueOf(6).setScale(2);
+        Date startDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), 80);
+        Date endDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), 100);
+        int availableTicket = 80;
+        FlightRoute newFlightRoute = new FlightRoute(flightNumber, departureCity, destinationCity, departureTime, arrivalTime,
+                aircraftId, overbooking, startDate, endDate);
+        flightService.createNewFlight(newFlightRoute);
+        FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
+        assertNotNull(returnedFlightRoute);
     }
 
     @Given("Printing the thread info for feature {string} and scenario {string}")
@@ -266,7 +359,7 @@ public class AirlineBookingSystemStepdefs {
         Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
         int seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
         bookTicket(customerId, flightNumber, flightDate);
-        bookSeat(customerId,flightNumber,flightDate,seatNumber);
+        bookSeat(customerId, flightNumber, flightDate, seatNumber);
     }
 
     @Given("^Set up the available ticket amount for the following flight$")
@@ -444,6 +537,12 @@ public class AirlineBookingSystemStepdefs {
         }
     }
 
+    @And("Commit current transaction to database")
+    public void commit_transaction_database() {
+        transactionManager.commit(transaction);
+        transaction = null;
+    }
+
     @And("^User enters the flight date in book flight page$")
     public void book_flight_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
@@ -456,7 +555,7 @@ public class AirlineBookingSystemStepdefs {
     }
 
     @And("^User enters the seat in book seat page$")
-    public void book_seat_request(DataTable dt){
+    public void book_seat_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
@@ -467,7 +566,7 @@ public class AirlineBookingSystemStepdefs {
     }
 
     @And("^User enters the following flight in cancel ticket page$")
-    public void cancel_ticket_request(DataTable dt){
+    public void cancel_ticket_request(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         requestJSON = "{\n" +
                 "  \"flightNumber\": " + getSelectFlightNumber(flightInfo.get("flightNumber")) + ",\n" +
@@ -489,6 +588,11 @@ public class AirlineBookingSystemStepdefs {
     @Then("The server return status code of {int}")
     public void verify_status_code(int httpCode) {
         assertEquals(httpCode, requestResult.getResponse().getStatus());
+    }
+
+    @And("Save the current response into concurrent list {string}")
+    public void set_concurrent_response(String key) {
+        dataGenerator.addConcurrentResult(key, requestResult);
     }
 
     @Then("The JWT token is {string}")
@@ -589,17 +693,17 @@ public class AirlineBookingSystemStepdefs {
     }
 
     @Then("The flight {string} includes in get flight routes request")
-    public void verify_default_flight(String flightNumbers) throws Exception {
+    public void verify_default_flight(String flightNumberStr) throws Exception {
+        System.out.println(flightNumberStr);
         List<Long> flightList = new ArrayList<>();
 
-        if (flightNumbers.equals("DEFAULT")) {
+
+        if (flightNumberStr.equals("DEFAULT")) {
             flightList.addAll(defaultFlights);
         } else {
             try {
-                String[] flights = flightNumbers.split(", ");
-                for (String flight : flights) {
-                    flightList.add(Long.parseLong(flight));
-                }
+                long flightNumber = getSelectFlightNumber(flightNumberStr);
+                flightList.add(flightNumber);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 assertFalse(true);
@@ -610,8 +714,9 @@ public class AirlineBookingSystemStepdefs {
         List<FlightRoute> flightRoutes = mapper.readValue(requestResult.getResponse().getContentAsString()
                 , new TypeReference<List<FlightRoute>>() {
                 });
-        for (Long flightNumber : flightList) {
-            assertTrue(validFlightExistInList(flightRoutes, flightNumber));
+
+        for (Long flight : flightList) {
+            assertTrue(validFlightExistInList(flightRoutes, flight));
         }
     }
 
@@ -699,25 +804,23 @@ public class AirlineBookingSystemStepdefs {
     public void verify_getTicket_response(DataTable dt) throws Exception {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
-        Date flightDate =dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
-        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber,flightDate).getFlightId();
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
         ObjectMapper mapper = new ObjectMapper();
         List<Ticket> returnedTicket = mapper.readValue(requestResult.getResponse().getContentAsString()
                 , new TypeReference<List<Ticket>>() {
                 });
         boolean isExist = false;
-        for (Ticket ticket: returnedTicket){
-            if (ticket.getFlightId() == flightId){
+        for (Ticket ticket : returnedTicket) {
+            if (ticket.getFlightId() == flightId) {
                 isExist = true;
             }
         }
-        if (flightInfo.get("existInResponse").equals("TRUE")){
+        if (flightInfo.get("existInResponse").equals("TRUE")) {
             assertTrue(isExist);
-        }
-        else if (flightInfo.get("existInResponse").equals("FALSE")){
+        } else if (flightInfo.get("existInResponse").equals("FALSE")) {
             assertFalse(isExist);
-        }
-        else {
+        } else {
             System.out.println("existInResponse is invalid! ");
             assertFalse(true);
         }
@@ -725,14 +828,14 @@ public class AirlineBookingSystemStepdefs {
     }
 
     @Then("^Verify the seat status in following flight$")
-    public void verify_seat_status(DataTable dt){
+    public void verify_seat_status(DataTable dt) {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         int seatNumber = getSeatNumber(flightInfo.get("seatNumber"));
         long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
         Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
         long flightId = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getFlightId();
         UnavailableSeatInfo reservedSeat;
-        switch (flightInfo.get("seatStatus")){
+        switch (flightInfo.get("seatStatus")) {
 
             case "BOOKED":
                 reservedSeat = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
@@ -768,6 +871,8 @@ public class AirlineBookingSystemStepdefs {
         if (flightNumber.contains("DEFAULT")) {
             String[] defaultFlightNumber = flightNumber.split(":");
             return defaultFlights.get(Integer.parseInt(defaultFlightNumber[1]) - 1);
+        } else if (dataGenerator.concurrentFlightList.get(flightNumber) != null) {
+            return dataGenerator.concurrentFlightList.get(flightNumber);
         } else if (flightNumber.equals("NON_EXISTENT")) {
             return dataGenerator.NON_EXISTENT_FLIGHT_NUMBER;
         } else if (flightNumber.equals("NEXT")) {
@@ -831,7 +936,7 @@ public class AirlineBookingSystemStepdefs {
 
     }
 
-    private void verifyTicketResponse(DataTable dt) throws Exception{
+    private void verifyTicketResponse(DataTable dt) throws Exception {
         Map<String, String> flightInfo = dt.asMap(String.class, String.class);
         long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
         Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
@@ -855,7 +960,7 @@ public class AirlineBookingSystemStepdefs {
         assertNotNull(returnedTicket);
     }
 
-    private void bookSeat(long customerId, long flightNumber, Date flightDate, int seatNumber) throws Exception{
+    private void bookSeat(long customerId, long flightNumber, Date flightDate, int seatNumber) throws Exception {
         Flight selectFlight = new Flight(flightNumber, flightDate);
         BookSeatRequest bookSeatRequest1 = new BookSeatRequest(selectFlight.getFlightNumber(),
                 selectFlight.getFlightDate(), seatNumber);

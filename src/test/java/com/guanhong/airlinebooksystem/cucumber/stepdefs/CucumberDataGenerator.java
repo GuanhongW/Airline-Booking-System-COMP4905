@@ -14,6 +14,8 @@ import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
 import io.cucumber.java.Before;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -71,6 +73,7 @@ public class CucumberDataGenerator {
     public static List<Long> flightList = new ArrayList<>();
     public static LinkedHashMap<String, Long> adminUserList = new LinkedHashMap<>();
     public static LinkedHashMap<String, Long> customerUserList = new LinkedHashMap<>();
+    public static HashMap<String, Long> concurrentFlightList = new HashMap<>();
 
     public  List<Long> getFlightList() {
         return flightList;
@@ -83,6 +86,10 @@ public class CucumberDataGenerator {
     public  HashMap<String, Long> getAdminUserList() {
         return adminUserList;
     }
+
+    public HashMap<String, List<MvcResult>> concurrentResponses = new HashMap<>();
+
+    private static HashMap<String, Integer> checkpointList = new HashMap<>();
 
     public void setAdminUserList(LinkedHashMap<String, Long> adminUserList) {
         CucumberDataGenerator.adminUserList = adminUserList;
@@ -171,6 +178,28 @@ public class CucumberDataGenerator {
         else {
             adminUserList.put(userName, id);
         }
+    }
+
+    public void addConcurrentFlight(String testName, long flightNumber){
+        concurrentFlightList.put(testName, flightNumber);
+    }
+
+    public List<MvcResult> getConcurrentResult(String key){
+        return concurrentResponses.get(key);
+    }
+
+    public void addConcurrentResult(String key, MvcResult result){
+        List<MvcResult> results = concurrentResponses.getOrDefault(key, new ArrayList<>());
+        results.add(result);
+        concurrentResponses.put(key, results);
+    }
+
+    public void addCheckpoint(String key, Integer value){
+        checkpointList.put(key, value);
+    }
+
+    public Integer getCheckpointValue(String key){
+        return checkpointList.get(key);
     }
 
 }
