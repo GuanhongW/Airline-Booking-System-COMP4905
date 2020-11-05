@@ -32,16 +32,14 @@ public class ConcurrencyStepDef {
     private FlightRouteRepository flightRouteRepository;
 
 
-
     private static CucumberDataGenerator dataGenerator = CucumberDataGenerator.getInstance();
 
     @Given("Concurrency scenario set up the checkpoint {string}")
     public void set_checkpoint(String checkpointStr) {
-        if (dataGenerator.getCheckpointValue(checkpointStr) == null){
+        if (dataGenerator.getCheckpointValue(checkpointStr) == null) {
             dataGenerator.addCheckpoint(checkpointStr, 0);
         }
     }
-
 
 
     @And("Scenario updates the checkpoint {string}")
@@ -60,18 +58,17 @@ public class ConcurrencyStepDef {
         String[] checkpoint = getCheckpointInfo(checkpointStr);
 //        boolean isFinished = false;
         int timeout = 0;
-        while ( timeout < 1000){
+        while (timeout < 1000) {
             Integer target = Integer.parseInt(checkpoint[1]);
             Integer current = dataGenerator.getCheckpointValue(checkpointStr);
-            if (current == null){
+            if (current == null) {
                 timeout++;
                 Thread.sleep(10);
             }
-            if (target.equals(current)){
+            if (target.equals(current)) {
                 System.out.println("All scenario reachs the checkpoint, start next step.");
                 return;
-            }
-            else {
+            } else {
                 timeout++;
                 Thread.sleep(10);
             }
@@ -84,31 +81,63 @@ public class ConcurrencyStepDef {
     public void verify_concurrent_response(DataTable dt) throws UnsupportedEncodingException {
         Map<String, String> responseInfo = dt.asMap(String.class, String.class);
         String key = responseInfo.get("responseName");
-        int expectedSuccessfulAmount = Integer.parseInt(responseInfo.get("successfulNum"));
-        int expectedFailedAmount = Integer.parseInt(responseInfo.get("failedNum"));
-        int totalAmount = expectedSuccessfulAmount + expectedFailedAmount;
-        int failedStatus = Integer.parseInt(responseInfo.get("failedStatus"));
-        String expectedFailedMessage = responseInfo.get("expectedFailedMessage");
+        int[] expectedSuccessfulAmounts = getResponseCount(responseInfo.get("successfulNum"));
+        int[] expectedFailedAmounts = getResponseCount(responseInfo.get("failedNum"));
+        int[] failedStatus = getHttpStatus(responseInfo.get("failedStatus"));
+        String[] expectedFailedMessages = responseInfo.get("expectedFailedMessage").split("/");
+        boolean matchedMessage = false;
+        boolean matchedCount = false;
+        for (int i = 0; i < expectedFailedMessages.length; i++) {
+            int totalAmount = expectedSuccessfulAmounts[i] + expectedFailedAmounts[i];
 
-        List<MvcResult> allResponse = dataGenerator.getConcurrentResult(key);
-        assertEquals(totalAmount, allResponse.size());
-        int actualSuccessful = 0;
-        int actualFailed = 0;
-        for (MvcResult response: allResponse) {
-            if (response.getResponse().getStatus() == 200){
-                actualSuccessful++;
+
+
+            List<MvcResult> allResponse = dataGenerator.getConcurrentResult(key);
+            assertEquals(totalAmount, allResponse.size());
+            int actualSuccessful = 0;
+            int actualFailed = 0;
+            for (MvcResult response : allResponse) {
+                if (response.getResponse().getStatus() == 200) {
+                    actualSuccessful++;
+                } else {
+                    actualFailed++;
+                    if (response.getResponse().getContentAsString().contains(expectedFailedMessages[i]) &&
+                            failedStatus[i] == response.getResponse().getStatus()){
+                        matchedMessage = true;
+                    }
+
+                }
             }
-            else {
-                actualFailed++;
-                assertTrue(response.getResponse().getContentAsString().contains(expectedFailedMessage));
+            if (expectedSuccessfulAmounts[i] == actualSuccessful || expectedFailedAmounts[i] == actualFailed){
+                 matchedCount = true;
+            }
+            if (actualFailed == 0){
+                matchedMessage = true;
             }
         }
-        assertEquals(expectedSuccessfulAmount, actualSuccessful);
-        assertEquals(expectedFailedAmount, actualFailed);
+        assertTrue(matchedCount);
+        assertTrue(matchedMessage);
+
+
     }
 
+    private int[] getResponseCount(String countStr) {
+        String[] countList = countStr.split("/");
+        int[] counts = new int[countList.length];
+        for (int i = 0; i < countList.length; i++) {
+            counts[i] = Integer.parseInt(countList[i]);
+        }
+        return counts;
+    }
 
-
+    private int[] getHttpStatus(String statusStr) {
+        String[] statusList = statusStr.split("/");
+        int[] statuses = new int[statusList.length];
+        for (int i = 0; i < statusList.length; i++) {
+            statuses[i] = Integer.parseInt(statusList[i]);
+        }
+        return statuses;
+    }
 
 
     private String[] getCheckpointInfo(String checkpoint) {

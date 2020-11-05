@@ -79,7 +79,7 @@ Feature: Two customer users try to book the same seat at the same time
 
     Examples:
       | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |
-      | TwoUsersBookSameSeat | 85         | DEFAULT:1 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 404          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
+      | TwoUsersBookSameSeat | 85         | DEFAULT:1 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 400          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
 
   Scenario Outline: Customer 2 try to book the seat 10
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -146,4 +146,4 @@ Feature: Two customer users try to book the same seat at the same time
 
     Examples:
       | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |
-      | TwoUsersBookSameSeat | 85         | DEFAULT:2 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 404          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
+      | TwoUsersBookSameSeat | 85         | DEFAULT:2 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 400          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
