@@ -60,7 +60,7 @@ public class ConcurrencyStepDef {
         String[] checkpoint = getCheckpointInfo(checkpointStr);
 //        boolean isFinished = false;
         int timeout = 0;
-        while ( timeout < 500){
+        while ( timeout < 1000){
             Integer target = Integer.parseInt(checkpoint[1]);
             Integer current = dataGenerator.getCheckpointValue(checkpointStr);
             if (current == null){
@@ -106,6 +106,8 @@ public class ConcurrencyStepDef {
         assertEquals(expectedSuccessfulAmount, actualSuccessful);
         assertEquals(expectedFailedAmount, actualFailed);
     }
+
+
 
 
 

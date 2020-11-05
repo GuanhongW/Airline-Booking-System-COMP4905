@@ -1,6 +1,6 @@
-Feature: Thre customer try to book the same flight at the same time
+Feature: Three customer try to book the same flight at the same time
 
-  Scenario Outline: Setup concurrency test's flight in the system
+  Scenario Outline: Setup concurrency flight for three concurrent booking
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"
     Given Concurrency scenario set up the checkpoint "<setupCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
@@ -10,8 +10,8 @@ Feature: Thre customer try to book the same flight at the same time
     And Scenario updates the checkpoint "<waitAllScenario>"
     Then Waiting the checkpoint "<waitAllScenario>" is finished
     Examples:
-      | setupCheckpoint   | waitAllScenario   |
-      | SetupBookFlight:1 | WaitAllScenario:4 |
+      | setupCheckpoint   | waitAllScenario               |
+      | SetupBookFlight:1 | ThreeCustomerBookSameFlight:4 |
 
 
   Scenario Outline: Test 1
@@ -41,11 +41,11 @@ Feature: Thre customer try to book the same flight at the same time
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
     Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
     And User clicks the "Book Flight" button
-    And Save the current response into concurrent list "BookFlightRequest"
+    And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | responseName           | <responseName>           |
+      | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -65,8 +65,8 @@ Feature: Thre customer try to book the same flight at the same time
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-      | BookFlightConcurrency | 85         | DEFAULT:2 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName      | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint      | waitAllScenario               | setupCheckpoint   | waitBookCheckpoint           |
+      | BookFlightConcurrency | 85         | DEFAULT:2 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | ThreeBookedOneFlight:3 | ThreeCustomerBookSameFlight:4 | SetupBookFlight:1 | BeforeThreeBookedOneFlight:3 |
 
   Scenario Outline: Test 2
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -95,11 +95,11 @@ Feature: Thre customer try to book the same flight at the same time
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
     Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
     And User clicks the "Book Flight" button
-    And Save the current response into concurrent list "BookFlightRequest"
+    And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | responseName           | <responseName>           |
+      | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -119,8 +119,8 @@ Feature: Thre customer try to book the same flight at the same time
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-      | BookFlightConcurrency | 85         | DEFAULT:1 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName      | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint      | waitAllScenario               | setupCheckpoint   | waitBookCheckpoint           |
+      | BookFlightConcurrency | 85         | DEFAULT:1 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | ThreeBookedOneFlight:3 | ThreeCustomerBookSameFlight:4 | SetupBookFlight:1 | BeforeThreeBookedOneFlight:3 |
 
   Scenario Outline: Test 3
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -149,11 +149,11 @@ Feature: Thre customer try to book the same flight at the same time
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
     Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
     And User clicks the "Book Flight" button
-    And Save the current response into concurrent list "BookFlightRequest"
+    And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | responseName           | <responseName>           |
+      | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -173,8 +173,8 @@ Feature: Thre customer try to book the same flight at the same time
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-      | BookFlightConcurrency | 85         | DEFAULT:3 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName      | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint      | waitAllScenario               | setupCheckpoint   | waitBookCheckpoint           |
+      | BookFlightConcurrency | 85         | DEFAULT:3 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | ThreeBookedOneFlight:3 | ThreeCustomerBookSameFlight:4 | SetupBookFlight:1 | BeforeThreeBookedOneFlight:3 |
 
 #  Scenario Outline: Test 4
 #    Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -228,4 +228,4 @@ Feature: Thre customer try to book the same flight at the same time
 #
 #    Examples:
 #      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-#      | BookFlightConcurrency | 85         | DEFAULT:4 | 3       | NULL       | BookFlightRequest | 3             | 1         | 503          | Server is busy. Try to book flight failed. | BOOKED:3         | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3      |
+#      | BookFlightConcurrency | 85         | DEFAULT:4 | 3       | NULL       | BookFlightRequest | 3             | 1         | 503          | Server is busy. Try to book flight failed. | ThreeBookedOneFlight:3         | ThreeCustomerBookSameFlight:4 | SetupBookFlight:1 | BeforeThreeBookedOneFlight:3      |

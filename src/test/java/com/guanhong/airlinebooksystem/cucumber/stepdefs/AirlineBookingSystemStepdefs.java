@@ -7,6 +7,7 @@ import com.guanhong.airlinebookingsystem.AirlineBookingSystemApplication;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.*;
 import com.guanhong.airlinebookingsystem.repository.*;
+import com.guanhong.airlinebookingsystem.service.BatchService;
 import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
@@ -63,8 +64,6 @@ public class AirlineBookingSystemStepdefs {
 
     private TransactionStatus transaction;
 
-    private TransactionStatus suspendTransaction;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -86,6 +85,8 @@ public class AirlineBookingSystemStepdefs {
     private UnavailableSeatInfoRepository unavailableSeatInfoRepository;
     @Autowired
     private TicketRepository ticketRepository;
+    @Autowired
+    private BatchService batchService;
 
     private static CucumberDataGenerator dataGenerator = CucumberDataGenerator.getInstance();
 
@@ -251,19 +252,19 @@ public class AirlineBookingSystemStepdefs {
                 }
             }
 
-            if (concurrentFlight != null){
-                flightNumber = concurrentFlight;
-                List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
-                FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
-                flightRouteRepository.delete(flightRoute);
-                assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
-                List<Flight> emptyFlights = new ArrayList<>();
-                assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
-                List<UnavailableSeatInfo> emptyList = new ArrayList<>();
-                for (int j = 0; j < flights.size(); j++) {
-                    assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
-                }
-            }
+//            if (concurrentFlight != null){
+//                flightNumber = concurrentFlight;
+//                List<Flight> flights = flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber);
+//                FlightRoute flightRoute = flightRouteRepository.findFlightByflightNumber(flightNumber);
+//                flightRouteRepository.delete(flightRoute);
+//                assertNull(flightRouteRepository.findFlightByflightNumber(flightNumber));
+//                List<Flight> emptyFlights = new ArrayList<>();
+//                assertEquals(emptyFlights, flightRepository.findAllByFlightNumberOrderByFlightDate(flightNumber));
+//                List<UnavailableSeatInfo> emptyList = new ArrayList<>();
+//                for (int j = 0; j < flights.size(); j++) {
+//                    assertEquals(emptyList, unavailableSeatInfoRepository.findAllByFlightId(flights.get(j).getFlightId()));
+//                }
+//            }
         }
 
     }
@@ -287,7 +288,7 @@ public class AirlineBookingSystemStepdefs {
     public void create_concurrency_flight(String testName) throws Exception {
         long flightNumber = dataGenerator.getNextAvailableFlightNumber();
         dataGenerator.addConcurrentFlight(testName, flightNumber);
-        concurrentFlight = flightNumber;
+        defaultFlights.add(flightNumber);
         System.out.println("The concurrent flight number: " + flightNumber);
         String departureCity = "YYZ";
         String destinationCity = "YVR";
@@ -303,6 +304,25 @@ public class AirlineBookingSystemStepdefs {
         flightService.createNewFlight(newFlightRoute);
         FlightRoute returnedFlightRoute = flightRouteRepository.findFlightByflightNumber(newFlightRoute.getFlightNumber());
         assertNotNull(returnedFlightRoute);
+    }
+
+    @And("^Set up the available tickets for following flight$")
+    public void setup_available_ticket(DataTable dt){
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(), Integer.parseInt(flightInfo.get("flightDate")));
+        int newAvailableTickets = Integer.parseInt(flightInfo.get("availableTickets"));
+        Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate);
+        int availableTickets = returnedFlight.getAvailableTickets();
+        List<UnavailableSeatInfo> unavailableSeats = new ArrayList<>();
+        for (int i = availableTickets; i > newAvailableTickets; i--){
+            unavailableSeats.add(new UnavailableSeatInfo(returnedFlight.getFlightId(), i, SeatStatus.UNAVAILABLE));
+        }
+        batchService.batchInsert(unavailableSeats);
+        returnedFlight.setAvailableTickets(newAvailableTickets);
+        assertDoesNotThrow(() -> flightRepository.save(returnedFlight));
+        assertEquals(newAvailableTickets, flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate).getAvailableTickets());
+
     }
 
     @Given("Printing the thread info for feature {string} and scenario {string}")

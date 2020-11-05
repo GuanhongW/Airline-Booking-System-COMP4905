@@ -1,6 +1,6 @@
 Feature: Two customer users try to book the same seat at the same time
 
-  Scenario Outline: Setup concurrency flight for booking the same seat in the system
+  Scenario Outline: Setup two customer user try to book the same seat at the same time
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"
     Given Concurrency scenario set up the checkpoint "<setupCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
@@ -10,8 +10,8 @@ Feature: Two customer users try to book the same seat at the same time
     And Scenario updates the checkpoint "<waitAllScenario>"
     Then Waiting the checkpoint "<waitAllScenario>" is finished
     Examples:
-      | setupCheckpoint   | waitAllScenario   |
-      | SetupCheckpoint:1 | WaitAllScenario:3 |
+      | setupCheckpoint | waitAllScenario           |
+      | SameSeat:1      | TwoCustomerBookSameSeat:3 |
 
 
   Scenario Outline: Customer 1 try to book the seat 10
@@ -78,8 +78,8 @@ Feature: Two customer users try to book the same seat at the same time
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName     | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-      | TwoUsersBookSameSeat | 85         | DEFAULT:1 | 10               | NULL           | BookSeatSameTime | 1             | 1         | 404          | is not available.     | BOOKEDSEAT:2     | WaitAllScenario:3 | SetupCheckpoint:1 | BEFOREBOOK:2       |
+      | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |
+      | TwoUsersBookSameSeat | 85         | DEFAULT:1 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 404          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
 
   Scenario Outline: Customer 2 try to book the seat 10
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -145,5 +145,5 @@ Feature: Two customer users try to book the same seat at the same time
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName     | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
-      | TwoUsersBookSameSeat | 85         | DEFAULT:2 | 10               | NULL           | BookSeatSameTime | 1             | 1         | 404          | is not available.     | BOOKEDSEAT:2     | WaitAllScenario:3 | SetupCheckpoint:1 | BEFOREBOOK:2       |
+      | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |
+      | TwoUsersBookSameSeat | 85         | DEFAULT:2 | 10               | NULL           | BookSameSeatSameTime | 1             | 1         | 404          | is not available.     | BookSameSeat:2    | TwoCustomerBookSameSeat:3 | SameSeat:1      | BeforeBookSeatSameTime:2       |
