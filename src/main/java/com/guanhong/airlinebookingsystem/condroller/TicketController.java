@@ -26,6 +26,7 @@ import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 
 @RestController
 @CrossOrigin
@@ -72,6 +73,8 @@ public class TicketController {
         }
         while (bookIndex < 3){
             try{
+                // Timestamp for book flight
+                log.warn("Try Index: " + bookIndex + "at " + new Timestamp(System.currentTimeMillis()));
                 ResponseEntity res = new ResponseEntity(ticketService.bookFlight(flightRequest, user.getId()), HttpStatus.OK);
                 log.info(user.getId() + " got the ticket in flight " + flightRequest.getFlightNumber() + " on "+
                         flightRequest.getFlightDate().toString());

@@ -8,7 +8,7 @@ import org.testng.annotations.DataProvider;
 //@RunWith(Cucumber.class)
 @CucumberOptions(plugin = {"pretty", "timeline:target/cucumber-report/timeline/",
         "html:target/cucumber-report/html/report.html", "json:target/cucumber-report/json/cucumber.json"},
-        features = "src/test/resources/concurrency_features",
+        features = "src/test/resources/features_concurrency",
         glue = "com.guanhong.airlinebooksystem.cucumber.stepdefs")
 //@SpringBootTest
 //@ContextConfiguration(classes = AirlineBookingSystemApplication.class)
