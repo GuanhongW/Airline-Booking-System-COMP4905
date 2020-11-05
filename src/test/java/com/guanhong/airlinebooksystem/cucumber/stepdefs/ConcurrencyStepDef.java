@@ -83,7 +83,7 @@ public class ConcurrencyStepDef {
     @Then("^Verify concurrent response by following information$")
     public void verify_concurrent_response(DataTable dt) throws UnsupportedEncodingException {
         Map<String, String> responseInfo = dt.asMap(String.class, String.class);
-        String key = responseInfo.get("requestName");
+        String key = responseInfo.get("responseName");
         int expectedSuccessfulAmount = Integer.parseInt(responseInfo.get("successfulNum"));
         int expectedFailedAmount = Integer.parseInt(responseInfo.get("failedNum"));
         int totalAmount = expectedSuccessfulAmount + expectedFailedAmount;
@@ -100,9 +100,11 @@ public class ConcurrencyStepDef {
             }
             else {
                 actualFailed++;
-                assertEquals(expectedFailedMessage, response.getResponse().getContentAsString());
+                assertTrue(response.getResponse().getContentAsString().contains(expectedFailedMessage));
             }
         }
+        assertEquals(expectedSuccessfulAmount, actualSuccessful);
+        assertEquals(expectedFailedAmount, actualFailed);
     }
 
 

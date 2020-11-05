@@ -1,4 +1,4 @@
-Feature: Four customer try to book the same flight at the same time (However, server only can process three request at the same time)
+Feature: Thre customer try to book the same flight at the same time
 
   Scenario Outline: Setup concurrency test's flight in the system
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"
@@ -45,7 +45,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | requestName           | <requestName>           |
+      | responseName           | <responseName>           |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -65,7 +65,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | requestName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
       | BookFlightConcurrency | 85         | DEFAULT:2 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
 
   Scenario Outline: Test 2
@@ -99,7 +99,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | requestName           | <requestName>           |
+      | responseName           | <responseName>           |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -119,7 +119,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | requestName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
       | BookFlightConcurrency | 85         | DEFAULT:1 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
 
   Scenario Outline: Test 3
@@ -153,7 +153,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     And Scenario updates the checkpoint "<bookingCheckpoint>"
     And Waiting the checkpoint "<bookingCheckpoint>" is finished
     And Verify concurrent response by following information
-      | requestName           | <requestName>           |
+      | responseName           | <responseName>           |
       | successfulNum         | <successfulNum>         |
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
@@ -173,7 +173,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
     Then Waiting the checkpoint "<waitAllScenario>" is finished
 
     Examples:
-      | flightNumber          | flightDate | customer  | tickets | seatNumber | requestName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
+      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
       | BookFlightConcurrency | 85         | DEFAULT:3 | 3       | NULL       | BookFlightRequest | 3             | 0         | 200          | Server is busy. Try to book flight failed. | BOOKED:3          | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3       |
 
 #  Scenario Outline: Test 4
@@ -207,7 +207,7 @@ Feature: Four customer try to book the same flight at the same time (However, se
 #    And Scenario updates the checkpoint "<bookingCheckpoint>"
 #    And Waiting the checkpoint "<bookingCheckpoint>" is finished
 #    And Verify concurrent response by following information
-#      | requestName           | <requestName>           |
+#      | responseName           | <responseName>           |
 #      | successfulNum         | <successfulNum>         |
 #      | failedNum             | <failedNum>             |
 #      | failedStatus          | <failedStatus>          |
@@ -227,5 +227,5 @@ Feature: Four customer try to book the same flight at the same time (However, se
 #    Then Waiting the checkpoint "<waitAllScenario>" is finished
 #
 #    Examples:
-#      | flightNumber          | flightDate | customer  | tickets | seatNumber | requestName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
+#      | flightNumber          | flightDate | customer  | tickets | seatNumber | responseName       | successfulNum | failedNum | failedStatus | expectedFailedMessage                      | bookingCheckpoint | waitAllScenario   | setupCheckpoint   | waitBookCheckpoint |
 #      | BookFlightConcurrency | 85         | DEFAULT:4 | 3       | NULL       | BookFlightRequest | 3             | 1         | 503          | Server is busy. Try to book flight failed. | BOOKED:3         | WaitAllScenario:4 | SetupBookFlight:1 | BEFOREBOOK:3      |
