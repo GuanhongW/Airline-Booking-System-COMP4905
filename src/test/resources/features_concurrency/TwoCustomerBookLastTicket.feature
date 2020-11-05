@@ -12,7 +12,7 @@ Feature: Three customer try to book the same flight at the same time
     And Commit current transaction to database
     And Scenario updates the checkpoint "<setupCheckpoint>"
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
     Examples:
       | flightNumber     | flightDate | availableTickets | setupCheckpoint    | waitAllScenario   |
       | LastTicketFlight | 92         | 1                | LastTicketFlight:1 | LastTicket:3 |
@@ -24,7 +24,7 @@ Feature: Three customer try to book the same flight at the same time
     Given Concurrency scenario set up the checkpoint "<bookingCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitBookCheckpoint>"
     And Commit current transaction to database
-    Then Waiting the checkpoint "<setupCheckpoint>" is finished
+    Then Waiting the checkpoint "<setupCheckpoint>" is finished by each 20 ms
     Given "Customer" user 1 logs in to the system
     When User clicks "Book Flight" in side menu
     Then The server return status code of 200
@@ -43,11 +43,11 @@ Feature: Three customer try to book the same flight at the same time
       # Flight date is how many days start from today
       | flightDate   | <flightDate>   |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 1 ms
     And User clicks the "Book Flight" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookingCheckpoint>"
-    And Waiting the checkpoint "<bookingCheckpoint>" is finished
+    And Waiting the checkpoint "<bookingCheckpoint>" is finished by each 1 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
@@ -60,7 +60,7 @@ Feature: Three customer try to book the same flight at the same time
       | flightDate   | <flightDate>   |
       | tickets      | <tickets>      |
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
       | flightNumber     | flightDate | tickets | responseName              | successfulNum | failedNum | failedStatus | expectedFailedMessage                                 | bookingCheckpoint | waitAllScenario   | setupCheckpoint    | waitBookCheckpoint |
@@ -72,7 +72,7 @@ Feature: Three customer try to book the same flight at the same time
     Given Concurrency scenario set up the checkpoint "<bookingCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitBookCheckpoint>"
     And Commit current transaction to database
-    Then Waiting the checkpoint "<setupCheckpoint>" is finished
+    Then Waiting the checkpoint "<setupCheckpoint>" is finished by each 20 ms
     Given "Customer" user 2 logs in to the system
     When User clicks "Book Flight" in side menu
     Then The server return status code of 200
@@ -91,11 +91,11 @@ Feature: Three customer try to book the same flight at the same time
       # Flight date is how many days start from today
       | flightDate   | <flightDate>   |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 1 ms
     And User clicks the "Book Flight" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookingCheckpoint>"
-    And Waiting the checkpoint "<bookingCheckpoint>" is finished
+    And Waiting the checkpoint "<bookingCheckpoint>" is finished by each 1 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
@@ -108,7 +108,7 @@ Feature: Three customer try to book the same flight at the same time
       | flightDate   | <flightDate>   |
       | tickets      | <tickets>      |
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
       | flightNumber     | flightDate | tickets | responseName              | successfulNum | failedNum | failedStatus | expectedFailedMessage                                 | bookingCheckpoint | waitAllScenario   | setupCheckpoint    | waitBookCheckpoint |

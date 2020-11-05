@@ -8,7 +8,7 @@ Feature: Two customer users try to book the same seat at the same time
     And Commit current transaction to database
     And Scenario updates the checkpoint "<setupCheckpoint>"
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
     Examples:
       | setupCheckpoint | waitAllScenario           |
       | SameSeat:1      | TwoCustomerBookSameSeat:3 |
@@ -20,7 +20,7 @@ Feature: Two customer users try to book the same seat at the same time
     Given Concurrency scenario set up the checkpoint "<bookedCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitBookCheckpoint>"
     And Commit current transaction to database
-    Then Waiting the checkpoint "<setupCheckpoint>" is finished
+    Then Waiting the checkpoint "<setupCheckpoint>" is finished by each 20 ms
     Given "Customer" user 1 logs in to the system
     When User clicks "Book Flight" in side menu
     Then The server return status code of 200
@@ -63,11 +63,11 @@ Feature: Two customer users try to book the same seat at the same time
       | flightDate   | <flightDate>       |
       | seatNumber   | <selectSeatNumber> |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 1 ms
     And User clicks the "Book Seat" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookedCheckpoint>"
-    And Waiting the checkpoint "<bookedCheckpoint>" is finished
+    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 1 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
@@ -75,7 +75,7 @@ Feature: Two customer users try to book the same seat at the same time
       | failedStatus          | <failedStatus>          |
       | expectedFailedMessage | <expectedFailedMessage> |
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
       | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |
@@ -87,7 +87,7 @@ Feature: Two customer users try to book the same seat at the same time
     Given Concurrency scenario set up the checkpoint "<bookedCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitBookCheckpoint>"
     And Commit current transaction to database
-    Then Waiting the checkpoint "<setupCheckpoint>" is finished
+    Then Waiting the checkpoint "<setupCheckpoint>" is finished by each 20 ms
     Given "Customer" user 2 logs in to the system
     When User clicks "Book Flight" in side menu
     Then The server return status code of 200
@@ -130,11 +130,11 @@ Feature: Two customer users try to book the same seat at the same time
       | flightDate   | <flightDate>       |
       | seatNumber   | <selectSeatNumber> |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 1 ms
     And User clicks the "Book Seat" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookedCheckpoint>"
-    And Waiting the checkpoint "<bookedCheckpoint>" is finished
+    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 1 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
@@ -142,7 +142,7 @@ Feature: Two customer users try to book the same seat at the same time
       | failedStatus          | <failedStatus>          |
       | expectedFailedMessage | <expectedFailedMessage> |
     And Scenario updates the checkpoint "<waitAllScenario>"
-    Then Waiting the checkpoint "<waitAllScenario>" is finished
+    Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
       | flightNumber         | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage | bookedCheckpoint | waitAllScenario           | setupCheckpoint | waitBookCheckpoint |

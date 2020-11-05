@@ -1,21 +1,21 @@
-Feature: One customer user tries to cancel the ticket of select flight and release the target seat,
+Feature: One customer user tries to change the seat  and release the target seat,
   and another customer user tries to book the seat at the same time
 
-  Scenario Outline: Setup the flight for one cancel and one book request at the same time
+  Scenario Outline: Setup the flight for one change and one book request at the same time
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"
     Given Concurrency scenario set up the checkpoint "<setupCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
-    Then System create a flight for concurrency test "OneCancelOneBookSeatFlight"
+    Then System create a flight for concurrency test "OneChangeOneBookSeatFlight"
     And Commit current transaction to database
     And Scenario updates the checkpoint "<setupCheckpoint>"
     And Scenario updates the checkpoint "<waitAllScenario>"
     Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
     Examples:
       | setupCheckpoint              | waitAllScenario        |
-      | OneCancelOneBookSeatFlight:1 | OneCancelOneBookSeat:3 |
+      | OneChangeOneBookSeatFlight:1 | OneChangeOneBookSeat:3 |
 
 
-  Scenario Outline: Customer 1 try to book the seat 8
+  Scenario Outline: Customer 1 try to book the seat 15
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
     Given Concurrency scenario set up the checkpoint "<bookedCheckpoint>"
@@ -64,12 +64,12 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
       | flightDate   | <flightDate>       |
       | seatNumber   | <selectSeatNumber> |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 40 ms
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 35 ms
 #    And Waiting 15 ms
     And User clicks the "Book Seat" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookedCheckpoint>"
-    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 40 ms
+    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 35 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |
@@ -80,10 +80,10 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
     Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
-      | flightNumber               | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint     | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
-      | OneCancelOneBookSeatFlight | 85         | DEFAULT:1 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1      | 200/400      | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
+      | flightNumber               | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint    | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
+      | OneChangeOneBookSeatFlight | 85         | DEFAULT:1 | 15               | NULL           | OneChangeOneBookSeat | 2/1           | 0/1       | 200/400      | NULL/is not available. | ChangedBookedSeat:2 | OneChangeOneBookSeat:3 | OneChangeOneBookSeatFlight:1 | BeforeChangeBookSeat:2 |
 
-  Scenario Outline: Customer 2 try to cancel the ticket and release seat 8
+  Scenario Outline: Customer 2 try to change the seat from 15 to 22
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
     Given Concurrency scenario set up the checkpoint "<bookedCheckpoint>"
@@ -151,14 +151,20 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
       | flightDate   | <flightDate>       |
       | seatNumber   | <selectSeatNumber> |
       | seatStatus   | BOOKED             |
-    When User clicks "Cancel Ticket" in side menu
+
+    When User clicks "Book Seat" in side menu
     Then The server return status code of 200
-    And User enters the following flight in cancel ticket page
-      | flightNumber | <flightNumber> |
-      | flightDate   | <flightDate>   |
+    Then Verify the following ticket status in the server response
+      | flightNumber    | <flightNumber> |
+      | flightDate      | <flightDate>   |
+      | existInResponse | TRUE           |
+    And User enters the seat in book seat page
+      | flightNumber | <flightNumber>  |
+      | flightDate   | <flightDate>    |
+      | seatNumber   | <newSeatNumber> |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
     Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 40 ms
-    And User clicks the "Cancel Ticket" button
+    And User clicks the "Book Seat" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookedCheckpoint>"
     And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 40 ms
@@ -168,9 +174,28 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
       | failedNum             | <failedNum>             |
       | failedStatus          | <failedStatus>          |
       | expectedFailedMessage | <expectedFailedMessage> |
+    Then The server return status code of 200
+    Then The server return the following response for book flight request
+      | customer     | <customer>         |
+      | flightNumber | <flightNumber>     |
+      # Flight date is how many days start from today
+      | flightDate   | <flightDate>       |
+      | seatNumber   | <newSeatNumber> |
+    Then User get the following ticket
+      | customer     | <customer>      |
+      | flightNumber | <flightNumber>  |
+      # Flight date is how many days start from today
+      | flightDate   | <flightDate>    |
+      | seatNumber   | <newSeatNumber> |
+    Then Verify the seat status in following flight
+      | flightNumber | <flightNumber>  |
+      # Flight date is how many days start from today
+      | flightDate   | <flightDate>    |
+      | seatNumber   | <newSeatNumber> |
+      | seatStatus   | BOOKED          |
     And Scenario updates the checkpoint "<waitAllScenario>"
     Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
 
     Examples:
-      | flightNumber               | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint     | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
-      | OneCancelOneBookSeatFlight | 85         | DEFAULT:2 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1       | 200/400    | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
+      | flightNumber               | flightDate | customer  | selectSeatNumber | newSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint    | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
+      | OneChangeOneBookSeatFlight | 85         | DEFAULT:2 | 15               | 22            | NULL           | OneChangeOneBookSeat | 2/1           | 0/1       | 200/400      | NULL/is not available. | ChangedBookedSeat:2 | OneChangeOneBookSeat:3 | OneChangeOneBookSeatFlight:1 | BeforeChangeBookSeat:2 |

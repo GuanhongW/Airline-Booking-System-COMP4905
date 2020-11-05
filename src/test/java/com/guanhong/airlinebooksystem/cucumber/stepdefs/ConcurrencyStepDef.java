@@ -54,23 +54,24 @@ public class ConcurrencyStepDef {
         }
     }
 
-    @Then("Waiting the checkpoint {string} is finished")
-    public void wait_checkpoint(String checkpointStr) throws InterruptedException {
+    @Then("Waiting the checkpoint {string} is finished by each {int} ms")
+    public void wait_checkpoint(String checkpointStr, int ms) throws InterruptedException {
         String[] checkpoint = getCheckpointInfo(checkpointStr);
         int timeout = 0;
-        while (timeout < 250) {
+        int TOTAL_MS  = 5000;
+        while (timeout < (TOTAL_MS/ms)) {
             Integer target = Integer.parseInt(checkpoint[1]);
             Integer current = dataGenerator.getCheckpointValue(checkpointStr);
             if (current == null) {
                 timeout++;
-                Thread.sleep(20);
+                Thread.sleep(ms);
             }
             if (target.equals(current)) {
                 System.out.println("All scenario reachs the checkpoint, start next step.");
                 return;
             } else {
                 timeout++;
-                Thread.sleep(20);
+                Thread.sleep(ms);
             }
         }
         System.out.println("The waiting function is timeout. (5 sec)");
