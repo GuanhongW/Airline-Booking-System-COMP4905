@@ -9,6 +9,7 @@ import io.cucumber.java.bs.A;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en_scouse.An;
 import io.cucumber.java.sl.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
@@ -56,21 +57,20 @@ public class ConcurrencyStepDef {
     @Then("Waiting the checkpoint {string} is finished")
     public void wait_checkpoint(String checkpointStr) throws InterruptedException {
         String[] checkpoint = getCheckpointInfo(checkpointStr);
-//        boolean isFinished = false;
         int timeout = 0;
-        while (timeout < 1000) {
+        while (timeout < 250) {
             Integer target = Integer.parseInt(checkpoint[1]);
             Integer current = dataGenerator.getCheckpointValue(checkpointStr);
             if (current == null) {
                 timeout++;
-                Thread.sleep(10);
+                Thread.sleep(20);
             }
             if (target.equals(current)) {
                 System.out.println("All scenario reachs the checkpoint, start next step.");
                 return;
             } else {
                 timeout++;
-                Thread.sleep(10);
+                Thread.sleep(20);
             }
         }
         System.out.println("The waiting function is timeout. (5 sec)");
@@ -113,12 +113,21 @@ public class ConcurrencyStepDef {
             }
             if (actualFailed == 0){
                 matchedMessage = true;
+                System.out.println("All response is 200.");
+            }
+            else {
+                System.out.println("Some response is failed");
             }
         }
         assertTrue(matchedCount);
         assertTrue(matchedMessage);
 
 
+    }
+
+    @And("Waiting {int} ms")
+    public void wait_sec(int ms) throws InterruptedException {
+        Thread.sleep(ms);
     }
 
     private int[] getResponseCount(String countStr) {

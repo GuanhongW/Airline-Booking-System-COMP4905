@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
-import com.guanhong.airlinebookingsystem.entity.Flight;
-import com.guanhong.airlinebookingsystem.entity.FlightRoute;
-import com.guanhong.airlinebookingsystem.entity.Role;
-import com.guanhong.airlinebookingsystem.entity.User;
+import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.model.FlightRequest;
 import com.guanhong.airlinebookingsystem.service.FlightService;
@@ -74,7 +71,7 @@ public class TicketController {
         while (bookIndex < 3){
             try{
                 // Timestamp for book flight
-                log.warn("Try Index: " + bookIndex + "at " + new Timestamp(System.currentTimeMillis()));
+//                log.warn("Try Index: " + bookIndex + "at " + new Timestamp(System.currentTimeMillis()));
                 ResponseEntity res = new ResponseEntity(ticketService.bookFlight(flightRequest, user.getId()), HttpStatus.OK);
                 log.info(user.getId() + " got the ticket in flight " + flightRequest.getFlightNumber() + " on "+
                         flightRequest.getFlightDate().toString());
@@ -138,7 +135,10 @@ public class TicketController {
                     return new ResponseEntity("Only customer user can book new flights.", HttpStatus.UNAUTHORIZED);
                 }
             }
-            return ResponseEntity.ok(ticketService.bookSeat(bookSeatRequest, user.getId()));
+            log.warn("The book seat transaction start at " + new Timestamp(System.currentTimeMillis()));
+            Ticket responseTicket = ticketService.bookSeat(bookSeatRequest, user.getId());
+            log.warn("The book seat transaction end at " + new Timestamp(System.currentTimeMillis()));
+            return ResponseEntity.ok(responseTicket);
         }
         catch (ServerException e){
             log.error("URL: bookSeat, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());
@@ -190,7 +190,10 @@ public class TicketController {
                     return new ResponseEntity("Only customer user can cancel existent ticket.", HttpStatus.UNAUTHORIZED);
                 }
             }
-            return ResponseEntity.ok(ticketService.cancelTicket(flightRequest, user.getId()));
+            log.warn("The cancel ticket transaction start at " + new Timestamp(System.currentTimeMillis()));
+            boolean isSuccess = ticketService.cancelTicket(flightRequest, user.getId());
+            log.warn("The cancel ticket transaction end at " + new Timestamp(System.currentTimeMillis()));
+            return ResponseEntity.ok(isSuccess);
         }
         catch (ServerException e){
             log.error("URL: cancelTicket, Http Code: " + e.getHttpStatus() + ": " + e.getMessage());

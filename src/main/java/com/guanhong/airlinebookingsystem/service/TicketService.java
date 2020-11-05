@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -64,6 +65,7 @@ public class TicketService {
 
     @Transactional(rollbackFor = Exception.class)
     public Ticket bookSeat(BookSeatRequest bookSeatRequest, long customerId) throws Exception {
+//        log.warn("The user tries to book seat at " + new Timestamp(System.currentTimeMillis()));
         Flight flight = flightRepository.findFlightByFlightNumberAndFlightDate(bookSeatRequest.getFlightNumber(),
                 bookSeatRequest.getFlightDate());
         if (flight == null){
@@ -100,8 +102,10 @@ public class TicketService {
             int seatNumber = ticket.getSeatNumber();
             // Clean the seat record
             ticketRepository.delete(ticket);
+//            log.warn("The user finished delete ticket at " + new Timestamp(System.currentTimeMillis()));
             int deleteResult = unavailableSeatInfoRepository.deleteUnavailableSeatInfoByFlightIdAndSeatNumber(flight.getFlightId(),
                     seatNumber);
+//            log.warn("The user finished delete reserved seat at " + new Timestamp(System.currentTimeMillis()));
             if (deleteResult != 1){
                 log.error("Delete seat reservation from unavailable seat info table failed.");
                 throw new ServerException("Failed delete the seat reservation.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -109,6 +113,7 @@ public class TicketService {
         }
         else {
             ticketRepository.delete(ticket);
+//            log.warn("The user finished delete ticket at " + new Timestamp(System.currentTimeMillis()));
         }
         flight.addAvailableTickets(1);
         if (flightRepository.save(flight) != null){
@@ -156,18 +161,21 @@ public class TicketService {
     }
 
     private synchronized boolean validSeatStatus(long flightId, int seatNumber, long flightNumber) throws Exception {
+//        log.warn("The system try to check reserved seat at DB at " + new Timestamp(System.currentTimeMillis()));
         UnavailableSeatInfo seatInfo = unavailableSeatInfoRepository.findUnavailableSeatInfoByFlightIdAndSeatNumber(flightId, seatNumber);
+
         if (seatInfo == null) {
             //If the seat is available, reserve the seat in unavailable seat info table
             UnavailableSeatInfo seatReservation = new UnavailableSeatInfo(flightId, seatNumber, SeatStatus.BOOKED);
             UnavailableSeatInfo returnedSeatReservation = unavailableSeatInfoRepository.save(seatReservation);
+
             if (returnedSeatReservation != null) {
                 return true;
             }
             log.error("Unavailable to create seat reservation in Unavailable Seat Info. Release the lock.");
             throw new ServerException("Unavailable to book the seat.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        log.info("The seat " + seatNumber + " in the flight " + flightId + " is not available.");
+        log.info("The seat " + seatNumber + " in the flight " + flightId + " is not available. (at " + new Timestamp(System.currentTimeMillis()));
         throw new ClientException("The seat " + seatNumber + " in the flight " + flightNumber + " is not available.",
                 HttpStatus.BAD_REQUEST);
     }
