@@ -64,12 +64,12 @@ Feature: One customer user tries to change the seat  and release the target seat
       | flightDate   | <flightDate>       |
       | seatNumber   | <selectSeatNumber> |
     And Scenario updates the checkpoint "<waitBookCheckpoint>"
-    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 35 ms
+    Then Waiting the checkpoint "<waitBookCheckpoint>" is finished by each 40 ms
 #    And Waiting 15 ms
     And User clicks the "Book Seat" button
     And Save the current response into concurrent list "<responseName>"
     And Scenario updates the checkpoint "<bookedCheckpoint>"
-    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 35 ms
+    And Waiting the checkpoint "<bookedCheckpoint>" is finished by each 40 ms
     And Verify concurrent response by following information
       | responseName          | <responseName>          |
       | successfulNum         | <successfulNum>         |

@@ -58,7 +58,7 @@ public class ConcurrencyStepDef {
     public void wait_checkpoint(String checkpointStr, int ms) throws InterruptedException {
         String[] checkpoint = getCheckpointInfo(checkpointStr);
         int timeout = 0;
-        int TOTAL_MS  = 5000;
+        int TOTAL_MS  = 6000;
         while (timeout < (TOTAL_MS/ms)) {
             Integer target = Integer.parseInt(checkpoint[1]);
             Integer current = dataGenerator.getCheckpointValue(checkpointStr);
@@ -117,7 +117,7 @@ public class ConcurrencyStepDef {
                 System.out.println("All response is 200.");
             }
             else {
-                System.out.println("Some response is failed");
+                System.out.println(actualFailed + " response is failed");
             }
         }
         assertTrue(matchedCount);

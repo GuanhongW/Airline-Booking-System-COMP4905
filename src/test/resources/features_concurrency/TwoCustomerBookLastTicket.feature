@@ -1,4 +1,4 @@
-Feature: Three customer try to book the same flight at the same time
+Feature: Two customer user try to book the last ticket of the flight
 
   Scenario Outline: Setup last ticket flight for two concurrent booking
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"

@@ -605,6 +605,17 @@ public class AirlineBookingSystemStepdefs {
         selectedFlightAvailableTickets = returnedFlight.getAvailableTickets();
     }
 
+    @Then("^Verify the available tickets of following flight$")
+    public void verify_available_tickets(DataTable dt){
+        Map<String, String> flightInfo = dt.asMap(String.class, String.class);
+        long flightNumber = getSelectFlightNumber(flightInfo.get("flightNumber"));
+        Date flightDate = dataGenerator.datePlusSomeDays(dataGenerator.today(),
+                Integer.parseInt(flightInfo.get("flightDate")));
+        int availableTickets = Integer.parseInt(flightInfo.get("availableTickets"));
+        Flight returnedFlight = flightRepository.findFlightByFlightNumberAndFlightDate(flightNumber, flightDate);
+        assertEquals(availableTickets, returnedFlight.getAvailableTickets());
+    }
+
     @Then("The server return status code of {int}")
     public void verify_status_code(int httpCode) {
         assertEquals(httpCode, requestResult.getResponse().getStatus());
