@@ -53,7 +53,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
-
 @AutoConfigureMockMvc
 @CucumberContextConfiguration
 @SpringBootTest(classes = AirlineBookingSystemApplication.class)

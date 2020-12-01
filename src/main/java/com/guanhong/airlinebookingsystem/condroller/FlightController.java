@@ -3,6 +3,7 @@ package com.guanhong.airlinebookingsystem.condroller;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
+import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;
@@ -25,14 +26,21 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 public class FlightController {
 
-    @Autowired
-    private FlightService flightService;
+//    @Autowired
+//    private FlightService flightService;
+
+    private final FlightService flightService;
+
+    private final JwtUserDetailsService jwtUserDetailsService;
+
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    public FlightController(FlightService flightService, JwtUserDetailsService jwtUserDetailsService, JwtTokenUtil jwtTokenUtil){
+        this.flightService = flightService;
+        this.jwtUserDetailsService = jwtUserDetailsService;
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
 
     @ApiOperation(value = "", authorizations = { @Authorization(value="apiKey") })
     @RequestMapping(value = "/api/createFlight", method = RequestMethod.POST)

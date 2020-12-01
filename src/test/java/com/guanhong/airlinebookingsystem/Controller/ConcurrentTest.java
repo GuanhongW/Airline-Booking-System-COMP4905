@@ -96,7 +96,7 @@ public class ConcurrentTest {
         assertEquals(Role.ADMIN, user.getRole());
 
         // Create default customer user
-        int userAmount = 25;
+        int userAmount = 15;
         for (int i = 0; i < userAmount; i++) {
             testUsername = constants.getNextCustomerUsername();
             defaultCustomerUsernames.add(testUsername);

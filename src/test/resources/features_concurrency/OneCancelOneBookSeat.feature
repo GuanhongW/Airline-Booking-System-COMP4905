@@ -5,14 +5,14 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Setup concurrency flight"
     Given Concurrency scenario set up the checkpoint "<setupCheckpoint>"
     Given Concurrency scenario set up the checkpoint "<waitAllScenario>"
-    Then System create a flight for concurrency test "OneCancelOneBookSeatFlight"
+    Then System create a flight for concurrency test "<flightNumber>"
     And Commit current transaction to database
     And Scenario updates the checkpoint "<setupCheckpoint>"
     And Scenario updates the checkpoint "<waitAllScenario>"
     Then Waiting the checkpoint "<waitAllScenario>" is finished by each 20 ms
     Examples:
-      | setupCheckpoint              | waitAllScenario        |
-      | OneCancelOneBookSeatFlight:1 | OneCancelOneBookSeat:3 |
+      | flightNumber               | setupCheckpoint              | waitAllScenario        |
+      | OneCancelOneBookSeatFlight | OneCancelOneBookSeatFlight:1 | OneCancelOneBookSeat:3 |
 
 
   Scenario Outline: Customer 1 try to book the seat 8
@@ -81,7 +81,7 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
 
     Examples:
       | flightNumber               | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint     | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
-      | OneCancelOneBookSeatFlight | 85         | DEFAULT:1 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1      | 200/400      | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
+      | OneCancelOneBookSeatFlight | 85         | DEFAULT:1 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1       | 200/400      | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
 
   Scenario Outline: Customer 2 try to cancel the ticket and release seat 8
     Given Printing the thread info for feature "Book Flight Concurrency" and scenario "Test1"
@@ -173,4 +173,4 @@ Feature: One customer user tries to cancel the ticket of select flight and relea
 
     Examples:
       | flightNumber               | flightDate | customer  | selectSeatNumber | initSeatNumber | responseName         | successfulNum | failedNum | failedStatus | expectedFailedMessage  | bookedCheckpoint     | waitAllScenario        | setupCheckpoint              | waitBookCheckpoint     |
-      | OneCancelOneBookSeatFlight | 85         | DEFAULT:2 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1       | 200/400    | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
+      | OneCancelOneBookSeatFlight | 85         | DEFAULT:2 | 8                | NULL           | OneCancelOneBookSeat | 2/1           | 0/1       | 200/400      | NULL/is not available. | CanceledBookedSeat:2 | OneCancelOneBookSeat:3 | OneCancelOneBookSeatFlight:1 | BeforeCancelBookSeat:2 |
