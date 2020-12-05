@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: BatchService</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.service</a> ]
+</div>
+
+<h1>Coverage Summary for Class: BatchService (com.guanhong.airlinebookingsystem.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BatchService</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.6%
+  </span>
+  <span class="absValue">
+    (10/ 19)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BatchService$$EnhancerBySpringCGLIB$$c9f050a1</td>
+  </tr>
+  <tr>
+    <td class="name">BatchService$$EnhancerBySpringCGLIB$$c9f050a1$$FastClassBySpringCGLIB$$31d6cd12</td>
+  </tr>
+  <tr>
+    <td class="name">BatchService$$FastClassBySpringCGLIB$$949eb472</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.6%
+  </span>
+  <span class="absValue">
+    (10/ 19)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.service;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.springframework.stereotype.Service;
+<i>4</i>&nbsp;import org.springframework.transaction.annotation.Transactional;
+<i>5</i>&nbsp;import org.springframework.util.ObjectUtils;
+<i>6</i>&nbsp;
+<i>7</i>&nbsp;import javax.persistence.EntityManager;
+<i>8</i>&nbsp;import javax.persistence.PersistenceContext;
+<i>9</i>&nbsp;import java.util.List;
+<i>10</i>&nbsp;
+<i>11</i>&nbsp;@Transactional
+<i>12</i>&nbsp;@Service
+<b class="fc"><i>13</i>&nbsp;public class BatchService {</b>
+<i>14</i>&nbsp;
+<i>15</i>&nbsp;    @PersistenceContext
+<i>16</i>&nbsp;    private EntityManager entityManager;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;    /**
+<i>19</i>&nbsp;     * Batch insert
+<i>20</i>&nbsp;     * without check if entity is in the DB
+<i>21</i>&nbsp;     * @param list list of entity
+<i>22</i>&nbsp;     * @param &lt;T&gt;  entity
+<i>23</i>&nbsp;     */
+<i>24</i>&nbsp;    public &lt;T&gt; void batchInsert(List&lt;T&gt; list) {
+<b class="nc"><i>25</i>&nbsp;        if (!ObjectUtils.isEmpty(list)){</b>
+<b class="nc"><i>26</i>&nbsp;            for (int i = 0; i &lt; list.size(); i++) {</b>
+<b class="nc"><i>27</i>&nbsp;                entityManager.persist(list.get(i));</b>
+<b class="nc"><i>28</i>&nbsp;                if (i % 500 == 0) {</b>
+<b class="nc"><i>29</i>&nbsp;                    entityManager.flush();</b>
+<b class="nc"><i>30</i>&nbsp;                    entityManager.clear();</b>
+<i>31</i>&nbsp;                }
+<i>32</i>&nbsp;            }
+<b class="nc"><i>33</i>&nbsp;            entityManager.flush();</b>
+<b class="nc"><i>34</i>&nbsp;            entityManager.clear();</b>
+<i>35</i>&nbsp;        }
+<b class="nc"><i>36</i>&nbsp;    }</b>
+<i>37</i>&nbsp;
+<i>38</i>&nbsp;    /**
+<i>39</i>&nbsp;     * batch update
+<i>40</i>&nbsp;     * without check if entity is in the DB
+<i>41</i>&nbsp;     * @param list list of entity
+<i>42</i>&nbsp;     * @param &lt;T&gt;  entity
+<i>43</i>&nbsp;     */
+<i>44</i>&nbsp;    public &lt;T&gt; void batchUpdate(List&lt;T&gt; list) {
+<b class="fc"><i>45</i>&nbsp;        if (!ObjectUtils.isEmpty(list)){</b>
+<b class="fc"><i>46</i>&nbsp;            for (int i = 0; i &lt; list.size(); i++) {</b>
+<b class="fc"><i>47</i>&nbsp;                entityManager.merge(list.get(i));</b>
+<b class="fc"><i>48</i>&nbsp;                if (i % 500 == 0) {</b>
+<b class="fc"><i>49</i>&nbsp;                    entityManager.flush();</b>
+<b class="fc"><i>50</i>&nbsp;                    entityManager.clear();</b>
+<i>51</i>&nbsp;                }
+<i>52</i>&nbsp;            }
+<b class="fc"><i>53</i>&nbsp;            entityManager.flush();</b>
+<b class="fc"><i>54</i>&nbsp;            entityManager.clear();</b>
+<i>55</i>&nbsp;        }
+<b class="fc"><i>56</i>&nbsp;    }</b>
+<i>57</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-04 21:21</div>
+</div>
+</body>
+</html>
