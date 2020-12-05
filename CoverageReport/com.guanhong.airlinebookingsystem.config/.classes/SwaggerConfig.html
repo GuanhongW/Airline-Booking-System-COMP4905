@@ -1,0 +1,141 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SwaggerConfig</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.config</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SwaggerConfig (com.guanhong.airlinebookingsystem.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SwaggerConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/ 15)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SwaggerConfig$$EnhancerBySpringCGLIB$$f2471ee2</td>
+  </tr>
+  <tr>
+    <td class="name">SwaggerConfig$$EnhancerBySpringCGLIB$$f2471ee2$$FastClassBySpringCGLIB$$5eff170b</td>
+  </tr>
+  <tr>
+    <td class="name">SwaggerConfig$$FastClassBySpringCGLIB$$d724273e</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/ 15)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.config;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.springframework.context.annotation.Bean;
+<i>4</i>&nbsp;import org.springframework.context.annotation.Configuration;
+<i>5</i>&nbsp;import springfox.documentation.builders.ApiInfoBuilder;
+<i>6</i>&nbsp;import springfox.documentation.builders.PathSelectors;
+<i>7</i>&nbsp;import springfox.documentation.builders.RequestHandlerSelectors;
+<i>8</i>&nbsp;import springfox.documentation.service.ApiInfo;
+<i>9</i>&nbsp;import springfox.documentation.service.ApiKey;
+<i>10</i>&nbsp;import springfox.documentation.spi.DocumentationType;
+<i>11</i>&nbsp;import springfox.documentation.spring.web.plugins.Docket;
+<i>12</i>&nbsp;import springfox.documentation.swagger2.annotations.EnableSwagger2;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;import java.util.Arrays;
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;@Configuration
+<i>17</i>&nbsp;@EnableSwagger2
+<b class="fc"><i>18</i>&nbsp;public class SwaggerConfig {</b>
+<i>19</i>&nbsp;    @Bean
+<i>20</i>&nbsp;    public Docket api() {
+<b class="fc"><i>21</i>&nbsp;        return new Docket(DocumentationType.SWAGGER_2)</b>
+<b class="fc"><i>22</i>&nbsp;                .select()</b>
+<b class="fc"><i>23</i>&nbsp;                .apis(RequestHandlerSelectors.any())</b>
+<b class="fc"><i>24</i>&nbsp;                .paths(PathSelectors.any())</b>
+<b class="fc"><i>25</i>&nbsp;                .build()</b>
+<b class="fc"><i>26</i>&nbsp;                .apiInfo(apiInfo())</b>
+<b class="fc"><i>27</i>&nbsp;                .securitySchemes(Arrays.asList(apiKey()));</b>
+<i>28</i>&nbsp;    }
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;    private ApiInfo apiInfo() {
+<b class="fc"><i>31</i>&nbsp;        return new ApiInfoBuilder()</b>
+<b class="fc"><i>32</i>&nbsp;                .title(&quot;REST API Document of Airline Booking System&quot;)</b>
+<b class="fc"><i>33</i>&nbsp;                .description(&quot;description for api&quot;)</b>
+<b class="fc"><i>34</i>&nbsp;                .termsOfServiceUrl(&quot;localhost&quot;)</b>
+<b class="fc"><i>35</i>&nbsp;                .version(&quot;1.0&quot;)</b>
+<b class="fc"><i>36</i>&nbsp;                .build();</b>
+<i>37</i>&nbsp;    }
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    private ApiKey apiKey() {
+<b class="fc"><i>40</i>&nbsp;        return new ApiKey(&quot;apiKey&quot;, &quot;Authorization&quot;, &quot;header&quot;); //`apiKey` is the name of the APIKey, `Authorization` is the key in the request header</b>
+<i>41</i>&nbsp;    }
+<i>42</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: AricraftConstant</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.model</a> ]
+</div>
+
+<h1>Coverage Summary for Class: AricraftConstant (com.guanhong.airlinebookingsystem.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AricraftConstant</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.7%
+  </span>
+  <span class="absValue">
+    (13/ 15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.model;
+<i>2</i>&nbsp;
+<b class="nc"><i>3</i>&nbsp;public class AricraftConstant {</b>
+<i>4</i>&nbsp;    private static final int B737_CAPACITY = 169;
+<i>5</i>&nbsp;    private static final int B777_CAPACITY = 400;
+<i>6</i>&nbsp;    private static final int CRJ900_CAPACITY = 76;
+<i>7</i>&nbsp;    private static final int A320_CAPACITY = 146;
+<i>8</i>&nbsp;    private static final int CRJ200_CAPACITY = 50;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;    public static int getCapacityByAircraft(int aircraftId) {
+<b class="fc"><i>11</i>&nbsp;        switch (aircraftId) {</b>
+<i>12</i>&nbsp;            case 737:
+<b class="fc"><i>13</i>&nbsp;                return B737_CAPACITY;</b>
+<i>14</i>&nbsp;            case 777:
+<b class="fc"><i>15</i>&nbsp;                return B777_CAPACITY;</b>
+<i>16</i>&nbsp;            case 900:
+<b class="fc"><i>17</i>&nbsp;                return CRJ900_CAPACITY;</b>
+<i>18</i>&nbsp;            case 320:
+<b class="fc"><i>19</i>&nbsp;                return A320_CAPACITY;</b>
+<i>20</i>&nbsp;            case 200:
+<b class="fc"><i>21</i>&nbsp;                return CRJ200_CAPACITY;</b>
+<i>22</i>&nbsp;            default:
+<b class="nc"><i>23</i>&nbsp;                return 0;</b>
+<i>24</i>&nbsp;        }
+<i>25</i>&nbsp;    }
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;    public static boolean validAircraftID(int aircraftId){
+<b class="fc"><i>28</i>&nbsp;        switch (aircraftId) {</b>
+<i>29</i>&nbsp;            case 737:
+<b class="fc"><i>30</i>&nbsp;                return true;</b>
+<i>31</i>&nbsp;            case 777:
+<b class="fc"><i>32</i>&nbsp;                return true;</b>
+<i>33</i>&nbsp;            case 900:
+<b class="fc"><i>34</i>&nbsp;                return true;</b>
+<i>35</i>&nbsp;            case 320:
+<b class="fc"><i>36</i>&nbsp;                return true;</b>
+<i>37</i>&nbsp;            case 200:
+<b class="fc"><i>38</i>&nbsp;                return true;</b>
+<i>39</i>&nbsp;            default:
+<b class="fc"><i>40</i>&nbsp;                return false;</b>
+<i>41</i>&nbsp;        }
+<i>42</i>&nbsp;    }
+<i>43</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

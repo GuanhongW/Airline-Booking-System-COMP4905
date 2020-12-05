@@ -1,0 +1,78 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: FlightRepository</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.repository</a> ]
+</div>
+
+<h1>Coverage Summary for Class: FlightRepository (com.guanhong.airlinebookingsystem.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">FlightRepository</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.repository;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.Flight;
+<i>4</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.FlightRoute;
+<i>5</i>&nbsp;
+<i>6</i>&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+<i>7</i>&nbsp;import org.springframework.data.jpa.repository.Lock;
+<i>8</i>&nbsp;import org.springframework.stereotype.Repository;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;import java.util.Date;
+<i>11</i>&nbsp;import java.util.Iterator;
+<i>12</i>&nbsp;import java.util.List;
+<i>13</i>&nbsp;import org.springframework.transaction.annotation.Transactional;
+<i>14</i>&nbsp;
+<i>15</i>&nbsp;import javax.persistence.EntityManager;
+<i>16</i>&nbsp;import javax.persistence.LockModeType;
+<i>17</i>&nbsp;import javax.persistence.PersistenceContext;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;@Repository
+<i>20</i>&nbsp;public interface FlightRepository extends JpaRepository&lt;Flight, Long&gt; {
+<i>21</i>&nbsp;    public List&lt;Flight&gt; findAllByFlightNumberAndAvailableTicketsGreaterThanAndFlightDateGreaterThanEqualOrderByFlightDate(long flightNumber, int availableSeats, Date today);
+<i>22</i>&nbsp;    public List&lt;Flight&gt; findAllByFlightNumberOrderByFlightDate(long flightNumber);
+<i>23</i>&nbsp;    public Flight findFlightByFlightId(long flightId);
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;//    @Lock(value = LockModeType.PESSIMISTIC_FORCE_INCREMENT)
+<i>26</i>&nbsp;    public Flight findFlightByFlightNumberAndFlightDate(long flightNumber, Date flightDate);
+<i>27</i>&nbsp;
+<i>28</i>&nbsp;    public List&lt;Flight&gt; findAllByFlightNumberAndFlightDateBetweenOrderByFlightDate(long flightNumber, Date startDate, Date endDate);
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;}
+<i>31</i>&nbsp;
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

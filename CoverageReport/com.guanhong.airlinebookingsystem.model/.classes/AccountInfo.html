@@ -1,0 +1,151 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: AccountInfo</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.model</a> ]
+</div>
+
+<h1>Coverage Summary for Class: AccountInfo (com.guanhong.airlinebookingsystem.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AccountInfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/ 11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/ 23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.model;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.fasterxml.jackson.annotation.JsonFormat;
+<i>4</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.Gender;
+<i>5</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.Role;
+<i>6</i>&nbsp;
+<i>7</i>&nbsp;import java.util.Date;
+<i>8</i>&nbsp;
+<i>9</i>&nbsp;public class AccountInfo extends UserCredential{
+<i>10</i>&nbsp;
+<i>11</i>&nbsp;    private String name;
+<i>12</i>&nbsp;    private Role role;
+<i>13</i>&nbsp;    private Gender gender;
+<i>14</i>&nbsp;    @JsonFormat(pattern=&quot;yyyy-MM-dd&quot;)
+<i>15</i>&nbsp;    private String birthDate;
+<i>16</i>&nbsp;
+<b class="fc"><i>17</i>&nbsp;    public AccountInfo(){</b>
+<i>18</i>&nbsp;
+<b class="fc"><i>19</i>&nbsp;    }</b>
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;    public AccountInfo(String username, String password, Role role, String name, Gender gender, String birthDate) {
+<b class="fc"><i>22</i>&nbsp;        super(username, password);</b>
+<i>23</i>&nbsp;
+<b class="fc"><i>24</i>&nbsp;        this.name = name;</b>
+<b class="fc"><i>25</i>&nbsp;        this.role = role;</b>
+<b class="fc"><i>26</i>&nbsp;        this.gender = gender;</b>
+<b class="fc"><i>27</i>&nbsp;        this.birthDate = birthDate;</b>
+<b class="fc"><i>28</i>&nbsp;    }</b>
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;    public AccountInfo(String username, String password, Role role) {
+<b class="fc"><i>31</i>&nbsp;        super(username, password);</b>
+<i>32</i>&nbsp;
+<b class="fc"><i>33</i>&nbsp;        this.role = role;</b>
+<b class="fc"><i>34</i>&nbsp;    }</b>
+<i>35</i>&nbsp;
+<i>36</i>&nbsp;
+<i>37</i>&nbsp;    public String getName() {
+<b class="fc"><i>38</i>&nbsp;        return name;</b>
+<i>39</i>&nbsp;    }
+<i>40</i>&nbsp;
+<i>41</i>&nbsp;    public void setName(String name) {
+<b class="fc"><i>42</i>&nbsp;        this.name = name;</b>
+<b class="fc"><i>43</i>&nbsp;    }</b>
+<i>44</i>&nbsp;
+<i>45</i>&nbsp;    public Role getRole() {
+<b class="fc"><i>46</i>&nbsp;        return role;</b>
+<i>47</i>&nbsp;    }
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    public void setRole(Role role) {
+<b class="fc"><i>50</i>&nbsp;        this.role = role;</b>
+<b class="fc"><i>51</i>&nbsp;    }</b>
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;    public Gender getGender() {
+<b class="fc"><i>54</i>&nbsp;        return gender;</b>
+<i>55</i>&nbsp;    }
+<i>56</i>&nbsp;
+<i>57</i>&nbsp;    public void setGender(Gender gender) {
+<b class="fc"><i>58</i>&nbsp;        this.gender = gender;</b>
+<b class="fc"><i>59</i>&nbsp;    }</b>
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;    public String getBirthDate() {
+<b class="fc"><i>62</i>&nbsp;        return birthDate;</b>
+<i>63</i>&nbsp;    }
+<i>64</i>&nbsp;
+<i>65</i>&nbsp;    public void setBirthDate(String birthDate) {
+<b class="fc"><i>66</i>&nbsp;        this.birthDate = birthDate;</b>
+<b class="fc"><i>67</i>&nbsp;    }</b>
+<i>68</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,165 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: JwtAuthenticationController</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.controller</a> ]
+</div>
+
+<h1>Coverage Summary for Class: JwtAuthenticationController (com.guanhong.airlinebookingsystem.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JwtAuthenticationController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42.9%
+  </span>
+  <span class="absValue">
+    (12/ 28)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.controller;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.guanhong.airlinebookingsystem.Exception.ClientException;
+<i>4</i>&nbsp;import com.guanhong.airlinebookingsystem.Exception.ServerException;
+<i>5</i>&nbsp;import com.guanhong.airlinebookingsystem.model.AccountInfo;
+<i>6</i>&nbsp;import com.guanhong.airlinebookingsystem.model.CreateUserResponse;
+<i>7</i>&nbsp;import com.guanhong.airlinebookingsystem.model.UserCredential;
+<i>8</i>&nbsp;import io.swagger.annotations.ApiOperation;
+<i>9</i>&nbsp;import io.swagger.annotations.Authorization;
+<i>10</i>&nbsp;import lombok.extern.slf4j.Slf4j;
+<i>11</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>12</i>&nbsp;import org.springframework.dao.DataIntegrityViolationException;
+<i>13</i>&nbsp;import org.springframework.http.HttpStatus;
+<i>14</i>&nbsp;import org.springframework.http.ResponseEntity;
+<i>15</i>&nbsp;import org.springframework.web.bind.annotation.CrossOrigin;
+<i>16</i>&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+<i>17</i>&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+<i>18</i>&nbsp;import org.springframework.web.bind.annotation.RequestMethod;
+<i>19</i>&nbsp;import org.springframework.web.bind.annotation.RestController;
+<i>20</i>&nbsp;import com.guanhong.airlinebookingsystem.service.JwtUserDetailsService;
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;@RestController
+<i>23</i>&nbsp;@CrossOrigin
+<b class="fc"><i>24</i>&nbsp;@Slf4j</b>
+<b class="fc"><i>25</i>&nbsp;public class JwtAuthenticationController {</b>
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;    @Autowired
+<i>28</i>&nbsp;    private JwtUserDetailsService jwtUserDetailsService;
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;    @ApiOperation(value = &quot;&quot;, authorizations = { @Authorization(value=&quot;apiKey&quot;) })
+<i>31</i>&nbsp;    @RequestMapping(value = &quot;/authenticate&quot;, method = RequestMethod.POST)
+<i>32</i>&nbsp;    public ResponseEntity createAuthenticationTokenController(@RequestBody UserCredential userCredential){
+<i>33</i>&nbsp;        try{
+<b class="fc"><i>34</i>&nbsp;            if (userCredential.getUsername() == null || userCredential.getPassword() == null){</b>
+<b class="fc"><i>35</i>&nbsp;                log.error(&quot;Http Code: 400  URL: authenticate  username or password is null&quot;);</b>
+<b class="fc"><i>36</i>&nbsp;                return ResponseEntity.badRequest().body(&quot;Username or password cannot be empty.&quot;);</b>
+<i>37</i>&nbsp;            }
+<b class="fc"><i>38</i>&nbsp;            return ResponseEntity.ok(jwtUserDetailsService.authUser(userCredential));</b>
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;        }
+<b class="nc"><i>41</i>&nbsp;        catch (Exception e){</b>
+<b class="nc"><i>42</i>&nbsp;            log.error(&quot;URL: authenticate, Http Code: 400: &quot; + e.getMessage());</b>
+<b class="nc"><i>43</i>&nbsp;            return new ResponseEntity(e.getMessage(), HttpStatus.UNAUTHORIZED);</b>
+<i>44</i>&nbsp;        }
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;
+<i>47</i>&nbsp;
+<i>48</i>&nbsp;    }
+<i>49</i>&nbsp;
+<i>50</i>&nbsp;    @ApiOperation(value = &quot;&quot;, authorizations = { @Authorization(value=&quot;apiKey&quot;) })
+<i>51</i>&nbsp;    @RequestMapping(value = &quot;/register&quot;, method = RequestMethod.POST)
+<i>52</i>&nbsp;    public ResponseEntity createUserController(@RequestBody AccountInfo newUserInfo) throws Exception {
+<b class="fc"><i>53</i>&nbsp;        System.out.println(newUserInfo.getRole());</b>
+<i>54</i>&nbsp;        try{
+<b class="fc"><i>55</i>&nbsp;            if (newUserInfo.getUsername() == null || newUserInfo.getPassword() == null || newUserInfo.getRole() == null){</b>
+<b class="fc"><i>56</i>&nbsp;                log.error(&quot;Http Code: 400  URL: register  username, password, or role is null&quot;);</b>
+<b class="fc"><i>57</i>&nbsp;                return ResponseEntity.badRequest().body(&quot;Username, password, or role cannot be empty&quot;);</b>
+<i>58</i>&nbsp;            }
+<b class="fc"><i>59</i>&nbsp;            CreateUserResponse test = jwtUserDetailsService.createAccount(newUserInfo);</b>
+<b class="fc"><i>60</i>&nbsp;            return ResponseEntity.ok(test);</b>
+<i>61</i>&nbsp;        }
+<b class="nc"><i>62</i>&nbsp;        catch (ServerException e){</b>
+<b class="nc"><i>63</i>&nbsp;            log.error(&quot;URL: register, Http Code: &quot; + e.getHttpStatus() + &quot;: &quot; + e.getMessage());</b>
+<b class="nc"><i>64</i>&nbsp;            return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+<i>65</i>&nbsp;        }
+<b class="nc"><i>66</i>&nbsp;        catch (ClientException e){</b>
+<b class="nc"><i>67</i>&nbsp;            log.error(&quot;URL: register, Http Code: &quot; + e.getHttpStatus() + &quot;: &quot; + e.getMessage());</b>
+<b class="nc"><i>68</i>&nbsp;            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);</b>
+<i>69</i>&nbsp;        }
+<b class="nc"><i>70</i>&nbsp;        catch (DataIntegrityViolationException e){</b>
+<b class="nc"><i>71</i>&nbsp;            log.error(e.getMessage());</b>
+<b class="nc"><i>72</i>&nbsp;            log.info(&quot;Create entity in customer info table is failed, rolling back in user table&quot;);</b>
+<b class="nc"><i>73</i>&nbsp;            return new ResponseEntity(&quot;Create a new flight failed because of server error.&quot;, HttpStatus.INTERNAL_SERVER_ERROR);</b>
+<i>74</i>&nbsp;        }
+<b class="nc"><i>75</i>&nbsp;        catch (Exception e){</b>
+<b class="nc"><i>76</i>&nbsp;            log.error(&quot;URL: register, Http Code: 400: &quot; + e.getMessage());</b>
+<b class="nc"><i>77</i>&nbsp;            return ResponseEntity.badRequest().body(e.getMessage());</b>
+<i>78</i>&nbsp;        }
+<i>79</i>&nbsp;    }
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;
+<i>82</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

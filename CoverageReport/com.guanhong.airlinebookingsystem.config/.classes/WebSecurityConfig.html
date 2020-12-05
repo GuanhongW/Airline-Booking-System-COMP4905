@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: WebSecurityConfig</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.config</a> ]
+</div>
+
+<h1>Coverage Summary for Class: WebSecurityConfig (com.guanhong.airlinebookingsystem.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebSecurityConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/ 13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WebSecurityConfig$$EnhancerBySpringCGLIB$$f011aacc</td>
+  </tr>
+  <tr>
+    <td class="name">WebSecurityConfig$$EnhancerBySpringCGLIB$$f011aacc$$FastClassBySpringCGLIB$$4cf950fb</td>
+  </tr>
+  <tr>
+    <td class="name">WebSecurityConfig$$FastClassBySpringCGLIB$$375f5fe8</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/ 13)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.config;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>4</i>&nbsp;import org.springframework.context.annotation.Bean;
+<i>5</i>&nbsp;import org.springframework.context.annotation.Configuration;
+<i>6</i>&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+<i>7</i>&nbsp;import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+<i>8</i>&nbsp;import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+<i>9</i>&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+<i>10</i>&nbsp;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+<i>11</i>&nbsp;import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+<i>12</i>&nbsp;import org.springframework.security.config.http.SessionCreationPolicy;
+<i>13</i>&nbsp;import org.springframework.security.core.userdetails.UserDetailsService;
+<i>14</i>&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+<i>15</i>&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+<i>16</i>&nbsp;import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;@Configuration
+<i>19</i>&nbsp;@EnableWebSecurity
+<i>20</i>&nbsp;@EnableGlobalMethodSecurity(prePostEnabled = true)
+<b class="fc"><i>21</i>&nbsp;public class WebSecurityConfig extends WebSecurityConfigurerAdapter {</b>
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;    @Autowired
+<i>24</i>&nbsp;    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+<i>25</i>&nbsp;
+<i>26</i>&nbsp;    @Autowired
+<i>27</i>&nbsp;    private UserDetailsService jwtUserDetailsService;
+<i>28</i>&nbsp;
+<i>29</i>&nbsp;    @Autowired
+<i>30</i>&nbsp;    private JwtRequestFilter jwtRequestFilter;
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;    @Autowired
+<i>33</i>&nbsp;    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+<i>34</i>&nbsp;        // configure AuthenticationManager so that it knows from where to load
+<i>35</i>&nbsp;        // user for matching credentials
+<i>36</i>&nbsp;        // Use BCryptPasswordEncoder
+<b class="fc"><i>37</i>&nbsp;        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());</b>
+<b class="fc"><i>38</i>&nbsp;    }</b>
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;    @Bean
+<i>41</i>&nbsp;    public PasswordEncoder passwordEncoder() {
+<b class="fc"><i>42</i>&nbsp;        return new BCryptPasswordEncoder();</b>
+<i>43</i>&nbsp;    }
+<i>44</i>&nbsp;
+<i>45</i>&nbsp;    @Bean
+<i>46</i>&nbsp;    @Override
+<i>47</i>&nbsp;    public AuthenticationManager authenticationManagerBean() throws Exception {
+<b class="fc"><i>48</i>&nbsp;        return super.authenticationManagerBean();</b>
+<i>49</i>&nbsp;    }
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    @Override
+<i>52</i>&nbsp;    protected void configure(HttpSecurity httpSecurity) throws Exception {
+<i>53</i>&nbsp;        // We don&#39;t need CSRF for this example
+<b class="fc"><i>54</i>&nbsp;        httpSecurity.csrf().disable()</b>
+<i>55</i>&nbsp;                // dont authenticate this particular request
+<b class="fc"><i>56</i>&nbsp;                .authorizeRequests().antMatchers(</b>
+<i>57</i>&nbsp;                &quot;/authenticate&quot;, &quot;/register&quot;,
+<i>58</i>&nbsp;                &quot;/swagger-ui.html**&quot;, &quot;/swagger-resources/**&quot;,
+<b class="fc"><i>59</i>&nbsp;                &quot;/v2/api-docs**&quot;, &quot;/webjars/**&quot;, &quot;/test*&quot;, &quot;/druid/**&quot;).permitAll().</b>
+<i>60</i>&nbsp;                // all other requests need to be authenticated
+<b class="fc"><i>61</i>&nbsp;                        anyRequest().authenticated().and().</b>
+<i>62</i>&nbsp;                // make sure we use stateless session; session won&#39;t be used to
+<i>63</i>&nbsp;                // store user&#39;s state.
+<b class="fc"><i>64</i>&nbsp;                        exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()</b>
+<b class="fc"><i>65</i>&nbsp;                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);</b>
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;        // Add a filter to validate the tokens with every request
+<b class="fc"><i>68</i>&nbsp;        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);</b>
+<b class="fc"><i>69</i>&nbsp;    }</b>
+<i>70</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

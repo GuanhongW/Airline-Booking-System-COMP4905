@@ -1,0 +1,74 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: UnavailableSeatInfoRepository</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.repository</a> ]
+</div>
+
+<h1>Coverage Summary for Class: UnavailableSeatInfoRepository (com.guanhong.airlinebookingsystem.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">UnavailableSeatInfoRepository</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.repository;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.UnavailableSeatInfo;
+<i>4</i>&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+<i>5</i>&nbsp;import org.springframework.data.jpa.repository.Lock;
+<i>6</i>&nbsp;import org.springframework.data.jpa.repository.Query;
+<i>7</i>&nbsp;import org.springframework.stereotype.Repository;
+<i>8</i>&nbsp;
+<i>9</i>&nbsp;import javax.persistence.LockModeType;
+<i>10</i>&nbsp;import java.sql.Date;
+<i>11</i>&nbsp;import java.util.List;
+<i>12</i>&nbsp;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;@Repository
+<i>15</i>&nbsp;public interface UnavailableSeatInfoRepository extends JpaRepository&lt;UnavailableSeatInfo, Long&gt; {
+<i>16</i>&nbsp;    public List&lt;UnavailableSeatInfo&gt; findAllByFlightId(long flightId);
+<i>17</i>&nbsp;    public int deleteAllByFlightId(long flightId);
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
+<i>20</i>&nbsp;    @Query(&quot;select a from UnavailableSeatInfo a where a.flightId = :flightId and a.seatNumber = :seatNumber&quot;)
+<i>21</i>&nbsp;    public UnavailableSeatInfo findUnavailableSeatInfoByFlightIdAndSeatNumberWithPessimisticLock(long flightId, Integer seatNumber);
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;    public UnavailableSeatInfo findUnavailableSeatInfoByFlightIdAndSeatNumber(long flightId, Integer seatNumber);
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;    public int deleteUnavailableSeatInfoByFlightIdAndSeatNumber(long flightId, Integer seatNumber);
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>

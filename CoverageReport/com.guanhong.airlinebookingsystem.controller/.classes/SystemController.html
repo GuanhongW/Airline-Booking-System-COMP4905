@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SystemController</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.guanhong.airlinebookingsystem.controller</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SystemController (com.guanhong.airlinebookingsystem.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SystemController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    28.6%
+  </span>
+  <span class="absValue">
+    (2/ 7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.7%
+  </span>
+  <span class="absValue">
+    (2/ 26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.guanhong.airlinebookingsystem.controller;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.guanhong.airlinebookingsystem.service.UserService;
+<i>4</i>&nbsp;import io.swagger.annotations.ApiOperation;
+<i>5</i>&nbsp;import io.swagger.annotations.Authorization;
+<i>6</i>&nbsp;import lombok.extern.slf4j.Slf4j;
+<i>7</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>8</i>&nbsp;import org.springframework.http.HttpStatus;
+<i>9</i>&nbsp;import org.springframework.http.ResponseEntity;
+<i>10</i>&nbsp;import org.springframework.web.bind.annotation.*;
+<i>11</i>&nbsp;
+<i>12</i>&nbsp;import com.guanhong.airlinebookingsystem.entity.User;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;@RestController
+<b class="fc"><i>15</i>&nbsp;@Slf4j</b>
+<b class="fc"><i>16</i>&nbsp;public class SystemController {</b>
+<i>17</i>&nbsp;    @Autowired
+<i>18</i>&nbsp;    UserService userService;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;    @ApiOperation(value = &quot;&quot;, authorizations = { @Authorization(value=&quot;apiKey&quot;) })
+<i>21</i>&nbsp;    @RequestMapping(value = &quot;/getUser&quot;, method = RequestMethod.GET)
+<i>22</i>&nbsp;    public ResponseEntity getUserById(int id) {
+<i>23</i>&nbsp;        try{
+<b class="nc"><i>24</i>&nbsp;            System.out.println(userService.getUserById(id).toString());</b>
+<b class="nc"><i>25</i>&nbsp;            return new ResponseEntity(userService.getUserById(id),HttpStatus.OK);</b>
+<i>26</i>&nbsp;        }
+<b class="nc"><i>27</i>&nbsp;        catch (Exception e){</b>
+<b class="nc"><i>28</i>&nbsp;            System.out.println(e);</b>
+<b class="nc"><i>29</i>&nbsp;            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);</b>
+<i>30</i>&nbsp;        }
+<i>31</i>&nbsp;    }
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;    @ApiOperation(value = &quot;&quot;, authorizations = { @Authorization(value=&quot;apiKey&quot;) })
+<i>34</i>&nbsp;    @RequestMapping(value = &quot;/addUser&quot;, method = RequestMethod.POST)
+<i>35</i>&nbsp;    public ResponseEntity addUser(User user){
+<i>36</i>&nbsp;        try{
+<b class="nc"><i>37</i>&nbsp;            System.out.println(user);</b>
+<b class="nc"><i>38</i>&nbsp;            User newUser = userService.addUser(user);</b>
+<b class="nc"><i>39</i>&nbsp;            return new ResponseEntity(newUser, HttpStatus.OK);</b>
+<i>40</i>&nbsp;        }
+<b class="nc"><i>41</i>&nbsp;        catch (Exception e){</b>
+<b class="nc"><i>42</i>&nbsp;            System.out.println(e);</b>
+<b class="nc"><i>43</i>&nbsp;            return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);</b>
+<i>44</i>&nbsp;        }
+<i>45</i>&nbsp;    }
+<i>46</i>&nbsp;
+<i>47</i>&nbsp;    @ApiOperation(value = &quot;&quot;, authorizations = { @Authorization(value=&quot;apiKey&quot;) })
+<i>48</i>&nbsp;    @RequestMapping(value = &quot;/test&quot;, method = RequestMethod.GET)
+<i>49</i>&nbsp;    public ResponseEntity test(){
+<b class="nc"><i>50</i>&nbsp;        log.trace(&quot;Trace log Test 1&quot;);</b>
+<b class="nc"><i>51</i>&nbsp;        log.debug(&quot;Debug log test 2&quot;);</b>
+<b class="nc"><i>52</i>&nbsp;        log.info(&quot;Info log test 3&quot;);</b>
+<b class="nc"><i>53</i>&nbsp;        log.warn(&quot;Warn log test 4&quot;);</b>
+<b class="nc"><i>54</i>&nbsp;        log.error(&quot;Error log test 5&quot;);</b>
+<b class="nc"><i>55</i>&nbsp;        return new ResponseEntity(&quot;Test&quot;, HttpStatus.BAD_REQUEST);</b>
+<i>56</i>&nbsp;    }
+<i>57</i>&nbsp;
+<i>58</i>&nbsp;    @RequestMapping(value = &quot;/test1&quot;, method = RequestMethod.GET)
+<i>59</i>&nbsp;    public ResponseEntity test1() throws InterruptedException {
+<b class="nc"><i>60</i>&nbsp;        System.out.println(&quot;This is Test 1&quot;);</b>
+<b class="nc"><i>61</i>&nbsp;        Thread.sleep(15000);</b>
+<b class="nc"><i>62</i>&nbsp;        System.out.println(&quot;Test1 Finish&quot;);</b>
+<b class="nc"><i>63</i>&nbsp;        return new ResponseEntity(&quot;Test1&quot;, HttpStatus.OK);</b>
+<i>64</i>&nbsp;    }
+<i>65</i>&nbsp;
+<i>66</i>&nbsp;    @RequestMapping(value = &quot;/test2&quot;, method = RequestMethod.GET)
+<i>67</i>&nbsp;    public ResponseEntity test2(){
+<b class="nc"><i>68</i>&nbsp;        System.out.println(&quot;This is Test 2&quot;);</b>
+<b class="nc"><i>69</i>&nbsp;        System.out.println(&quot;Test2 Finish&quot;);</b>
+<b class="nc"><i>70</i>&nbsp;        return new ResponseEntity(&quot;Test1&quot;, HttpStatus.OK);</b>
+<i>71</i>&nbsp;    }
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-12-05 12:54</div>
+</div>
+</body>
+</html>
