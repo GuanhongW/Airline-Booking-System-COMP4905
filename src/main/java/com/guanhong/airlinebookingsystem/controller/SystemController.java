@@ -1,4 +1,4 @@
-package com.guanhong.airlinebookingsystem.condroller;
+package com.guanhong.airlinebookingsystem.controller;
 
 import com.guanhong.airlinebookingsystem.service.UserService;
 import io.swagger.annotations.ApiOperation;

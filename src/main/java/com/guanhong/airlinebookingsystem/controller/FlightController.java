@@ -1,9 +1,8 @@
-package com.guanhong.airlinebookingsystem.condroller;
+package com.guanhong.airlinebookingsystem.controller;
 
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
-import com.guanhong.airlinebookingsystem.entity.Flight;
 import com.guanhong.airlinebookingsystem.entity.FlightRoute;
 import com.guanhong.airlinebookingsystem.entity.Role;
 import com.guanhong.airlinebookingsystem.model.FlightNumberRequest;

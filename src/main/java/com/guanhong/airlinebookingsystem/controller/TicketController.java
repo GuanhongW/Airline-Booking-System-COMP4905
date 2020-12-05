@@ -1,13 +1,11 @@
-package com.guanhong.airlinebookingsystem.condroller;
+package com.guanhong.airlinebookingsystem.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guanhong.airlinebookingsystem.Exception.ClientException;
 import com.guanhong.airlinebookingsystem.Exception.ServerException;
 import com.guanhong.airlinebookingsystem.config.JwtTokenUtil;
 import com.guanhong.airlinebookingsystem.entity.*;
 import com.guanhong.airlinebookingsystem.model.BookSeatRequest;
 import com.guanhong.airlinebookingsystem.model.FlightRequest;
-import com.guanhong.airlinebookingsystem.service.FlightService;
 import com.guanhong.airlinebookingsystem.service.TicketService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
