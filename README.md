@@ -26,3 +26,4 @@ JDK: Java 8
 1. Before run cucumber test, please use the Swagger to create two default account (Username: `admintest`, password: `adminadmin`; Username: `test@carleton.ca`, password: `useruser`)
 2. Find `/test/java/airlinebooksystem/cucumber/runner`
 3. There are two Cucumber runner: ConcurrencyCucumberTest only includes the concurrent scenarios; CucumberTests includes all Cucumber test cases.
+4. NOTE: If you need the permanent Cucumber test report, please uncomment the `CUCUMBER_PUBLISH_TOKEN=TODO` and add your own token. instruction: https://reports.cucumber.io/profile 
