@@ -180,7 +180,7 @@ public class CucumberDataGenerator {
         }
     }
 
-    public void addConcurrentFlight(String testName, long flightNumber){
+    public synchronized void addConcurrentFlight(String testName, long flightNumber){
         concurrentFlightList.put(testName, flightNumber);
     }
 

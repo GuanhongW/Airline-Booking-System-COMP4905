@@ -50,7 +50,6 @@ public class FlightController {
                 return ResponseEntity.badRequest().body("new flight information is empty");
             }
             final String requestTokenHeader = request.getHeader("Authorization");
-
             if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
                 String jwtToken = requestTokenHeader.substring(7);
                 String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
